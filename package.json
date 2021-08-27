@@ -1,0 +1,14 @@
+{
+	"name": "com.8bitmischief.sharedunitymischief",
+	"version": "0.0.1",
+	"displayName": "Shared Unity Mischief",
+	"description": "Shared code for 8-Bit Mischief Unity games.",
+	"unity": "2020.3",
+	"unityRelease": "17f1",
+	"dependencies": {},
+	"author": {
+		"name": "8-Bit Mischief",
+		"email": "8bitmischief@gmail.com",
+		"url": "https://www.8bitmischief.com"
+	}
+}
