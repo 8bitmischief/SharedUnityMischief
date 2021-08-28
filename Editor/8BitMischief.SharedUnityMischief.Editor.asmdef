@@ -1,0 +1,16 @@
+{
+    "name": "8BitMischief.SharedUnityMischief.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:14eb6d69025de474aa405140eb989c9d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
