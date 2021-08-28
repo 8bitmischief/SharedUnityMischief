@@ -1,2 +1,2 @@
-# Meta files
-*.meta
+# Meta files should not be ignored
+!*.meta
