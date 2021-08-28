@@ -1,6 +1,6 @@
 {
 	"name": "com.8bitmischief.sharedunitymischief",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"displayName": "Shared Unity Mischief",
 	"description": "Shared code for 8-Bit Mischief Unity games.",
 	"unity": "2020.3",
