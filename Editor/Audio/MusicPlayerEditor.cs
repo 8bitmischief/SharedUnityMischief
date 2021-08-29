@@ -5,6 +5,7 @@ using UnityEditor;
 namespace SharedUnityMischief.Audio {
 	[CustomEditor(typeof(MusicPlayer), true)]
 	public class MusicPlayerEditor : Editor {
+		private double timeToPlayFrom = 0.0;
 		private double lastStartBarTime = 0.0;
 		private double lastBeatTime = 0.0;
 		List<string> musicEventNames = new List<string>();
@@ -44,6 +45,16 @@ namespace SharedUnityMischief.Audio {
 			MusicPlayer musicPlayer = (MusicPlayer) target;
 
 			DrawDefaultInspector();
+
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
+
+			GUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField("Play From Time");
+			timeToPlayFrom = EditorGUILayout.DoubleField(timeToPlayFrom);
+			if (GUILayout.Button("Play"))
+				musicPlayer.Play(timeToPlayFrom, 0.5);
+			GUILayout.EndHorizontal();
 
 			bool wasEnabled = GUI.enabled;
 			GUI.enabled = false;

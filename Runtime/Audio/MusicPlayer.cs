@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Audio {
 	public class MusicPlayer : MonoBehaviour {
-		private static readonly double PLAY_DELAY = 1.5;
+		private static readonly double INITIAL_PLAY_DELAY = 1.5;
 
 		[SerializeField] private AudioSource audioSource;
 		[SerializeField] private MusicDataScriptableObject musicDataContainer;
@@ -15,12 +15,12 @@ namespace SharedUnityMischief.Audio {
 		public double time {
 			get {
 				double time = AudioSettings.dspTime;
-				if (time < startTime)
-					return 0.0;
-				else if (time > startTime + duration)
+				if (time < playTime)
+					return startTime;
+				else if (time > playTime + duration)
 					return duration;
 				else
-					return time - startTime;
+					return startTime + time - playTime;
 			}
 		}
 		public int bar => nextBarIndex <= 0 ? 0 : bars[nextBarIndex - 1].barNumber;
@@ -31,7 +31,7 @@ namespace SharedUnityMischief.Audio {
 				if (audioClip == null)
 					return false;
 				double time = AudioSettings.dspTime;
-				if (time < startTime || time > startTime + duration)
+				if (time < playTime || time > playTime + duration - startTime)
 					return false;
 				else
 					return true;
@@ -44,6 +44,7 @@ namespace SharedUnityMischief.Audio {
 
 		private AudioClip audioClip => musicData?.audioClip ?? null;
 		private double startTime = 0.0;
+		private double playTime = 0.0;
 		private int nextBarIndex = 0;
 		private int nextBeatIndex = 0;
 		private int nextMusicEventIndex = 0;
@@ -53,7 +54,7 @@ namespace SharedUnityMischief.Audio {
 
 		private void Awake () {
 			if (playOnAwake && musicDataContainer != null)
-				Play(musicDataContainer.data);
+				Play(musicDataContainer.data, 0.0, INITIAL_PLAY_DELAY);
 		}
 
 		private void Update () {
@@ -88,15 +89,12 @@ namespace SharedUnityMischief.Audio {
 			}
 		}
 
-		public void Play (MusicData musicData) {
+		public void Play (MusicData musicData, double time = 0.0, double delay = 0.0) {
 			// Set properties
 			this.musicData = musicData;
 			duration = (double) audioClip.samples / audioClip.frequency;
-			startTime = AudioSettings.dspTime + PLAY_DELAY;
 
 			// Calculate the times of all bars and beats
-			nextBarIndex = 0;
-			nextBeatIndex = 0;
 			bars.Clear();
 			beats.Clear();
 			foreach (MusicBarData barData in musicData.bars) {
@@ -134,7 +132,6 @@ namespace SharedUnityMischief.Audio {
 			});
 
 			// Calculate the times of all music events
-			nextMusicEventIndex = 0;
 			musicEvents.Clear();
 			foreach (MusicEventData evtData in musicData.events) {
 				Bar bar = bars[Mathf.FloorToInt((float) evtData.startBar) - 1];
@@ -168,8 +165,42 @@ namespace SharedUnityMischief.Audio {
 			});
 
 			// Play the music
-			audioSource.clip = audioClip;
-			audioSource.PlayScheduled(startTime);
+			Play(time, delay);
+		}
+
+		public void Play (double time = 0.0, double delay = 0.0) {
+			if (audioClip != null) {
+				playTime = AudioSettings.dspTime + delay;
+				startTime = time;
+				// Skip forward
+				nextMusicEventIndex = 0;
+				nextBarIndex = 0;
+				nextBeatIndex = 0;
+				for (int i = nextBarIndex; i < bars.Count; i++) {
+					if (time > bars[nextBarIndex].time)
+						nextBarIndex++;
+					else
+						break;
+				}
+				for (int i = nextBeatIndex; i < beats.Count; i++) {
+					if (time > beats[nextBeatIndex].time)
+						nextBeatIndex++;
+					else
+						break;
+				}
+				for (int i = nextMusicEventIndex; i < musicEvents.Count; i++) {
+					if (time > musicEvents[nextMusicEventIndex].time)
+						nextMusicEventIndex++;
+					else
+						break;
+				}
+				// Actually play the music
+				audioSource.Stop();
+				audioSource.clip = audioClip;
+				audioSource.loop = false;
+				audioSource.time = (float) time;
+				audioSource.PlayScheduled(playTime);
+			}
 		}
 
 		private class Bar {
