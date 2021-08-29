@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Audio {
 	public class MusicPlayer : MonoBehaviour {
-		private static readonly double PLAY_DELAY = 1.0;
+		private static readonly double PLAY_DELAY = 1.5;
 
 		[SerializeField] private AudioSource audioSource;
 		[SerializeField] private MusicDataScriptableObject musicDataContainer;
@@ -23,8 +23,8 @@ namespace SharedUnityMischief.Audio {
 					return time - startTime;
 			}
 		}
-		public int bar { get; private set; } = 0;
-		public int beat { get; private set; } = 0;
+		public int bar => nextBarIndex <= 0 ? 0 : bars[nextBarIndex - 1].barNumber;
+		public int beat => nextBeatIndex <= 0 ? 0 : beats[nextBeatIndex - 1].beatNumber;
 		public double percentCompleted => duration <= 0.0 ? 0.0 : time / duration;
 		public bool isPlaying {
 			get {
@@ -40,10 +40,15 @@ namespace SharedUnityMischief.Audio {
 
 		public Action onStartBar;
 		public Action onBeat;
+		public Action<string> onMusicEvent;
 
 		private AudioClip audioClip => musicData?.audioClip ?? null;
 		private double startTime = 0.0;
+		private int nextBarIndex = 0;
+		private int nextBeatIndex = 0;
 		private int nextMusicEventIndex = 0;
+		private List<Bar> bars = new List<Bar>();
+		private List<Beat> beats = new List<Beat>();
 		private List<MusicEvent> musicEvents = new List<MusicEvent>();
 
 		private void Awake () {
@@ -52,24 +57,30 @@ namespace SharedUnityMischief.Audio {
 		}
 
 		private void Update () {
-			if (isPlaying && nextMusicEventIndex < musicEvents.Count) {
+			if (isPlaying) {
+				// Check for bars
+				for (int i = nextBarIndex; i < bars.Count; i++) {
+					if (time >= bars[nextBarIndex].time) {
+						nextBarIndex++;
+						onStartBar?.Invoke();
+					}
+					else
+						break;
+				}
+				// Check for beats
+				for (int i = nextBeatIndex; i < beats.Count; i++) {
+					if (time >= beats[nextBeatIndex].time) {
+						nextBeatIndex++;
+						onBeat?.Invoke();
+					}
+					else
+						break;
+				}
+				// Check for music events
 				for (int i = nextMusicEventIndex; i < musicEvents.Count; i++) {
-					MusicEvent evt = musicEvents[nextMusicEventIndex];
-					if (time >= evt.time) {
-						switch (evt.type) {
-							case MusicEventType.StartBar:
-								bar++;
-								beat = 0;
-								onStartBar?.Invoke();
-								break;
-						}
-						switch (evt.type) {
-							case MusicEventType.Beat:
-								beat++;
-								onBeat?.Invoke();
-								break;
-						}
+					if (time >= musicEvents[nextMusicEventIndex].time) {
 						nextMusicEventIndex++;
+						onMusicEvent?.Invoke(musicEvents[nextMusicEventIndex - 1].eventName);
 					}
 					else
 						break;
@@ -82,27 +93,71 @@ namespace SharedUnityMischief.Audio {
 			this.musicData = musicData;
 			duration = (double) audioClip.samples / audioClip.frequency;
 			startTime = AudioSettings.dspTime + PLAY_DELAY;
-			bar = 0;
 
-			// Calculate all future music events
-			nextMusicEventIndex = 0;
-			musicEvents.Clear();
+			// Calculate the times of all bars and beats
+			nextBarIndex = 0;
+			nextBeatIndex = 0;
+			bars.Clear();
+			beats.Clear();
 			foreach (MusicBarData barData in musicData.bars) {
 				for (int i = 0; i < barData.numBars; i++) {
-					musicEvents.Add(new MusicEvent {
-						type = MusicEventType.StartBar,
-						time = barData.startTime + barData.timePerBar * i
-					});
-					for (int j = 0; j < barData.beatsPerBar; j++) {
-						musicEvents.Add(new MusicEvent {
-							type = MusicEventType.Beat,
-							time = barData.startTime + barData.timePerBar * i + barData.timePerBar / ((double) barData.beatsPerBar) * j
+					Bar bar = new Bar {
+						time = barData.startTime + barData.barDuration * i,
+						duration = barData.barDuration
+					};
+					bars.Add(bar);
+					for (int j = 0; j < barData.beatsPerBar; j++)
+						beats.Add(new Beat {
+							bar = bar,
+							beatNumber = j + 1,
+							time = barData.startTime + barData.barDuration * i + barData.barDuration / ((double) barData.beatsPerBar) * j
 						});
+				}
+			}
+			bars.Sort((a, b) => {
+				if (a.time < b.time)
+					return -1;
+				else if (a.time > b.time)
+					return 1;
+				else
+					return 0;
+			});
+			for (int i = 0; i < bars.Count; i++)
+				bars[i].barNumber = i + 1;
+			beats.Sort((a, b) => {
+				if (a.time < b.time)
+					return -1;
+				else if (a.time > b.time)
+					return 1;
+				else
+					return 0;
+			});
+
+			// Calculate the times of all music events
+			nextMusicEventIndex = 0;
+			musicEvents.Clear();
+			foreach (MusicEventData evtData in musicData.events) {
+				Bar bar = bars[Mathf.FloorToInt((float) evtData.startBar) - 1];
+				for (int i = 0; i < evtData.numRepititions; i++) {
+					double startTime = bar.time + bar.duration * evtData.durationInBars * ((double) i) + bar.duration * (evtData.startBar % 1);
+					if (evtData.pattern.Length == 0)
+						musicEvents.Add(new MusicEvent {
+							eventName = evtData.eventName,
+							time = startTime + bar.duration
+						});
+					else {
+						for (int j = 0; j < evtData.pattern.Length; j++) {
+							char c = evtData.pattern[j];
+							if (c == 'X') {
+								musicEvents.Add(new MusicEvent {
+									eventName = evtData.eventName,
+									time = startTime + bar.duration * evtData.durationInBars * ((double) j) / ((double) evtData.pattern.Length)
+								});
+							}
+						}
 					}
 				}
 			}
-
-			// Sort music events by when they'll happen
 			musicEvents.Sort((a, b) => {
 				if (a.time < b.time)
 					return -1;
@@ -117,15 +172,21 @@ namespace SharedUnityMischief.Audio {
 			audioSource.PlayScheduled(startTime);
 		}
 
-		private class MusicEvent {
-			public MusicEventType type = MusicEventType.None;
+		private class Bar {
+			public int barNumber = 1;
+			public double time = 0.0;
+			public double duration = 1.0;
+		}
+
+		private class Beat {
+			public Bar bar = null;
+			public int beatNumber = 1;
 			public double time = 0.0;
 		}
 
-		private enum MusicEventType {
-			None = 0,
-			StartBar = 1,
-			Beat = 2
+		private class MusicEvent {
+			public string eventName = "";
+			public double time = 0.0;
 		}
 	}
 }

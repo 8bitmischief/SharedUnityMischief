@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
@@ -6,17 +7,21 @@ namespace SharedUnityMischief.Audio {
 	public class MusicPlayerEditor : Editor {
 		private double lastStartBarTime = 0.0;
 		private double lastBeatTime = 0.0;
+		List<string> musicEventNames = new List<string>();
+		private Dictionary<string, double> lastMusicEventTimes = new Dictionary<string, double>();
 
 		private void OnEnable () {
 			MusicPlayer musicPlayer = (MusicPlayer) target;
 			musicPlayer.onStartBar += OnStartBar;
 			musicPlayer.onBeat += OnBeat;
+			musicPlayer.onMusicEvent += OnMusicEvent;
 		}
 
 		private void OnDisable () {
 			MusicPlayer musicPlayer = (MusicPlayer) target;
 			musicPlayer.onStartBar -= OnStartBar;
 			musicPlayer.onBeat -= OnBeat;
+			musicPlayer.onMusicEvent -= OnMusicEvent;
 		}
 
 		private void OnStartBar () {
@@ -25,6 +30,12 @@ namespace SharedUnityMischief.Audio {
 
 		private void OnBeat () {
 			lastBeatTime = AudioSettings.dspTime;
+		}
+
+		private void OnMusicEvent (string eventName) {
+			if (!musicEventNames.Contains(eventName))
+				musicEventNames.Add(eventName);
+			lastMusicEventTimes[eventName] = AudioSettings.dspTime;
 		}
 
 		public override bool RequiresConstantRepaint () => true;
@@ -73,6 +84,19 @@ namespace SharedUnityMischief.Audio {
 			EditorGUILayout.IntField(musicPlayer.beat);
 			EditorGUILayout.ColorField(new Color(0.0f, 0.0f, beatHighlight, 1.0f));
 			GUILayout.EndHorizontal();
+
+			if (musicEventNames.Count > 0) {
+				EditorGUILayout.Space();
+				EditorGUILayout.LabelField("Music Events", EditorStyles.boldLabel);
+
+				foreach (string eventName in musicEventNames) {
+					float highlight = Mathf.Clamp01(1.25f * (1.0f - (float) (AudioSettings.dspTime - lastMusicEventTimes[eventName]) / 0.25f));
+					GUILayout.BeginHorizontal();
+					EditorGUILayout.LabelField(eventName);
+					EditorGUILayout.ColorField(new Color(0.0f, highlight, 0.0f, 1.0f));
+					GUILayout.EndHorizontal();
+				}
+			}
 
 			GUI.enabled = wasEnabled;
 		}
