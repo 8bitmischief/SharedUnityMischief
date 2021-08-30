@@ -50,10 +50,28 @@ namespace SharedUnityMischief.Audio {
 			EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
 
 			GUILayout.BeginHorizontal();
-			EditorGUILayout.LabelField("Play From Time");
 			timeToPlayFrom = EditorGUILayout.DoubleField(timeToPlayFrom);
 			if (GUILayout.Button("Play"))
-				musicPlayer.Play(timeToPlayFrom, 0.5);
+				musicPlayer.Play(timeToPlayFrom);
+			if (GUILayout.Button("Stop")) {
+				timeToPlayFrom = musicPlayer.time;
+				musicPlayer.Stop();
+			}
+			if (GUILayout.Button("Reimport")) {
+				timeToPlayFrom = musicPlayer.time;
+				musicPlayer.ReimportMusicData();
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			if (GUILayout.Button("Pause"))
+				musicPlayer.Pause();
+			if (GUILayout.Button("Resume"))
+				musicPlayer.Resume();
+			if (GUILayout.Button("Rewind"))
+				musicPlayer.Rewind();
+			if (GUILayout.Button("Fast Forward"))
+				musicPlayer.FastForward();
 			GUILayout.EndHorizontal();
 
 			bool wasEnabled = GUI.enabled;
@@ -65,6 +83,11 @@ namespace SharedUnityMischief.Audio {
 			GUILayout.BeginHorizontal();
 			EditorGUILayout.LabelField("Is Playing");
 			EditorGUILayout.Toggle(musicPlayer.isPlaying);
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField("State");
+			EditorGUILayout.TextField(musicPlayer.state.ToString());
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
