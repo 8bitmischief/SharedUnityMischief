@@ -2,9 +2,10 @@ using System;
 using UnityEngine;
 
 namespace SharedUnityMischief.Audio {
-	public class MusicEventTriggerer : MonoBehaviour {
+	public class MusicScheduler : MonoBehaviour {
 		[SerializeField] private MusicPlayer musicPlayer;
 
+		public Action onLoadMusicSchedule;
 		public Action<string> onMusicEvent;
 		public Action onStartBar;
 		public Action onBeat;
@@ -19,13 +20,13 @@ namespace SharedUnityMischief.Audio {
 		private int nextMusicEventIndex = 0;
 
 		private void OnEnable () {
-			musicPlayer.onLoadMusicData += InitializeMusicSchedule;
+			musicPlayer.onLoadMusicData += LoadMusicSchedule;
 			musicPlayer.onWillPlay += SeekToCurrentScheduleTime;
 			musicPlayer.onWillResume += SeekToCurrentScheduleTime;
 		}
 
 		private void OnDisable () {
-			musicPlayer.onLoadMusicData -= InitializeMusicSchedule;
+			musicPlayer.onLoadMusicData -= LoadMusicSchedule;
 			musicPlayer.onWillPlay -= SeekToCurrentScheduleTime;
 			musicPlayer.onWillResume -= SeekToCurrentScheduleTime;
 		}
@@ -59,11 +60,12 @@ namespace SharedUnityMischief.Audio {
 			}
 		}
 
-		public void InitializeMusicSchedule () {
+		public void LoadMusicSchedule () {
 			nextBarIndex = 0;
 			nextBeatIndex = 0;
 			nextMusicEventIndex = 0;
 			musicSchedule = new MusicSchedule(musicPlayer.musicData);
+			onLoadMusicSchedule?.Invoke();
 		}
 
 		private void SeekToCurrentScheduleTime () {

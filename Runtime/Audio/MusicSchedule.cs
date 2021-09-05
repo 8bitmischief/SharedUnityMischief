@@ -6,11 +6,11 @@ namespace SharedUnityMischief.Audio {
 		public MusicData musicData { get; private set; }
 		public List<Bar> bars { get; private set; } = new List<Bar>();
 		public List<Beat> beats { get; private set; } = new List<Beat>();
-		public List<MusicEvent> events { get; private set; } = new List<MusicEvent>();
+		public List<Event> events { get; private set; } = new List<Event>();
 
 		public MusicSchedule (MusicData musicData) {
 			this.musicData = musicData;
-			foreach (MusicBarData barData in musicData.bars) {
+			foreach (MusicData.Bar barData in musicData.bars) {
 				for (int i = 0; i < barData.numBars; i++) {
 					Bar bar = new Bar {
 						time = barData.startTime + barData.barDuration * i,
@@ -45,22 +45,22 @@ namespace SharedUnityMischief.Audio {
 			});
 
 			// Calculate the times of all music events
-			foreach (MusicEventData evtData in musicData.events) {
-				Bar bar = bars[Mathf.FloorToInt((float) evtData.startBar) - 1];
-				for (int i = 0; i < evtData.numRepititions; i++) {
-					double startTime = bar.time + bar.duration * evtData.durationInBars * ((double) i) + bar.duration * (evtData.startBar % 1);
-					if (evtData.pattern.Length == 0)
-						events.Add(new MusicEvent {
-							eventName = evtData.eventName,
+			foreach (MusicData.Event eventData in musicData.events) {
+				Bar bar = bars[Mathf.FloorToInt((float) eventData.startBar) - 1];
+				for (int i = 0; i < eventData.numRepititions; i++) {
+					double startTime = bar.time + bar.duration * eventData.durationInBars * ((double) i) + bar.duration * (eventData.startBar % 1);
+					if (eventData.pattern.Length == 0)
+						events.Add(new Event {
+							eventName = eventData.eventName,
 							time = startTime + bar.duration
 						});
 					else {
-						for (int j = 0; j < evtData.pattern.Length; j++) {
-							char c = evtData.pattern[j];
+						for (int j = 0; j < eventData.pattern.Length; j++) {
+							char c = eventData.pattern[j];
 							if (c == 'X') {
-								events.Add(new MusicEvent {
-									eventName = evtData.eventName,
-									time = startTime + bar.duration * evtData.durationInBars * ((double) j) / ((double) evtData.pattern.Length)
+								events.Add(new Event {
+									eventName = eventData.eventName,
+									time = startTime + bar.duration * eventData.durationInBars * ((double) j) / ((double) eventData.pattern.Length)
 								});
 							}
 						}
@@ -89,7 +89,7 @@ namespace SharedUnityMischief.Audio {
 			public double time = 0.0;
 		}
 
-		public class MusicEvent {
+		public class Event {
 			public string eventName = "";
 			public double time = 0.0;
 		}

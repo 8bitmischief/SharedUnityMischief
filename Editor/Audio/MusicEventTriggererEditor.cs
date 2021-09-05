@@ -3,22 +3,22 @@ using UnityEngine;
 using UnityEditor;
 
 namespace SharedUnityMischief.Audio {
-	[CustomEditor(typeof(MusicEventTriggerer), true)]
-	public class MusicEventTriggererEditor : Editor {
+	[CustomEditor(typeof(MusicScheduler), true)]
+	public class MusicSchedulerEditor : Editor {
 		private double lastStartBarTime = 0.0;
 		private double lastBeatTime = 0.0;
 		List<string> musicEventNames = new List<string>();
 		private Dictionary<string, double> lastMusicEventTimes = new Dictionary<string, double>();
 
 		private void OnEnable () {
-			MusicEventTriggerer musicEvents = (MusicEventTriggerer) target;
+			MusicScheduler musicEvents = (MusicScheduler) target;
 			musicEvents.onStartBar += OnStartBar;
 			musicEvents.onBeat += OnBeat;
 			musicEvents.onMusicEvent += OnMusicEvent;
 		}
 
 		private void OnDisable () {
-			MusicEventTriggerer musicEvents = (MusicEventTriggerer) target;
+			MusicScheduler musicEvents = (MusicScheduler) target;
 			musicEvents.onStartBar -= OnStartBar;
 			musicEvents.onBeat -= OnBeat;
 			musicEvents.onMusicEvent -= OnMusicEvent;
@@ -41,7 +41,7 @@ namespace SharedUnityMischief.Audio {
 		public override bool RequiresConstantRepaint () => true;
 
 		public override void OnInspectorGUI () {
-			MusicEventTriggerer musicEvents = (MusicEventTriggerer) target;
+			MusicScheduler musicEvents = (MusicScheduler) target;
 
 			DrawDefaultInspector();
 
