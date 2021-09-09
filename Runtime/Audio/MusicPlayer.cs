@@ -76,8 +76,11 @@ namespace SharedUnityMischief.Audio {
 		private double fadeEndAudioTime = 0.0;
 
 		private void Start () {
-			if (playOnStart && musicDataContainer != null)
-				Play(musicDataContainer.data, 0.0, initialPlayDelay);
+			if (musicDataContainer != null) {
+				LoadMusicData(musicDataContainer.data);
+				if (playOnStart)
+					Play(0.0, initialPlayDelay);
+			}
 		}
 
 		private void Update () {
