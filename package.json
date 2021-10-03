@@ -1,14 +1,13 @@
 {
-	"name": "com.8bitmischief.sharedunitymischief",
-	"version": "0.0.2",
-	"displayName": "Shared Unity Mischief",
-	"description": "Shared code and assets for 8-Bit Mischief LLC Unity games.",
-	"unity": "2020.3",
-	"unityRelease": "17f1",
-	"dependencies": {},
-	"author": {
-		"name": "8-Bit Mischief LLC",
-		"email": "8bitmischief@gmail.com",
-		"url": "https://www.8bitmischief.com"
-	}
+  "name": "com.8bitmischief.sharedunitymischief",
+  "version": "0.0.2",
+  "displayName": "Shared Unity Mischief",
+  "description": "Shared code and assets for 8-Bit Mischief LLC Unity games.",
+  "unity": "2020.3",
+  "unityRelease": "17f1",
+  "author": {
+    "name": "8-Bit Mischief LLC",
+    "email": "8bitmischief@gmail.com",
+    "url": "https://www.8bitmischief.com"
+  }
 }
