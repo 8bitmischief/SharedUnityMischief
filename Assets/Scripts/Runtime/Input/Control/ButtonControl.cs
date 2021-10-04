@@ -3,9 +3,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace SharedUnityMischief.Input.Control {
-	public class ButtonControl : IButtonControl, IDisposable {
+	public class ButtonControl : ControlMonoBehaviour, IButtonControl {
 		private static readonly float PRESS_THRESHOLD = 0.65f;
 		private static readonly float RELEASE_THRESHOLD = 0.25f;
+
+		[Header("Inputs")]
+		[SerializeField] private InputAction input;
 
 		public bool justPressed { get; private set; } = false;
 		public bool isHeld { get; private set; } = false;
@@ -15,18 +18,21 @@ namespace SharedUnityMischief.Input.Control {
 		public Action onPress { get; set; }
 		public Action onRelease { get; set; }
 
-		private InputAction action;
 		private int numPresses = 0;
 		private int numReleases = 0;
 		private float timeLastPressed = 0f;
 
-		public ButtonControl (InputAction action) {
-			this.action = action;
-			action.started += OnPress;
-			action.canceled += OnRelease;
+		private void Awake () {
+			RegisterInput(input);
 		}
 
-		public void Update () {
+		protected override void OnEnable () {
+			base.OnEnable();
+			input.started += OnPress;
+			input.canceled += OnRelease;
+		}
+
+		private void Update () {
 			justPressed = false;
 			justReleased = false;
 			// Trigger releases/presses
@@ -56,7 +62,7 @@ namespace SharedUnityMischief.Input.Control {
 			numPresses = 0;
 			numReleases = 0;
 			// Read the current state of the button
-			float amountHeldDown = action.ReadValue<float>();
+			float amountHeldDown = input.ReadValue<float>();
 			if (!isHeld && amountHeldDown >= PRESS_THRESHOLD) {
 				isHeld = true;
 				justPressed = true;
@@ -70,9 +76,10 @@ namespace SharedUnityMischief.Input.Control {
 			}
 		}
 
-		public void Dispose () {
-			action.started -= OnPress;
-			action.canceled -= OnRelease;
+		protected override void OnDisable () {
+			input.started -= OnPress;
+			input.canceled -= OnRelease;
+			base.OnDisable();
 		}
 
 		private void OnPress (InputAction.CallbackContext context) {

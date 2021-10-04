@@ -2,17 +2,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace SharedUnityMischief.Input.Control {
-	public class DoubleAxisControl : IDoubleAxisControl {
+	public class DoubleAxisControl : ControlMonoBehaviour, IDoubleAxisControl {
 		public Vector2 vector { get; private set; } = new Vector2(0f, 0f);
 
-		private InputAction action;
+		[Header("Inputs")]
+		[SerializeField] private InputAction vectorInput;
 
-		public DoubleAxisControl (InputAction action) {
-			this.action = action;
+		private void Awake () {
+			RegisterInput(vectorInput);
 		}
 
-		public void Update () {
-			vector = action.ReadValue<Vector2>();
+		private void Update () {
+			vector = vectorInput.ReadValue<Vector2>();
 		}
 	}
 }

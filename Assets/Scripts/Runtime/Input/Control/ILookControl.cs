@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SharedUnityMischief.Input.Control {
@@ -5,5 +6,9 @@ namespace SharedUnityMischief.Input.Control {
 		Vector2 vector { get; }
 		bool isMouseLookEnabled { get; }
 		bool isUsingMouseLook { get; }
+		void EnableMouseLook ();
+		void DisableMouseLook ();
+		Action onStartUsingMouseLook { get; set; }
+		Action onStopUsingMouseLook { get; set; }
 	}
 }
