@@ -23,6 +23,18 @@ namespace SharedUnityMischief {
 			}
 		}
 
+		protected bool ClaimSingletonInstanceOrDestroySelf (bool makeIndestructible = false) {
+			if (!ClaimSingletonInstance()) {
+				Destroy(this);
+				return false;
+			}
+			else {
+				if (makeIndestructible)
+					DontDestroyOnLoad(this);
+				return true;
+			}
+		}
+
 		protected bool ReleaseSingletonInstance () {
 			if (instance == this) {
 				instance = null;
