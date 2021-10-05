@@ -20,31 +20,37 @@ namespace SharedUnityMischief.Input.Control {
 		public Action onStartUsingMouseLook { get; set; }
 		public Action onStopUsingMouseLook { get; set; }
 
+		private int numMouseUpdatesToSkip = 0;
+
 		private void Awake () {
 			RegisterInput(mouseInput);
 			RegisterInput(buttonInput);
 		}
 
 		private void Update () {
-			Vector2 buttonLookVector = buttonInput.ReadValue<Vector2>();
-			if (isMouseLookEnabled && mouseInput != null && buttonLookVector.sqrMagnitude <= 0f) {
-				vector = CalculateLookVector(mouseInput.ReadValue<Vector2>(), mouseSensitivity);
+			Vector2 mouseVector = mouseInput?.ReadValue<Vector2>() ?? Vector2.zero;
+			Vector2 buttonVector = buttonInput?.ReadValue<Vector2>() ?? Vector2.zero;
+			if (isMouseLookEnabled && buttonVector.sqrMagnitude <= 0f && numMouseUpdatesToSkip == 0) {
+				vector = CalculateLookVector(mouseVector, mouseSensitivity);
 				if (vector.sqrMagnitude > 0f && !isUsingMouseLook) {
 					isUsingMouseLook = true;
 					onStartUsingMouseLook?.Invoke();
 				}
 			}
 			else {
-				vector = CalculateLookVector(buttonLookVector, buttonSensitivity, buttonPressureCurve);
+				vector = CalculateLookVector(buttonVector, buttonSensitivity, buttonPressureCurve);
 				if (vector.sqrMagnitude > 0f && isUsingMouseLook) {
 					isUsingMouseLook = false;
 					onStopUsingMouseLook?.Invoke();
 				}
 			}
+			if (mouseVector.sqrMagnitude > 0f && numMouseUpdatesToSkip > 0)
+				numMouseUpdatesToSkip--;
 		}
 
 		public void EnableMouseLook () {
 			isMouseLookEnabled = true;
+			numMouseUpdatesToSkip = 4;
 		}
 
 		public void DisableMouseLook () {
