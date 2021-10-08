@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace SharedUnityMischief.Input.Control {
+	[DefaultExecutionOrder(-75)]
 	public abstract class ControlMonoBehaviour : MonoBehaviour, IControl {
 		private List<InputAction> inputs = new List<InputAction>();
 

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 namespace SharedUnityMischief.Input.Control {
+	[DefaultExecutionOrder(-74)]
 	public class ToggleControl : ControlMonoBehaviour, IToggleControl {
 		[Header("Inputs")]
 		[SerializeField] private ButtonControl toggleButton;
