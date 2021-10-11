@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control {
-	[CustomEditor(typeof(SingleAxisControl), true)]
-	public class SingleAxisControlEditor : Editor {
+	[CustomEditor(typeof(FloatControl), true)]
+	public class FloatControlEditor : Editor {
 		public override bool RequiresConstantRepaint () => true;
 
 		public override void OnInspectorGUI () {
-			SingleAxisControl control = (SingleAxisControl) target;
+			FloatControl control = (FloatControl) target;
 
 			DrawDefaultInspector();
 

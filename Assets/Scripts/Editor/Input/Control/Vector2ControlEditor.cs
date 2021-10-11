@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control {
-	[CustomEditor(typeof(DoubleAxisControl), true)]
+	[CustomEditor(typeof(Vector2Control), true)]
 	public class DoubleAxisControlEditor : Editor {
 		public override bool RequiresConstantRepaint () => true;
 
 		public override void OnInspectorGUI () {
-			DoubleAxisControl control = (DoubleAxisControl) target;
+			Vector2Control control = (Vector2Control) target;
 
 			DrawDefaultInspector();
 

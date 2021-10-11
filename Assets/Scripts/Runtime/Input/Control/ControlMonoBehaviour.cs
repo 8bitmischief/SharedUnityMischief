@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 namespace SharedUnityMischief.Input.Control {
 	[DefaultExecutionOrder(-75)]
 	public abstract class ControlMonoBehaviour : MonoBehaviour, IControl {
+		public abstract bool isActuated { get; }
+
 		private List<InputAction> inputs = new List<InputAction>();
 
 		protected virtual void OnEnable () {

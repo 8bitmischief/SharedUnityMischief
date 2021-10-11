@@ -4,16 +4,15 @@ using UnityEngine.InputSystem;
 
 namespace SharedUnityMischief.Input.Control {
 	public class ButtonControl : ControlMonoBehaviour, IButtonControl {
-		private static readonly float PRESS_THRESHOLD = 0.65f;
-		private static readonly float RELEASE_THRESHOLD = 0.25f;
-
 		[Header("Inputs")]
 		[SerializeField] private InputAction input;
 
+		public override bool isActuated => justPressed || isHeld || justReleased;
 		public bool justPressed { get; private set; } = false;
 		public bool isHeld { get; private set; } = false;
 		public bool justReleased { get; private set; } = false;
 		public float holdDuration => isHeld ? Time.time - timeLastPressed : 0f;
+		public float amountHeldDown { get; private set; } = 0f;
 
 		public Action onPress { get; set; }
 		public Action onRelease { get; set; }
@@ -62,18 +61,18 @@ namespace SharedUnityMischief.Input.Control {
 			numPresses = 0;
 			numReleases = 0;
 			// Read the current state of the button
-			float amountHeldDown = input.ReadValue<float>();
-			if (!isHeld && amountHeldDown >= PRESS_THRESHOLD) {
-				isHeld = true;
-				justPressed = true;
-				timeLastPressed = Time.time;
-				onPress?.Invoke();
-			}
-			else if (isHeld && amountHeldDown <= RELEASE_THRESHOLD) {
-				isHeld = false;
-				justReleased = true;
-				onRelease?.Invoke();
-			}
+			amountHeldDown = input.ReadValue<float>();
+			 if (!isHeld && input.phase == InputActionPhase.Performed) {
+			 	isHeld = true;
+			 	justPressed = true;
+			 	timeLastPressed = Time.time;
+			 	onPress?.Invoke();
+			 }
+			 else if (isHeld && (input.phase == InputActionPhase.Waiting || input.phase == InputActionPhase.Disabled)) {
+			 	isHeld = false;
+			 	justReleased = true;
+			 	onRelease?.Invoke();
+			 }
 		}
 
 		protected override void OnDisable () {

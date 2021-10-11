@@ -12,8 +12,15 @@ namespace SharedUnityMischief.Input.Control {
 		[Header("Settings")]
 		[SerializeField] private bool startOn = false;
 
-		public bool isOn => hasInitialized ? _isOn : startOn;
-		public bool justToggled { get; private set; } = false;
+		public override bool isActuated => justToggled;
+		public bool isOn {
+			get => hasInitialized ? _isOn : startOn;
+			set {
+				_isOn = value;
+				hasInitialized = true;
+			}
+		}
+		public bool justToggled => justToggledOn || justToggledOff;
 		public bool justToggledOn { get; private set; } = false;
 		public bool justToggledOff { get; private set; } = false;
 
@@ -23,12 +30,11 @@ namespace SharedUnityMischief.Input.Control {
 		private bool hasInitialized = false;
 
 		private void Awake () {
-			_isOn = startOn;
-			hasInitialized = true;
+			if (!hasInitialized)
+				isOn = startOn;
 		}
 
 		private void Update () {
-			justToggled = false;
 			justToggledOn = false;
 			justToggledOff = false;
 			if ((toggleButton != null && toggleButton.justPressed) ||
@@ -38,19 +44,22 @@ namespace SharedUnityMischief.Input.Control {
 		}
 
 		public void Toggle (bool triggerEvents = true) {
-			_isOn = !_isOn;
-			justToggled = true;
-			if (_isOn)
+			isOn = !isOn;
+			if (isOn)
 				justToggledOn = true;
 			else
 				justToggledOff = true;
 			if (triggerEvents)
-				onToggle?.Invoke(_isOn);
+				onToggle?.Invoke(isOn);
 		}
 
 		public void Toggle (bool isOn, bool triggerEvents = true) {
-			if (isOn != _isOn)
+			if (isOn != this.isOn)
 				Toggle(triggerEvents);
 		}
+
+		public void ToggleOn (bool triggerEvents = true) => Toggle(true, triggerEvents);
+
+		public void ToggleOff (bool triggerEvents = true) => Toggle(false, triggerEvents);
 	}
 }
