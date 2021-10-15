@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,11 +18,14 @@ namespace SharedUnityMischief.Input.Control {
 		public Vector2 vector { get; private set; } = new Vector2(0f, 0f);
 		public bool isMouseLookEnabled { get; private set; } = false;
 		public bool isUsingMouseLook { get; private set; } = false;
+		public Vector2 recentAverageVector => recentVectors.Aggregate<Vector2>((a, b) => a + b) / recentVectors.Length;
 
 		public Action onStartUsingMouseLook { get; set; }
 		public Action onStopUsingMouseLook { get; set; }
 
 		private int numMouseUpdatesToSkip = 0;
+		private Vector2[] recentVectors = new Vector2[60];
+		private int nextVectorIndex = 0;
 
 		private void Awake () {
 			RegisterInput(mouseInput);
@@ -32,14 +36,14 @@ namespace SharedUnityMischief.Input.Control {
 			Vector2 mouseVector = mouseInput?.ReadValue<Vector2>() ?? Vector2.zero;
 			Vector2 buttonVector = buttonInput?.ReadValue<Vector2>() ?? Vector2.zero;
 			if (isMouseLookEnabled && buttonVector.sqrMagnitude <= 0f && numMouseUpdatesToSkip == 0) {
-				vector = CalculateLookVector(mouseVector, mouseSensitivity);
+				vector = CalculateLookVector(mouseVector, mouseSensitivity, null, true);
 				if (vector.sqrMagnitude > 0f && !isUsingMouseLook) {
 					isUsingMouseLook = true;
 					onStartUsingMouseLook?.Invoke();
 				}
 			}
 			else {
-				vector = CalculateLookVector(buttonVector, nonMouseSensitivity, nonMousePressureSensitivity);
+				vector = CalculateLookVector(buttonVector, nonMouseSensitivity, nonMousePressureSensitivity, false);
 				if (vector.sqrMagnitude > 0f && isUsingMouseLook) {
 					isUsingMouseLook = false;
 					onStopUsingMouseLook?.Invoke();
@@ -47,6 +51,8 @@ namespace SharedUnityMischief.Input.Control {
 			}
 			if (mouseVector.sqrMagnitude > 0f && numMouseUpdatesToSkip > 0)
 				numMouseUpdatesToSkip--;
+			recentVectors[nextVectorIndex] = vector;
+			nextVectorIndex = (nextVectorIndex + 1) % recentVectors.Length;
 		}
 
 		public void EnableMouseLook () {
@@ -60,13 +66,15 @@ namespace SharedUnityMischief.Input.Control {
 			isMouseLookEnabled = false;
 		}
 
-		private Vector2 CalculateLookVector (Vector2 vector, Vector2 sensitivity, Curve sensitivityCurve = null) {
+		private Vector2 CalculateLookVector (Vector2 vector, Vector2 sensitivity, Curve sensitivityCurve, bool denormalizeTime) {
 			if (vector.x != 0f || vector.y != 0f) {
 				if (sensitivityCurve != null) {
 					float magnitude = vector.magnitude;
 					vector *= sensitivityCurve.Evaluate(Mathf.Clamp01(magnitude)) / magnitude;
 				}
 				vector.Scale(sensitivity);
+				if (denormalizeTime)
+					vector /= 60f * Time.deltaTime;
 			}
 			return vector;
 		}
