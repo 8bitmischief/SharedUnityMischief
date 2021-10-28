@@ -14,8 +14,10 @@ namespace SharedUnityMischief {
 			}
 		}
 
+		[SerializeField] private bool indestructible = true;
+
 		protected void Awake () {
-			if (!ClaimSingletonInstanceOrDestroySelf(true))
+			if (!ClaimSingletonInstanceOrDestroySelf(indestructible))
 				return;
 		}
 
