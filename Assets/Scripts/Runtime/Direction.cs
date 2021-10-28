@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace SharedUnityMischief {
 	public enum Direction {
-		None = -1,
-		Up = 0,
-		Down = 1,
-		Left = 2,
-		Right = 3
+		None = 0,
+		Up = 1,
+		Down = 2,
+		Left = 3,
+		Right = 4
 	}
 }

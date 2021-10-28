@@ -14,6 +14,15 @@ namespace SharedUnityMischief {
 			}
 		}
 
+		protected void Awake () {
+			if (!ClaimSingletonInstanceOrDestroySelf(true))
+				return;
+		}
+
+		protected void OnDestroy () {
+			ReleaseSingletonInstance();
+		}
+
 		protected bool ClaimSingletonInstance () {
 			if (instance != null && instance != this)
 				return false;
@@ -38,7 +47,7 @@ namespace SharedUnityMischief {
 		protected bool ReleaseSingletonInstance () {
 			if (instance == this) {
 				instance = null;
-				return false;
+				return true;
 			}
 			else
 				return false;
