@@ -14,18 +14,19 @@ namespace SharedUnityMischief {
 			}
 		}
 
-		[SerializeField] private bool indestructible = true;
+		[Header("Singleton Config")]
+		[SerializeField] protected bool indestructible = true;
 
-		protected void Awake () {
+		protected virtual void Awake () {
 			if (!ClaimSingletonInstanceOrDestroySelf(indestructible))
 				return;
 		}
 
-		protected void OnDestroy () {
+		protected virtual void OnDestroy () {
 			ReleaseSingletonInstance();
 		}
 
-		protected bool ClaimSingletonInstance () {
+		protected virtual bool ClaimSingletonInstance () {
 			if (instance != null && instance != this)
 				return false;
 			else {
@@ -34,7 +35,7 @@ namespace SharedUnityMischief {
 			}
 		}
 
-		protected bool ClaimSingletonInstanceOrDestroySelf (bool makeIndestructible = false) {
+		protected virtual bool ClaimSingletonInstanceOrDestroySelf (bool makeIndestructible = false) {
 			if (!ClaimSingletonInstance()) {
 				Destroy(this);
 				return false;
@@ -46,7 +47,7 @@ namespace SharedUnityMischief {
 			}
 		}
 
-		protected bool ReleaseSingletonInstance () {
+		protected virtual bool ReleaseSingletonInstance () {
 			if (instance == this) {
 				instance = null;
 				return true;
