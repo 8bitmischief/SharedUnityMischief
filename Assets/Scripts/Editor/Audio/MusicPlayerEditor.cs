@@ -6,7 +6,7 @@ namespace SharedUnityMischief.Audio {
 	public class MusicPlayerEditor : Editor {
 		private double timeToPlayFrom = 0.0;
 
-		public override bool RequiresConstantRepaint () => true;
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
 		public override void OnInspectorGUI () {
 			MusicPlayer musicPlayer = (MusicPlayer) target;

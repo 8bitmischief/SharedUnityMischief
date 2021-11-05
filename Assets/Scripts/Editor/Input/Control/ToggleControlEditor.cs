@@ -3,8 +3,8 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control {
 	[CustomEditor(typeof(ToggleControl), true)]
-	public class ToggleControlEditor : Editor {
-		public override bool RequiresConstantRepaint () => true;
+	public class ToggleControlEditor : BaseEditor {
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
 		private float lastToggleTime = -999f;
 
@@ -18,13 +18,8 @@ namespace SharedUnityMischief.Input.Control {
 			control.onToggle += OnToggle;
 		}
 
-		public override void OnInspectorGUI () {
+		protected override void DrawState () {
 			ToggleControl control = (ToggleControl) target;
-
-			DrawDefaultInspector();
-
-			bool wasEnabled = GUI.enabled;
-			GUI.enabled = false;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
@@ -34,8 +29,6 @@ namespace SharedUnityMischief.Input.Control {
 			EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
 			float toggleHighlight = 1f - Math.Map(Time.time - lastToggleTime, 0.1f, 0.4f, 0f, 1f, true);
 			EditorGUILayout.ColorField("Toggle", new Color(toggleHighlight, toggleHighlight, 0.0f, 1.0f));
-
-			GUI.enabled = wasEnabled;
 		}
 
 		private void OnToggle (bool isOn) {

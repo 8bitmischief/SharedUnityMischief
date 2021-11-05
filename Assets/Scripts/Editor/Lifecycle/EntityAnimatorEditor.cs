@@ -4,16 +4,11 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Lifecycle {
 	[CustomEditor(typeof(EntityAnimator), true)]
-	public class EntityAnimatorEditor : Editor {
-		public override bool RequiresConstantRepaint () => true;
+	public class EntityAnimatorEditor : BaseEditor {
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
-		public override void OnInspectorGUI () {
+		protected override void DrawState () {
 			EntityAnimator animator = (EntityAnimator) target;
-
-			DrawDefaultInspector();
-
-			bool wasEnabled = GUI.enabled;
-			GUI.enabled = false;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
@@ -35,8 +30,6 @@ namespace SharedUnityMischief.Lifecycle {
 			EditorGUILayout.Toggle("Is Looping", animator.isAnimationLooping);
 			EditorGUILayout.Toggle("Has Looped", animator.hasAnimationLooped);
 			EditorGUILayout.TextField("Percent Into Frame", String.Format("{0:0.00%}", animator.percentInterpolated));
-
-			GUI.enabled = wasEnabled;
 		}
 	}
 }

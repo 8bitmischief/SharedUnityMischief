@@ -11,7 +11,9 @@ namespace SharedUnityMischief.Lifecycle {
 			}
 		}
 
+		public virtual void OnSpawn () {}
 		public virtual void UpdateState () {}
+		public virtual void OnDespawn () {}
 	}
 
 	public abstract class EntityComponent<T> : EntityComponent where T : Entity {

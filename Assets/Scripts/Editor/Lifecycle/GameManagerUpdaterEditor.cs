@@ -3,20 +3,16 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Lifecycle {
 	[CustomEditor(typeof(GameManagerUpdater), true)]
-	public class GameManagerUpdaterEditor : Editor {
-		public override bool RequiresConstantRepaint () => true;
+	public class GameManagerUpdaterEditor : BaseEditor {
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
-		private float manualAdvanceTime = 1f / 60f;
+		private float manualAdvanceTime = GameManager.timePerUpdate;
 
-		public override void OnInspectorGUI () {
+		protected override void DrawControls () {
 			GameManagerUpdater updater = (GameManagerUpdater) target;
 
-			DrawDefaultInspector();
-
-			bool wasEnabled = GUI.enabled;
-			GUI.enabled = Application.isPlaying;
-
 			// Show controls for manually manipulating the game's lifecycle
+			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
 			if (GUILayout.Button(updater.isUpdating ? "Pause" : "Resume")) {
 				if (updater.isUpdating)
@@ -37,8 +33,6 @@ namespace SharedUnityMischief.Lifecycle {
 				updater.AdvanceOneFrame();
 			}
 			GUILayout.EndHorizontal();
-
-			GUI.enabled = wasEnabled;
 		}
 	}
 }

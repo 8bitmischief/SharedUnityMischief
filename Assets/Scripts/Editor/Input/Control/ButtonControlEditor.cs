@@ -3,8 +3,8 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control {
 	[CustomEditor(typeof(ButtonControl), true)]
-	public class ButtonControlEditor : Editor {
-		public override bool RequiresConstantRepaint () => true;
+	public class ButtonControlEditor : BaseEditor {
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
 		private float lastPressTime = -999f;
 		private float lastReleaseTime = -999f;
@@ -21,13 +21,8 @@ namespace SharedUnityMischief.Input.Control {
 			control.onRelease += OnRelease;
 		}
 
-		public override void OnInspectorGUI () {
+		protected override void DrawState () {
 			ButtonControl control = (ButtonControl) target;
-
-			DrawDefaultInspector();
-
-			bool wasEnabled = GUI.enabled;
-			GUI.enabled = false;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
@@ -40,8 +35,6 @@ namespace SharedUnityMischief.Input.Control {
 			EditorGUILayout.ColorField("Press", new Color(pressHighlight, pressHighlight, 0.0f, 1.0f));
 			float releaseHighlight = 1f - Math.Map(Time.time - lastReleaseTime, 0.1f, 0.4f, 0f, 1f, true);
 			EditorGUILayout.ColorField("Release", new Color(releaseHighlight, releaseHighlight, 0.0f, 1.0f));
-
-			GUI.enabled = wasEnabled;
 		}
 
 		private void OnPress () {

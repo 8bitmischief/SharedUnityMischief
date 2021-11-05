@@ -3,22 +3,15 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control {
 	[CustomEditor(typeof(FloatControl), true)]
-	public class FloatControlEditor : Editor {
-		public override bool RequiresConstantRepaint () => true;
+	public class FloatControlEditor : BaseEditor {
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
-		public override void OnInspectorGUI () {
+		protected override void DrawState () {
 			FloatControl control = (FloatControl) target;
-
-			DrawDefaultInspector();
-
-			bool wasEnabled = GUI.enabled;
-			GUI.enabled = false;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
 			EditorGUILayout.FloatField("Value", control.value);
-
-			GUI.enabled = wasEnabled;
 		}
 	}
 }

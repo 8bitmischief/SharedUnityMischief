@@ -38,7 +38,7 @@ namespace SharedUnityMischief.Audio {
 			lastMusicEventTimes[eventName] = AudioSettings.dspTime;
 		}
 
-		public override bool RequiresConstantRepaint () => true;
+		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
 		public override void OnInspectorGUI () {
 			MusicScheduler musicEvents = (MusicScheduler) target;
