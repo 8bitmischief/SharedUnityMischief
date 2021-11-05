@@ -7,7 +7,7 @@ namespace SharedUnityMischief.Lifecycle {
 	public abstract class EntityAnimator : EntityComponent {
 		// In order to properly trigger events, we want to overshoot each frame a tiny bit
 		// This variable controls how much each frame gets overshot and undershot
-		private static readonly float UPDATE_FUDGE_TIME = GameManager.timePerUpdate / 100f;
+		private static readonly float UPDATE_FUDGE_TIME = UpdateLoop.timePerUpdate / 100f;
 
 		public abstract string stateName { get; }
 		public abstract float timeInState { get; protected set; }
@@ -30,7 +30,7 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public override void UpdateState () {
-			if (GameManager.I.isInterpolating) {
+			if (UpdateLoop.I.isInterpolating) {
 				if (InterpolateAnimation())
 					RefreshAnimationVariables();
 			}
@@ -54,9 +54,9 @@ namespace SharedUnityMischief.Lifecycle {
 				animationDuration = stateInfo.length;
 				percentAnimationCompleted = (isAnimationLooping ? stateInfo.normalizedTime % 1f : stateInfo.normalizedTime);
 				animationTime = percentAnimationCompleted * animationDuration;
-				animationFrame = Mathf.FloorToInt(animationTime / GameManager.timePerUpdate);
-				animationFrameDuration = Mathf.FloorToInt(animationDuration / GameManager.timePerUpdate + 0.01f);
-				percentInterpolated = (animationTime % GameManager.timePerUpdate) / GameManager.timePerUpdate;
+				animationFrame = Mathf.FloorToInt(animationTime / UpdateLoop.timePerUpdate);
+				animationFrameDuration = Mathf.FloorToInt(animationDuration / UpdateLoop.timePerUpdate + 0.01f);
+				percentInterpolated = (animationTime % UpdateLoop.timePerUpdate) / UpdateLoop.timePerUpdate;
 				return prevAnimtionTime != animationTime;
 			}
 			else
@@ -84,7 +84,7 @@ namespace SharedUnityMischief.Lifecycle {
 
 		private void AdvanceToNextFrame () {
 			// Progress the animation all the way to the next frame + a little bit beyond it (the fudge amount)
-			float deltaTime = GameManager.timePerUpdate - (animationTime % GameManager.timePerUpdate) + UPDATE_FUDGE_TIME;
+			float deltaTime = UpdateLoop.timePerUpdate - (animationTime % UpdateLoop.timePerUpdate) + UPDATE_FUDGE_TIME;
 			if (deltaTime < 2 * UPDATE_FUDGE_TIME)
 				deltaTime = 2 * UPDATE_FUDGE_TIME;
 			UpdateAnimator(deltaTime);
@@ -92,12 +92,12 @@ namespace SharedUnityMischief.Lifecycle {
 
 		private bool InterpolateAnimation (bool applyToTimeInState = false) {
 			// Figure out how far we need to advance to get to the right point between frames
-			float targetTimeBetweenFrames = GameManager.timePerUpdate * GameManager.I.percentNextUpdateInterpolated;
-			if (targetTimeBetweenFrames > GameManager.timePerUpdate - UPDATE_FUDGE_TIME)
-				targetTimeBetweenFrames = GameManager.timePerUpdate - UPDATE_FUDGE_TIME;
-			float currentTimeBetweenFrames = animationTime % GameManager.timePerUpdate;
+			float targetTimeBetweenFrames = UpdateLoop.timePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated;
+			if (targetTimeBetweenFrames > UpdateLoop.timePerUpdate - UPDATE_FUDGE_TIME)
+				targetTimeBetweenFrames = UpdateLoop.timePerUpdate - UPDATE_FUDGE_TIME;
+			float currentTimeBetweenFrames = animationTime % UpdateLoop.timePerUpdate;
 			float deltaTime = targetTimeBetweenFrames - currentTimeBetweenFrames;
-			if (deltaTime >= GameManager.timePerUpdate / 100f) {
+			if (deltaTime >= UpdateLoop.timePerUpdate / 100f) {
 				UpdateAnimator(deltaTime);
 				if (applyToTimeInState)
 					timeInState += deltaTime;
@@ -132,8 +132,8 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public override void UpdateState () {
-			timeInState += GameManager.I.deltaTime;
-			if (!GameManager.I.isInterpolating)
+			timeInState += UpdateLoop.I.deltaTime;
+			if (!UpdateLoop.I.isInterpolating)
 				framesInState++;
 			base.UpdateState();
 		}

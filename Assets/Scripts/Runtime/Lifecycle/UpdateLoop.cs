@@ -1,8 +1,7 @@
-using System;
 using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle {
-	public abstract class GameManager : SingletonMonoBehaviour<GameManager> {
+	public abstract class UpdateLoop : SingletonMonoBehaviour<UpdateLoop> {
 		public static readonly int updatesPerSecond = 60;
 		public static readonly float timePerUpdate = 1f / 60f;
 
@@ -63,62 +62,5 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		protected virtual void UpdateState () {}
-	}
-
-	public abstract class GameManager<T> : GameManager where T : GameManager {
-		private static T instance;
-		public static new T I {
-			get {
-				if (instance == null)
-					instance = UnityEngine.Object.FindObjectOfType<T>();
-				if (instance == null)
-					throw new Exception($"Could not find {typeof(T)} singleton in the scene hierarchy");
-				return instance;
-			}
-		}
-
-		protected override void Awake () {
-			if (!ClaimSingletonInstanceOrDestroySelf(indestructible))
-				return;
-		}
-
-		protected override void OnDestroy () {
-			ReleaseSingletonInstance();
-		}
-
-		protected override bool ClaimSingletonInstance () {
-			if (!base.ClaimSingletonInstance())
-				return false;
-			if (instance != null && instance != this) {
-				base.ReleaseSingletonInstance();
-				return false;
-			}
-			else {
-				instance = this as T;
-				return true;
-			}
-		}
-
-		protected override bool ClaimSingletonInstanceOrDestroySelf (bool makeIndestructible = false) {
-			if (!ClaimSingletonInstance()) {
-				Destroy(this);
-				return false;
-			}
-			else {
-				if (makeIndestructible)
-					DontDestroyOnLoad(this);
-				return true;
-			}
-		}
-
-		protected override bool ReleaseSingletonInstance () {
-			base.ReleaseSingletonInstance();
-			if (instance == this) {
-				instance = null;
-				return true;
-			}
-			else
-				return false;
-		}
 	}
 }
