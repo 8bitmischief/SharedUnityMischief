@@ -24,9 +24,9 @@ namespace SharedUnityMischief.Lifecycle {
 				UpdateState();
 		}
 
-		public void Pause () => isPaused = true;
+		public virtual void Pause () => isPaused = true;
 
-		public void Resume () => isPaused = false;
+		public virtual void Resume () => isPaused = false;
 
 		public void Advance (bool ignorePause = false) => Advance(Time.deltaTime, ignorePause);
 
