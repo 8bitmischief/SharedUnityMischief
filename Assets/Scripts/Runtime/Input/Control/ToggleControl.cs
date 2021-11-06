@@ -61,5 +61,10 @@ namespace SharedUnityMischief.Input.Control {
 		public void ToggleOn (bool triggerEvents = true) => Toggle(true, triggerEvents);
 
 		public void ToggleOff (bool triggerEvents = true) => Toggle(false, triggerEvents);
+
+		public override void ConsumeInstantaneousInputs () {
+			justToggledOn = false;
+			justToggledOff = false;
+		}
 	}
 }

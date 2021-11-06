@@ -23,5 +23,7 @@ namespace SharedUnityMischief.Input.Control {
 				vector *= pressureSensitivity.Evaluate(Mathf.Clamp01(magnitude)) / magnitude;
 			}
 		}
+
+		public override void ConsumeInstantaneousInputs () {}
 	}
 }

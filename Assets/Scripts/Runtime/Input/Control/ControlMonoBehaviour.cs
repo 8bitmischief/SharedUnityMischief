@@ -9,6 +9,8 @@ namespace SharedUnityMischief.Input.Control {
 
 		private List<InputAction> inputs = new List<InputAction>();
 
+		public abstract void ConsumeInstantaneousInputs ();
+
 		protected virtual void OnEnable () {
 			foreach (InputAction input in inputs)
 				input.Enable();

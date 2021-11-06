@@ -9,5 +9,7 @@ namespace SharedUnityMischief.Input.Control {
 		float holdDuration { get; }
 		Action onPress { get; set; }
 		Action onRelease { get; set; }
+		bool ConsumePress ();
+		bool ConsumeRelease ();
 	}
 }

@@ -18,5 +18,7 @@ namespace SharedUnityMischief.Input.Control {
 		private void Update () {
 			value = (positiveInput?.ReadValue<float>() ?? 0f) - (negativeInput?.ReadValue<float>() ?? 0f);
 		}
+
+		public override void ConsumeInstantaneousInputs () {}
 	}
 }

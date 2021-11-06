@@ -81,6 +81,29 @@ namespace SharedUnityMischief.Input.Control {
 			base.OnDisable();
 		}
 
+		public override void ConsumeInstantaneousInputs () {
+			justPressed = false;
+			justReleased = false;
+		}
+
+		public bool ConsumePress () {
+			if (justPressed) {
+				justPressed = false;
+				return true;
+			}
+			else
+				return false;
+		}
+
+		public bool ConsumeRelease () {
+			if (justReleased) {
+				justReleased = false;
+				return true;
+			}
+			else
+				return false;
+		}
+
 		private void OnPress (InputAction.CallbackContext context) {
 			numPresses++;
 		}

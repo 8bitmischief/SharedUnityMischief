@@ -66,6 +66,8 @@ namespace SharedUnityMischief.Input.Control {
 			isMouseLookEnabled = false;
 		}
 
+		public override void ConsumeInstantaneousInputs () {}
+
 		private Vector2 CalculateLookVector (Vector2 vector, Vector2 sensitivity, Curve sensitivityCurve, bool denormalizeTime) {
 			if (vector.x != 0f || vector.y != 0f) {
 				if (sensitivityCurve != null) {
