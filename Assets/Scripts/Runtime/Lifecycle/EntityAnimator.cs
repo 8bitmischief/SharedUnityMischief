@@ -9,6 +9,9 @@ namespace SharedUnityMischief.Lifecycle {
 		// This variable controls how much each frame gets overshot and undershot
 		private static readonly float UPDATE_FUDGE_TIME = UpdateLoop.timePerUpdate / 100f;
 
+		[Header("Root Motion")]
+		[SerializeField] protected Vector3 rootMotionProgress = Vector3.zero;
+
 		public abstract string stateName { get; }
 		public abstract float timeInState { get; protected set; }
 		public abstract int framesInState { get; protected set; }
@@ -20,8 +23,10 @@ namespace SharedUnityMischief.Lifecycle {
 		public int animationFrame { get; private set; } = 0;
 		public int animationFrameDuration { get; private set; } = 0;
 		public float percentInterpolated { get; private set; } = 0f;
+		public Vector3 rootMotion { get; set; } = Vector3.zero;
 
 		protected Animator animator;
+		protected Vector3 rootMotionAppliedSoFar = Vector3.zero;
 		private List<AnimationEvent> triggeredEvents = new List<AnimationEvent>();
 
 		protected virtual void Awake () {
@@ -32,11 +37,11 @@ namespace SharedUnityMischief.Lifecycle {
 		public override void UpdateState () {
 			if (UpdateLoop.I.isInterpolating) {
 				if (InterpolateAnimation())
-					RefreshAnimationVariables();
+					RefreshAnimationState();
 			}
 			else {
 				AdvanceToNextFrame();
-				RefreshAnimationVariables();
+				RefreshAnimationState();
 				// Handle animation events that were triggered by moving into the next frame
 				foreach (AnimationEvent evt in triggeredEvents)
 					OnAnimationEvent(evt);
@@ -44,9 +49,9 @@ namespace SharedUnityMischief.Lifecycle {
 			}
 		}
 
-		protected virtual bool RefreshAnimationVariables () => RefreshAnimationVariables(animator.GetCurrentAnimatorStateInfo(0));
+		protected virtual bool RefreshAnimationState (bool applyRootMotion = true) => RefreshAnimationState(animator.GetCurrentAnimatorStateInfo(0), applyRootMotion);
 
-		protected virtual bool RefreshAnimationVariables (AnimatorStateInfo stateInfo) {
+		protected virtual bool RefreshAnimationState (AnimatorStateInfo stateInfo, bool applyRootMotion = true) {
 			if (!float.IsInfinity(stateInfo.length)) {
 				float prevAnimtionTime = animationTime;
 				isAnimationLooping = stateInfo.loop;
@@ -63,17 +68,27 @@ namespace SharedUnityMischief.Lifecycle {
 				return false;
 		}
 
-		protected virtual void CheckForStateChanges () {
+		protected virtual void CheckForStateChanges () => CheckForStateChanges(Vector3.zero);
+
+		protected virtual void CheckForStateChanges (Vector3 rootMotion) {
 			UpdateAnimator(0f);
-			if (RefreshAnimationVariables())
+			if (RefreshAnimationState(false)) {
+				this.rootMotion = rootMotion;
+				rootMotionAppliedSoFar = Vector3.zero;
 				if (InterpolateAnimation(true))
-					RefreshAnimationVariables();
+					RefreshAnimationState();
+			}
 		}
 
 		protected void Trigger (int hash, bool checkForStateChanges = true) {
 			animator.SetTrigger(hash);
 			if (checkForStateChanges)
 				CheckForStateChanges();
+		}
+
+		protected void Trigger (int hash, Vector3 rootMotion) {
+			animator.SetTrigger(hash);
+			CheckForStateChanges(rootMotion);
 		}
 
 		protected virtual void OnAnimationEvent (AnimationEvent evt) {}
@@ -115,10 +130,9 @@ namespace SharedUnityMischief.Lifecycle {
 
 	public abstract class EntityAnimator<T> : EntityAnimator {
 		public T state { get; private set; }
+		public override string stateName => state.ToString();
 		public override float timeInState { get; protected set; } = 0f;
 		public override int framesInState { get; protected set; } = 0;
-
-		public override string stateName => state.ToString();
 
 		public Action<T, T> onChangeState;
 
@@ -138,8 +152,8 @@ namespace SharedUnityMischief.Lifecycle {
 			base.UpdateState();
 		}
 
-		protected override bool RefreshAnimationVariables (AnimatorStateInfo stateInfo) {
-			bool hasAnimtionUpdated = base.RefreshAnimationVariables(stateInfo);
+		protected override bool RefreshAnimationState (AnimatorStateInfo stateInfo, bool applyRootMotion = true) {
+			bool hasAnimationUpdated = base.RefreshAnimationState(stateInfo);
 			T prevState = state;
 			bool hasChangedState = false;
 			bool foundState = false;
@@ -150,6 +164,8 @@ namespace SharedUnityMischief.Lifecycle {
 						timeInState = 0f;
 						framesInState = 0;
 						hasChangedState = true;
+						rootMotion = Vector3.zero;
+						rootMotionAppliedSoFar = Vector3.zero;
 						onChangeState?.Invoke(state, prevState);
 					}
 					foundState = true;
@@ -161,6 +177,8 @@ namespace SharedUnityMischief.Lifecycle {
 				timeInState = 0f;
 				framesInState = 0;
 				hasChangedState = true;
+				rootMotion = Vector3.zero;
+				rootMotionAppliedSoFar = Vector3.zero;
 				onChangeState?.Invoke(state, prevState);
 			}
 			if (!hasSetInitialState && !state.Equals(default(T))) {
@@ -168,7 +186,15 @@ namespace SharedUnityMischief.Lifecycle {
 				timeInState = animationTime;
 				framesInState = animationFrame;
 			}
-			return hasAnimtionUpdated || hasChangedState;
+			if (applyRootMotion)
+				ApplyRootMotion();
+			return hasAnimationUpdated || hasChangedState;
+		}
+
+		private void ApplyRootMotion () {
+			Vector3 targetRootMotion = Vector3.Scale(rootMotion, rootMotionProgress);
+			transform.position += targetRootMotion - rootMotionAppliedSoFar;
+			rootMotionAppliedSoFar = targetRootMotion;
 		}
 	}
 
