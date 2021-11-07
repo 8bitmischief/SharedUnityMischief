@@ -3,8 +3,8 @@ using UnityEngine;
 namespace SharedUnityMischief.Lifecycle {
 	public abstract class Entity : EntityComponent {
 		public bool isSpawned { get; private set; } = false;
-		public bool scheduledToSpawn = false;
-		public bool scheduledToDespawn = false;
+		public bool scheduledToSpawn { get; set; } = false;
+		public bool scheduledToDespawn { get; set; } = false;
 
 		private EntityComponent[] components;
 		
