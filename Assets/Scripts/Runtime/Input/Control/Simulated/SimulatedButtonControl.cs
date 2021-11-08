@@ -15,12 +15,11 @@ namespace SharedUnityMischief.Input.Control {
 					simulatedIsHeld = control.isHeld;
 					simulatedJustReleased = false;
 					simulatedHoldDuration = control.holdDuration;
-					numSimulatedStateChanges = 0;
 				}
 			}
 		}
 
-		public bool isActuated => justPressed || isHeld || justReleased;
+		public bool isActuated => mode == SimulatedControlMode.Simulate ? simulatedJustPressed || simulatedIsHeld || simulatedJustReleased : control.isActuated;
 		public bool justPressed => mode == SimulatedControlMode.Simulate ? simulatedJustPressed : control.justPressed;
 		public bool isHeld => mode == SimulatedControlMode.Simulate ? simulatedIsHeld : control.isHeld;
 		public bool justReleased => mode == SimulatedControlMode.Simulate ? simulatedJustReleased : control.justReleased;
@@ -35,7 +34,6 @@ namespace SharedUnityMischief.Input.Control {
 		private bool simulatedIsHeld = false;
 		private bool simulatedJustReleased = false;
 		private float simulatedHoldDuration = 0f;
-		private int numSimulatedStateChanges = 0;
 
 		private void OnEnable () {
 			control.onPress += OnPress;
@@ -53,23 +51,20 @@ namespace SharedUnityMischief.Input.Control {
 			if (mode == SimulatedControlMode.Simulate) {
 				simulatedJustPressed = false;
 				simulatedJustReleased = false;
-				if (isHeld)
+				if (simulatedIsHeld)
 					simulatedHoldDuration += deltaTime;
-				// Simulate releases/presses
-				for (int i = 0; i < numSimulatedStateChanges; i++) {
-					simulatedIsHeld = !isHeld;
-					if (isHeld) {
-						simulatedJustPressed = true;
-						simulatedHoldDuration = 0f;
-						onPress?.Invoke();
-					}
-					else {
-						simulatedJustReleased = true;
-						simulatedHoldDuration = 0f;
-						onRelease?.Invoke();
-					}
+				if (!simulatedIsHeld && control.isHeld) {
+					simulatedIsHeld = true;
+					simulatedJustPressed = true;
+					simulatedHoldDuration = 0f;
+					onPress?.Invoke();
 				}
-				numSimulatedStateChanges = 0;
+				else if (simulatedIsHeld && !control.isHeld) {
+					simulatedIsHeld = false;
+					simulatedJustReleased = true;
+					simulatedHoldDuration = 0f;
+					onRelease?.Invoke();
+				}
 			}
 		}
 
@@ -109,9 +104,7 @@ namespace SharedUnityMischief.Input.Control {
 		}
 
 		private void OnPress () {
-			if (mode == SimulatedControlMode.Simulate)
-				numSimulatedStateChanges++;
-			else
+			if (mode != SimulatedControlMode.Simulate)
 				onPress?.Invoke();
 		}
 
