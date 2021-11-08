@@ -45,6 +45,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public override int animationFrameDuration { get; protected set; } = 0;
 		public override float percentInterpolated { get; protected set; } = 0f;
 		public override Vector3 programmaticRootMotionProgress { get; protected set; } = Vector3.zero;
+		public Vector3 authoredRootMotion { get; private set; } = Vector3.zero;
 
 		public Action<T> onEnterState;
 		public Action<T> onLeaveState;
@@ -54,7 +55,6 @@ namespace SharedUnityMischief.Lifecycle {
 		private List<AnimationEvent> triggeredEvents = new List<AnimationEvent>();
 		private bool didStartNewAnimation = false;
 		private bool undoAuthoredRootMotion = false;
-		private Vector3 authoredRootMotion = Vector3.zero;
 		private Vector3 authoredRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 programmaticRootMotion = Vector3.zero;
 		private Vector3 programmaticRootMotionTraveledSoFar = Vector3.zero;
@@ -115,7 +115,10 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public void SetRootMotionTarget (Vector3 position) {
-			programmaticRootMotion = position - transform.position;
+			if (undoAuthoredRootMotion)
+				programmaticRootMotion = position - transform.position;
+			else
+				programmaticRootMotion = position - transform.position - Vector3.Scale(authoredRootMotion, transform.localScale);
 		}
 
 		protected virtual void OnAnimationEvent (AnimationEvent evt) {}
