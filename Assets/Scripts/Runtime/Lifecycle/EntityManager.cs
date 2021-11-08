@@ -18,9 +18,9 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public virtual void UpdateState () {
+			UpdateEntities();
 			DespawnEntitiesScheduledToDespawn();
 			SpawnEntitiesScheduledToSpawn();
-			UpdateEntities();
 		}
 
 		public T SpawnEntityFromPrefab<T> (T entityPrefab) where T : Entity => SpawnEntityFromPrefab(entityPrefab, Vector3.zero);
