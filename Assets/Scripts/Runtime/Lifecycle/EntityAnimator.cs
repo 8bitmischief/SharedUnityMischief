@@ -127,7 +127,7 @@ namespace SharedUnityMischief.Lifecycle {
 			if (isTargetPosition)
 				programmaticRootMotion -= transform.position;
 			if (!undoAuthoredRootMotion)
-				programmaticRootMotion = rootMotion - Vector3.Scale(authoredRootMotion, transform.localScale);
+				programmaticRootMotion -= Vector3.Scale(authoredRootMotion, transform.localScale);
 		}
 
 		protected virtual void OnAnimationEvent (AnimationEvent evt) {}
