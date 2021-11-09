@@ -22,6 +22,8 @@ namespace SharedUnityMischief.Lifecycle {
 		public abstract int animationFrame { get; protected set; }
 		public abstract int animationFrameDuration { get; protected set; }
 		public abstract float percentInterpolated { get; protected set; }
+		public abstract Vector3 authoredRootMotion { get; protected set; }
+		public abstract Vector3 programmaticRootMotion { get; protected set; }
 		public abstract Vector3 programmaticRootMotionProgress { get; protected set; }
 
 		public enum ProgrammaticRootMotionType {
@@ -44,8 +46,9 @@ namespace SharedUnityMischief.Lifecycle {
 		public override int animationFrame { get; protected set; } = 0;
 		public override int animationFrameDuration { get; protected set; } = 0;
 		public override float percentInterpolated { get; protected set; } = 0f;
+		public override Vector3 authoredRootMotion { get; protected set; } = Vector3.zero;
+		public override Vector3 programmaticRootMotion { get; protected set; } = Vector3.zero;
 		public override Vector3 programmaticRootMotionProgress { get; protected set; } = Vector3.zero;
-		public Vector3 authoredRootMotion { get; private set; } = Vector3.zero;
 
 		public Action<T> onEnterState;
 		public Action<T> onLeaveState;
@@ -56,8 +59,8 @@ namespace SharedUnityMischief.Lifecycle {
 		private bool didStartNewAnimation = false;
 		private bool undoAuthoredRootMotion = false;
 		private Vector3 authoredRootMotionTraveledSoFar = Vector3.zero;
-		private Vector3 programmaticRootMotion = Vector3.zero;
 		private Vector3 programmaticRootMotionTraveledSoFar = Vector3.zero;
+		private Vector3 rootMotionForTriggeredAnimation = Vector3.zero;
 		private ProgrammaticRootMotionType xProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
@@ -65,6 +68,7 @@ namespace SharedUnityMischief.Lifecycle {
 		protected virtual void Awake () {
 			animator = GetComponent<Animator>();
 			animator.speed = 0f;
+			UpdateAnimator(updateFudgeTime);
 		}
 
 		public override void UpdateState () {
@@ -91,7 +95,9 @@ namespace SharedUnityMischief.Lifecycle {
 			undoAuthoredRootMotion = animation.undoAuthoredRootMotion;
 			authoredRootMotion = animation.authoredRootMotion;
 			authoredRootMotionTraveledSoFar = Vector3.zero;
-			programmaticRootMotion = Vector3.zero;
+			programmaticRootMotion = rootMotionForTriggeredAnimation;
+			if (!undoAuthoredRootMotion)
+				programmaticRootMotion -= Vector3.Scale(authoredRootMotion, transform.localScale);
 			programmaticRootMotionTraveledSoFar = Vector3.zero;
 			programmaticRootMotionProgress = Vector3.zero;
 			xProgrammaticRootMotion = animation.xRootMotion;
@@ -103,22 +109,25 @@ namespace SharedUnityMischief.Lifecycle {
 			onChangeState?.Invoke(state, prevState);
 		}
 
-		public void Trigger (int hash) {
+		public void Trigger (int hash) => Trigger(hash, Vector3.zero, false);
+
+		public void Trigger (int hash, Vector3 rootMotion, bool isTargetPosition = false) {
+			rootMotionForTriggeredAnimation = rootMotion;
+			if (isTargetPosition)
+				rootMotionForTriggeredAnimation -= transform.position;
 			animator.SetTrigger(hash);
 			UpdateAnimator(0f);
+			rootMotionForTriggeredAnimation = Vector3.zero;
 			if (didStartNewAnimation)
 				InterpolateAnimation();
 		}
 
-		public void SetRootMotion (Vector3 rootMotion) {
+		public void SetRootMotion (Vector3 rootMotion, bool isTargetPosition = false) {
 			programmaticRootMotion = rootMotion;
-		}
-
-		public void SetRootMotionTarget (Vector3 position) {
-			if (undoAuthoredRootMotion)
-				programmaticRootMotion = position - transform.position;
-			else
-				programmaticRootMotion = position - transform.position - Vector3.Scale(authoredRootMotion, transform.localScale);
+			if (isTargetPosition)
+				programmaticRootMotion -= transform.position;
+			if (!undoAuthoredRootMotion)
+				programmaticRootMotion = rootMotion - Vector3.Scale(authoredRootMotion, transform.localScale);
 		}
 
 		protected virtual void OnAnimationEvent (AnimationEvent evt) {}

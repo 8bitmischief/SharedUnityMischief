@@ -30,6 +30,7 @@ namespace SharedUnityMischief.Lifecycle {
 			EditorGUILayout.Toggle("Is Looping", animator.isAnimationLooping);
 			EditorGUILayout.Toggle("Has Looped", animator.hasAnimationLooped);
 			EditorGUILayout.TextField("Percent Into Frame", String.Format("{0:0.00%}", animator.percentInterpolated));
+			EditorGUILayout.Vector3Field("Root Motion", animator.programmaticRootMotion);
 			EditorGUILayout.Vector3Field("Root Motion Progress", animator.programmaticRootMotionProgress);
 		}
 	}
