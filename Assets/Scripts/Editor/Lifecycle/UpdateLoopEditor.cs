@@ -7,7 +7,7 @@ namespace SharedUnityMischief.Lifecycle {
 	public class UpdateLoopEditor : BaseEditor {
 		public override bool RequiresConstantRepaint () => Application.isPlaying;
 
-		private float manualAdvanceTime = UpdateLoop.timePerUpdate;
+		private float manualAdvanceTime = 0.018f;
 
 		protected override void DrawControls () {
 			UpdateLoop loop = (UpdateLoop) target;

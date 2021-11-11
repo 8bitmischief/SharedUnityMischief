@@ -54,7 +54,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public Action<T> onLeaveState;
 		public Action<T, T> onChangeState;
 
-		private Animator animator;
+		protected Animator animator;
 		private List<AnimationEvent> triggeredEvents = new List<AnimationEvent>();
 		private bool didStartNewAnimation = false;
 		private bool undoAuthoredRootMotion = false;
@@ -140,9 +140,11 @@ namespace SharedUnityMischief.Lifecycle {
 			timeInState += deltaTime;
 			framesInState++;
 			UpdateAnimator(deltaTime);
+			if (didStartNewAnimation)
+				InterpolateAnimation();
 		}
 
-		private void InterpolateAnimation () {
+		private void InterpolateAnimation (bool allowRecursion = true) {
 			// Figure out how far we need to advance to get to the right point between frames
 			float targetTimeBetweenFrames = UpdateLoop.timePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated;
 			if (targetTimeBetweenFrames > UpdateLoop.timePerUpdate - updateFudgeTime)
@@ -152,6 +154,8 @@ namespace SharedUnityMischief.Lifecycle {
 			if (deltaTime >= UpdateLoop.timePerUpdate / 100f) {
 				timeInState += deltaTime;
 				UpdateAnimator(deltaTime);
+				if (didStartNewAnimation && allowRecursion)
+					InterpolateAnimation(false);
 			}
 		}
 
