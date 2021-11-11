@@ -25,6 +25,8 @@ namespace SharedUnityMischief.Lifecycle {
 		public abstract Vector3 authoredRootMotion { get; protected set; }
 		public abstract Vector3 programmaticRootMotion { get; protected set; }
 		public abstract Vector3 programmaticRootMotionProgress { get; protected set; }
+		public bool willFinishAnimationNextFrame => !isAnimationLooping && animationFrame == animationFrameDuration - 1;
+		public bool willLoopAnimationNextFrame => isAnimationLooping && animationFrame == animationFrameDuration - 1;
 
 		public enum ProgrammaticRootMotionType {
 			None = 0,
@@ -144,7 +146,7 @@ namespace SharedUnityMischief.Lifecycle {
 				InterpolateAnimation();
 		}
 
-		private void InterpolateAnimation (bool allowRecursion = true) {
+		private void InterpolateAnimation (int allowedRecursions = 3) {
 			// Figure out how far we need to advance to get to the right point between frames
 			float targetTimeBetweenFrames = UpdateLoop.timePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated;
 			if (targetTimeBetweenFrames > UpdateLoop.timePerUpdate - updateFudgeTime)
@@ -154,8 +156,8 @@ namespace SharedUnityMischief.Lifecycle {
 			if (deltaTime >= UpdateLoop.timePerUpdate / 100f) {
 				timeInState += deltaTime;
 				UpdateAnimator(deltaTime);
-				if (didStartNewAnimation && allowRecursion)
-					InterpolateAnimation(false);
+				if (didStartNewAnimation && allowedRecursions > 0)
+					InterpolateAnimation(allowedRecursions - 1);
 			}
 		}
 
