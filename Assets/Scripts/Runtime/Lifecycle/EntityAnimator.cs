@@ -17,6 +17,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public abstract float animationTime { get; protected set; }
 		public abstract float animationDuration { get; protected set; }
 		public abstract float percentAnimationCompleted { get; protected set; }
+		public abstract bool hasAnimationCompleted { get; protected set; }
 		public abstract bool isAnimationLooping { get; protected set; }
 		public abstract bool hasAnimationLooped { get; protected set; }
 		public abstract int animationFrame { get; protected set; }
@@ -43,6 +44,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public override float animationTime { get; protected set; } = 0f;
 		public override float animationDuration { get; protected set; } = 0f;
 		public override float percentAnimationCompleted { get; protected set; } = 0f;
+		public override bool hasAnimationCompleted { get; protected set; } = false;
 		public override bool isAnimationLooping { get; protected set; } = false;
 		public override bool hasAnimationLooped { get; protected set; } = false;
 		public override int animationFrame { get; protected set; } = 0;
@@ -113,7 +115,7 @@ namespace SharedUnityMischief.Lifecycle {
 
 		public void Trigger (int hash) => Trigger(hash, Vector3.zero, false);
 
-		public void Trigger (int hash, Vector3 rootMotion, bool isTargetPosition = false) {
+		public void Trigger (int hash, Vector3 rootMotion, bool isTargetPosition = true) {
 			rootMotionForTriggeredAnimation = rootMotion;
 			if (isTargetPosition)
 				rootMotionForTriggeredAnimation -= transform.position;
@@ -124,7 +126,7 @@ namespace SharedUnityMischief.Lifecycle {
 				InterpolateAnimation();
 		}
 
-		public void SetRootMotion (Vector3 rootMotion, bool isTargetPosition = false) {
+		public void SetRootMotion (Vector3 rootMotion, bool isTargetPosition = true) {
 			programmaticRootMotion = rootMotion;
 			if (isTargetPosition)
 				programmaticRootMotion -= transform.position;
@@ -209,11 +211,14 @@ namespace SharedUnityMischief.Lifecycle {
 				isAnimationLooping = stateInfo.loop;
 				hasAnimationLooped = isAnimationLooping && stateInfo.normalizedTime >= 1f;
 				animationDuration = stateInfo.length;
-				percentAnimationCompleted = (isAnimationLooping ? stateInfo.normalizedTime % 1f : stateInfo.normalizedTime);
+				percentAnimationCompleted = isAnimationLooping ? stateInfo.normalizedTime % 1f : Mathf.Min(stateInfo.normalizedTime, 1f);
 				animationTime = percentAnimationCompleted * animationDuration;
 				animationFrame = Mathf.FloorToInt(animationTime / UpdateLoop.timePerUpdate);
 				animationFrameDuration = Mathf.FloorToInt(animationDuration / UpdateLoop.timePerUpdate + 0.01f);
+				if (!isAnimationLooping)
+					animationFrame = Mathf.Min(animationFrame, animationFrameDuration - 1);
 				percentInterpolated = (animationTime % UpdateLoop.timePerUpdate) / UpdateLoop.timePerUpdate;
+				hasAnimationCompleted = !isAnimationLooping && animationFrame == animationFrameDuration - 1;
 				return true;
 			}
 			else

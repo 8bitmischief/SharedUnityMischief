@@ -13,7 +13,7 @@ namespace SharedUnityMischief.Lifecycle {
 
 		private void Start () {
 			foreach (Entity entity in FindObjectsOfType<Entity>())
-				SpawnEntity(entity);
+				ScheduleEntityToSpawn(entity);
 			SpawnEntitiesScheduledToSpawn();
 		}
 
@@ -21,6 +21,7 @@ namespace SharedUnityMischief.Lifecycle {
 			UpdateEntities();
 			DespawnEntitiesScheduledToDespawn();
 			SpawnEntitiesScheduledToSpawn();
+			DespawnEntitiesScheduledToDespawn();
 		}
 
 		public T SpawnEntityFromPrefab<T> (T entityPrefab) where T : Entity => SpawnEntityFromPrefab(entityPrefab, Vector3.zero);
@@ -29,7 +30,14 @@ namespace SharedUnityMischief.Lifecycle {
 			T entity = Instantiate(entityPrefab, position, rotation);
 			entity.name = entityPrefab.name;
 			entity.gameObject.SetActive(true);
-			return SpawnEntity(entity);
+			return ScheduleEntityToSpawn(entity);
+		}
+		private T ScheduleEntityToSpawn<T> (T entity) where T : Entity {
+			if (!entity.scheduledToSpawn && !entity.isSpawned && !entity.scheduledToDespawn) {
+				entity.scheduledToSpawn = true;
+				entitiesToSpawn.Add(entity);
+			}
+			return entity;
 		}
 
 		public void DespawnEntity (Entity entity) {
@@ -49,29 +57,25 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		protected void SpawnEntitiesScheduledToSpawn () {
-			foreach (Entity entity in entitiesToSpawn) {
-				entities.Add(entity);
-				entity.Spawn();
+			if (entitiesToSpawn.Count > 0) {
+				foreach (Entity entity in entitiesToSpawn) {
+					entities.Add(entity);
+					entity.Spawn();
+				}
+				entitiesToSpawn.Clear();
 			}
-			entitiesToSpawn.Clear();
 		}
 
 		protected void DespawnEntitiesScheduledToDespawn () {
-			foreach (Entity entity in entitiesToDespawn)
-				entities.Remove(entity);
-			foreach (Entity entity in entitiesToDespawn)
-				entity.Despawn();
-			foreach (Entity entity in entitiesToDespawn)
-				Destroy(entity.gameObject);
-			entitiesToDespawn.Clear();
-		}
-
-		private T SpawnEntity<T> (T entity) where T : Entity {
-			if (!entity.scheduledToSpawn && !entity.isSpawned && !entity.scheduledToDespawn) {
-				entity.scheduledToSpawn = true;
-				entitiesToSpawn.Add(entity);
+			if (entitiesToDespawn.Count > 0) {
+				foreach (Entity entity in entitiesToDespawn)
+					entities.Remove(entity);
+				foreach (Entity entity in entitiesToDespawn)
+					entity.Despawn();
+				foreach (Entity entity in entitiesToDespawn)
+					Destroy(entity.gameObject);
+				entitiesToDespawn.Clear();
 			}
-			return entity;
 		}
 	}
 }
