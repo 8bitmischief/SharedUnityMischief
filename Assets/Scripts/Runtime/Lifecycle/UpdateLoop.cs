@@ -21,7 +21,7 @@ namespace SharedUnityMischief.Lifecycle {
 
 		private void Update () {
 			if (updateAutomatically)
-				UpdateState();
+				Advance();
 		}
 
 		public virtual void Pause () => isPaused = true;
