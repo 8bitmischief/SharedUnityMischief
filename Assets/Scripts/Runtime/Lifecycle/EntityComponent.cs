@@ -12,7 +12,9 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public virtual void OnSpawn () {}
+		public virtual void EarlyUpdateState () {}
 		public virtual void UpdateState () {}
+		public virtual void LateUpdateState () {}
 		public virtual void OnDespawn () {}
 	}
 

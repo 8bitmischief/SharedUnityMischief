@@ -10,6 +10,7 @@ namespace SharedUnityMischief.Lifecycle {
 		protected List<Entity> entities = new List<Entity>();
 		private List<Entity> entitiesToSpawn = new List<Entity>();
 		private List<Entity> entitiesToDespawn = new List<Entity>();
+		private Dictionary<string, int> entitySpawnCounts = new Dictionary<string, int>();
 
 		private void Start () {
 			foreach (Entity entity in FindObjectsOfType<Entity>())
@@ -28,7 +29,14 @@ namespace SharedUnityMischief.Lifecycle {
 		public T SpawnEntityFromPrefab<T> (T entityPrefab, Vector3 position) where T : Entity => SpawnEntityFromPrefab(entityPrefab, position, Quaternion.identity);
 		public T SpawnEntityFromPrefab<T> (T entityPrefab, Vector3 position, Quaternion rotation) where T : Entity {
 			T entity = Instantiate(entityPrefab, position, rotation);
-			entity.name = entityPrefab.name;
+			if (entity.appendSpawnIndexToName) {
+				if (!entitySpawnCounts.ContainsKey(entityPrefab.name))
+					entitySpawnCounts.Add(entityPrefab.name, 0);
+				entitySpawnCounts[entityPrefab.name]++;
+				entity.name = $"{entityPrefab.name} {entitySpawnCounts[entityPrefab.name]}";
+			}
+			else
+				entity.name = entityPrefab.name;
 			entity.gameObject.SetActive(true);
 			return ScheduleEntityToSpawn(entity);
 		}
@@ -53,7 +61,11 @@ namespace SharedUnityMischief.Lifecycle {
 
 		protected virtual void UpdateEntities () {
 			foreach (Entity entity in entities)
+				entity.EarlyUpdateEntityState();
+			foreach (Entity entity in entities)
 				entity.UpdateEntityState();
+			foreach (Entity entity in entities)
+				entity.LateUpdateEntityState();
 		}
 
 		protected void SpawnEntitiesScheduledToSpawn () {

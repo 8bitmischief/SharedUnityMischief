@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle {
 	public abstract class AnimatedEntity<T, U> : Entity where U : EntityAnimator<T> {
-		public T state => animator.state;
-		public float timeInState => animator.timeInState;
-		public int framesInState => animator.framesInState;
+		public T state => animator != null ? animator.state : default(T);
+		public float timeInState => animator?.timeInState ?? 0f;
+		public int framesInState => animator?.framesInState ?? 0;
 
 		protected U animator;
 

@@ -2,6 +2,8 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle {
 	public abstract class Entity : EntityComponent {
+		public virtual bool appendSpawnIndexToName => false;
+
 		public bool isSpawned { get; private set; } = false;
 		public bool scheduledToSpawn { get; set; } = false;
 		public bool scheduledToDespawn { get; set; } = false;
@@ -24,9 +26,19 @@ namespace SharedUnityMischief.Lifecycle {
 				return false;
 		}
 
+		public void EarlyUpdateEntityState () {
+			foreach (EntityComponent component in components)
+				component.EarlyUpdateState();
+		}
+
 		public void UpdateEntityState () {
 			foreach (EntityComponent component in components)
 				component.UpdateState();
+		}
+
+		public void LateUpdateEntityState () {
+			foreach (EntityComponent component in components)
+				component.LateUpdateState();
 		}
 
 		public bool Despawn () {
