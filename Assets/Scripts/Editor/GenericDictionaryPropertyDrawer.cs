@@ -8,6 +8,12 @@ namespace SharedUnityMischief {
 		static float lineHeight = EditorGUIUtility.singleLineHeight;
 		static float vertSpace = EditorGUIUtility.standardVerticalSpacing;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void Init () {
+			lineHeight = EditorGUIUtility.singleLineHeight;
+			vertSpace = EditorGUIUtility.standardVerticalSpacing;
+		}
+
 		public override void OnGUI (Rect pos, SerializedProperty property, GUIContent label) {
 			// Draw list
 			var list = property.FindPropertyRelative("list");

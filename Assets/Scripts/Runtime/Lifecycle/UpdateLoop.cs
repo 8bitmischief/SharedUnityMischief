@@ -5,6 +5,9 @@ namespace SharedUnityMischief.Lifecycle {
 		public static readonly int updatesPerSecond = 60;
 		public static readonly float timePerUpdate = 1f / 60f;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		protected static void Reset () => ResetInstance();
+
 		[Header("Update Loop Config")]
 		public bool updateAutomatically = true;
 		[Range(0, 2)] public float timeScale = 1.00f;

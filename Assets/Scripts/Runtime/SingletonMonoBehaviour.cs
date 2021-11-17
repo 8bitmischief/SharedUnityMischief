@@ -14,6 +14,10 @@ namespace SharedUnityMischief {
 			}
 		}
 
+		protected static void ResetInstance () {
+			instance = null;
+		}
+
 		[Header("Singleton Config")]
 		[SerializeField] protected bool indestructible = true;
 
