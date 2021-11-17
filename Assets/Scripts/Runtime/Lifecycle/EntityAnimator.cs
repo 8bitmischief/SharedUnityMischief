@@ -23,6 +23,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public abstract int animationFrame { get; protected set; }
 		public abstract int animationFrameDuration { get; protected set; }
 		public abstract float percentInterpolated { get; protected set; }
+		public abstract float animationSpeed { get; set; }
 		public abstract Vector3 authoredRootMotion { get; protected set; }
 		public abstract Vector3 programmaticRootMotion { get; protected set; }
 		public abstract Vector3 programmaticRootMotionProgress { get; protected set; }
@@ -50,6 +51,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public override int animationFrame { get; protected set; } = 0;
 		public override int animationFrameDuration { get; protected set; } = 0;
 		public override float percentInterpolated { get; protected set; } = 0f;
+		public override float animationSpeed { get; set; } = 1.00f;
 		public override Vector3 authoredRootMotion { get; protected set; } = Vector3.zero;
 		public override Vector3 programmaticRootMotion { get; protected set; } = Vector3.zero;
 		public override Vector3 programmaticRootMotionProgress { get; protected set; } = Vector3.zero;
@@ -76,14 +78,16 @@ namespace SharedUnityMischief.Lifecycle {
 		}
 
 		public override void UpdateState () {
-			if (UpdateLoop.I.isInterpolating)
+			if (animationSpeed != 1.00f) {
+				AdvanceNonStandardSpeed();
+				if (!UpdateLoop.I.isInterpolating)
+					TriggerEvents();
+			}
+			else if (UpdateLoop.I.isInterpolating)
 				InterpolateAnimation();
 			else {
 				AdvanceToNextFrame();
-				// Handle animation events that were triggered by moving into the next frame
-				foreach (AnimationEvent evt in triggeredEvents)
-					OnAnimationEvent(evt);
-				triggeredEvents.Clear();
+				TriggerEvents();
 			}
 		}
 
@@ -91,6 +95,7 @@ namespace SharedUnityMischief.Lifecycle {
 			didStartNewAnimation = true;
 			T prevState = state;
 			// Leave the previous state
+			OnLeaveState(state);
 			onLeaveState?.Invoke(state);
 			// Enter the new state
 			state = animation.state;
@@ -108,8 +113,10 @@ namespace SharedUnityMischief.Lifecycle {
 			yProgrammaticRootMotion = animation.yRootMotion;
 			zProgrammaticRootMotion = animation.zRootMotion;
 			RefreshAnimationState(stateInfo);
+			OnEnterState(state);
 			onEnterState?.Invoke(state);
 			// Trigger change states
+			OnChangeState(state, prevState);
 			onChangeState?.Invoke(state, prevState);
 		}
 
@@ -134,6 +141,12 @@ namespace SharedUnityMischief.Lifecycle {
 				programmaticRootMotion -= Vector3.Scale(authoredRootMotion, transform.localScale);
 		}
 
+		protected virtual void OnEnterState (T state) {}
+
+		protected virtual void OnLeaveState (T state) {}
+
+		protected virtual void OnChangeState (T state, T prevState) {}
+
 		protected virtual void OnAnimationEvent (AnimationEvent evt) {}
 
 		private void AdvanceToNextFrame () {
@@ -146,6 +159,13 @@ namespace SharedUnityMischief.Lifecycle {
 			UpdateAnimator(deltaTime);
 			if (didStartNewAnimation)
 				InterpolateAnimation();
+		}
+
+		private void AdvanceNonStandardSpeed () {
+			timeInState += UpdateLoop.I.deltaTime;
+			framesInState = Mathf.FloorToInt(timeInState / UpdateLoop.timePerUpdate);
+			float deltaTime = UpdateLoop.I.deltaTime * animationSpeed;
+			UpdateAnimator(deltaTime);
 		}
 
 		private void InterpolateAnimation (int allowedRecursions = 3) {
@@ -161,6 +181,13 @@ namespace SharedUnityMischief.Lifecycle {
 				if (didStartNewAnimation && allowedRecursions > 0)
 					InterpolateAnimation(allowedRecursions - 1);
 			}
+		}
+
+		private void TriggerEvents () {
+			// Handle animation events that were triggered by moving into the next frame
+			foreach (AnimationEvent evt in triggeredEvents)
+				OnAnimationEvent(evt);
+			triggeredEvents.Clear();
 		}
 
 		private void UpdateAnimator (float deltaTime) {
