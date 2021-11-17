@@ -19,7 +19,7 @@ namespace SharedUnityMischief {
 		}
 
 		[Header("Singleton Config")]
-		[SerializeField] protected bool indestructible = true;
+		[SerializeField] protected bool indestructible = false;
 
 		protected virtual void Awake () {
 			if (!ClaimSingletonInstanceOrDestroySelf(indestructible))
