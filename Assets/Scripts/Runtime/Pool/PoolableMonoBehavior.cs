@@ -3,13 +3,25 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Pool {
 	public abstract class PoolableMonoBehavior : MonoBehaviour, IPoolable {
-		public Action DepositToPool { get; set; } = null;
+		public bool isPooled => DepositToPool != null;
+		public Func<bool> DepositToPool { get; set; } = null;
 
-		public void DepositOrDestroy () {
-			if (DepositToPool != null)
-				DepositToPool.Invoke();
-			else
+		public bool DepositToPoolOrDestroy () {
+			if (isPooled && DepositToPool())
+				return true;
+			else {
 				Destroy(gameObject);
+				return false;
+			}
+		}
+
+		public bool DepositToPoolOrDeactivate () {
+			if (isPooled && DepositToPool())
+				return true;
+			else {
+				gameObject.SetActive(false);
+				return false;
+			}
 		}
 
 		public virtual void OnWithdrawFromPool () {

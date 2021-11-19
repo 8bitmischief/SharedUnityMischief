@@ -1,23 +1,44 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace SharedUnityMischief.Pool {
-	public abstract class PrefabPool<T> : MonoBehaviour where T : MonoBehaviour, IPoolable {
+	public abstract class PrefabPool : MonoBehaviour {
+		public abstract int numInstances { get; protected set; }
+		public abstract int numAvailableInstances { get; }
+	}
+	
+	public abstract class PrefabPool<T> : PrefabPool where T : MonoBehaviour, IPoolable {
 		[Header("Pool Config")]
 		[SerializeField] private T prefab;
 		[SerializeField] private bool collectionCheck = false;
-		[SerializeField] private int defaultCapacity = 10;
-		[SerializeField] private int maxSize = 10000;
+		[SerializeField] private int defaultCapacity = 0;
+		[SerializeField] private int maxSize = -1;
 
-		private ObjectPool<T> pool;
+		public override int numInstances { get; protected set; } = 0;
+		public override int numAvailableInstances => availableInstances.Count;
+
+		private Stack<T> availableInstances = new Stack<T>();
 
 		private void Awake () {
-			pool = new ObjectPool<T>(
-				CreateInstance, WithdrawInstance, DepositInstance, DestroyInstance,
-				collectionCheck, defaultCapacity, maxSize);
+			for (int i = 0; i < defaultCapacity; i++)
+				DepositInstance(CreateInstance());
 		}
 
-		public T Withdraw () => pool.Get();
+		private void OnDestroy () {
+			foreach (T instance in availableInstances)
+				DestroyInstance(instance);
+		}
+
+		public T Withdraw () {
+			if (availableInstances.Count == 0) {
+				if (maxSize >= 0 && numInstances > maxSize)
+					return null;
+				else
+					return CreateInstance();
+			}
+			else
+				return WithdrawInstance();
+		}
 
 		public T Withdraw (Vector3 position) {
 			T instance = Withdraw();
@@ -31,22 +52,37 @@ namespace SharedUnityMischief.Pool {
 			return instance;
 		}
 
+		public void Deposit (T instance) => DepositInstance(instance);
+
 		private T CreateInstance () {
+			numInstances++;
 			T instance = Instantiate(prefab);
-			instance.DepositToPool = () => pool.Release(instance);
+			instance.DepositToPool = () => {
+				if (this == null)
+					return false;
+				else {
+					Deposit(instance);
+					return true;
+				}
+			};
 			return instance;
 		}
 
-		private void WithdrawInstance (T instance) {
+		private T WithdrawInstance () {
+			T instance = availableInstances.Pop();
 			instance.OnWithdrawFromPool();
+			return instance;
 		}
 
 		private void DepositInstance (T instance) {
-			instance.OnDepositToPool();
+			if (!collectionCheck || !availableInstances.Contains(instance)) {
+				availableInstances.Push(instance);
+				instance.OnDepositToPool();
+			}
 		}
 
 		private void DestroyInstance (T instance) {
-			Destroy(instance);
+			Destroy(instance.gameObject);
 		}
 	}
 }

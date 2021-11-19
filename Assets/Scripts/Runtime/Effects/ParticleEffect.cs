@@ -17,7 +17,7 @@ namespace SharedUnityMischief.Effects {
 
 		private void Update () {
 			if (director.state != PlayState.Playing)
-				DepositOrDestroy();
+				DepositToPoolOrDestroy();
 		}
 
 		private void OnDisable () {
