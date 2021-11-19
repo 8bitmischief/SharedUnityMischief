@@ -1,20 +1,28 @@
 using UnityEngine;
+using UnityEngine.Playables;
 
 namespace SharedUnityMischief {
-	[RequireComponent(typeof(Animator))]
+	[RequireComponent(typeof(PlayableDirector))]
 	public class ParticleEffect : MonoBehaviour {
-		private static readonly int playHash = Animator.StringToHash("Play");
+		[SerializeField] private bool playOnAwake = false;
+		[SerializeField] private bool playOnEnable = false;
 
-		private Animator animator;
+		private PlayableDirector director;
 
 		private void Awake () {
-			animator = GetComponent<Animator>();
+			director = GetComponent<PlayableDirector>();
+			if (playOnAwake)
+				Play();
+		}
+
+		private void OnEnable () {
+			if (playOnEnable)
+				Play();
 		}
 
 		public void Play () {
-			if (!gameObject.activeSelf)
-				gameObject.SetActive(true);
-			animator.SetTrigger(playHash);
+			director.Stop();
+			director.Play();
 		}
 	}
 }
