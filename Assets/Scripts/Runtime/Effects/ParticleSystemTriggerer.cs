@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SharedUnityMischief {
+namespace SharedUnityMischief.Effects {
 	[ExecuteInEditMode]
 	[RequireComponent(typeof(ParticleSystem))]
 	public class ParticleSystemTriggerer : MonoBehaviour {
