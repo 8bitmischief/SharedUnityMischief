@@ -1,15 +1,22 @@
+using System;
 using UnityEngine;
+using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Lifecycle {
-	public abstract class Entity : EntityComponent {
-		public virtual bool appendSpawnIndexToName => false;
+	public abstract class Entity : EntityComponent, IPoolable {
+		[SerializeField] public bool appendSpawnIndexToName = false;
+
+		public override Entity entity => this;
 
 		public bool isSpawned { get; private set; } = false;
 		public bool scheduledToSpawn { get; set; } = false;
 		public bool scheduledToDespawn { get; set; } = false;
+		public bool isPooled => DepositToPool != null;
+
+		public Func<bool> DepositToPool { get; set; } = null;
 
 		private EntityComponent[] components;
-		
+
 		protected virtual void Awake () {
 			components = GetComponentsInChildren<EntityComponent>();
 		}
@@ -51,6 +58,34 @@ namespace SharedUnityMischief.Lifecycle {
 			}
 			else
 				return false;
+		}
+
+		public bool DepositToPoolOrDestroy () {
+			if (isPooled && DepositToPool())
+				return true;
+			else {
+				Destroy(gameObject);
+				return false;
+			}
+		}
+
+		public bool DepositToPoolOrDeactivate () {
+			if (isPooled && DepositToPool())
+				return true;
+			else {
+				gameObject.SetActive(false);
+				return false;
+			}
+		}
+
+		public virtual void OnWithdrawFromPool () {
+			gameObject.SetActive(true);
+			foreach (EntityComponent component in components)
+				component.Reset();
+		}
+
+		public virtual void OnDepositToPool () {
+			gameObject.SetActive(false);
 		}
 	}
 }

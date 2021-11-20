@@ -1,9 +1,9 @@
 using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle {
-	public abstract class EntityComponent : MonoBehaviour {
+	public abstract class EntityComponent : MonoBehaviour, IEntityComponent {
 		private Entity _entity;
-		protected Entity entity {
+		public virtual Entity entity {
 			get {
 				if (_entity == null)
 					_entity = GetComponentInParent<Entity>();
@@ -11,6 +11,7 @@ namespace SharedUnityMischief.Lifecycle {
 			}
 		}
 
+		public virtual void Reset () {}
 		public virtual void OnSpawn () {}
 		public virtual void EarlyUpdateState () {}
 		public virtual void UpdateState () {}
@@ -20,7 +21,7 @@ namespace SharedUnityMischief.Lifecycle {
 
 	public abstract class EntityComponent<T> : EntityComponent where T : Entity {
 		private T _typedEntity;
-		protected new T entity {
+		public new T entity {
 			get {
 				if (_typedEntity == null)
 					_typedEntity = GetComponentInParent<T>();

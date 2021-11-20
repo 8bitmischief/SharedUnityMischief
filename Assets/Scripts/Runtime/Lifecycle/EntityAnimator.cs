@@ -8,6 +8,7 @@ namespace SharedUnityMischief.Lifecycle {
 		// In order to properly trigger events, we want to overshoot each frame a tiny bit
 		// This variable controlss how much each frame gets overshot and undershot
 		protected static readonly float updateFudgeTime = UpdateLoop.timePerUpdate / 100f;
+		protected static readonly int resetHash = Animator.StringToHash("Reset");
 
 		[SerializeField] protected Vector3 rootMotionProgress = Vector3.zero;
 
@@ -77,6 +78,37 @@ namespace SharedUnityMischief.Lifecycle {
 			UpdateAnimator(updateFudgeTime);
 		}
 
+		public override void Reset () {
+			foreach (AnimatorControllerParameter param in animator.parameters)
+				if (param.name == "Reset")
+					Trigger(resetHash);
+			state = default(T);
+			timeInState = 0f;
+			framesInState = 0;
+			animationTime = 0f;
+			animationDuration = 0f;
+			percentAnimationCompleted = 0f;
+			hasAnimationCompleted = false;
+			isAnimationLooping = false;
+			hasAnimationLooped = false;
+			animationFrame = 0;
+			animationFrameDuration = 0;
+			percentInterpolated = 0f;
+			animationSpeed = 1.00f;
+			authoredRootMotion = Vector3.zero;
+			programmaticRootMotion = Vector3.zero;
+			programmaticRootMotionProgress = Vector3.zero;
+			didStartNewAnimation = false;
+			undoAuthoredRootMotion = false;
+			authoredRootMotionTraveledSoFar = Vector3.zero;
+			programmaticRootMotionTraveledSoFar = Vector3.zero;
+			rootMotionForTriggeredAnimation = Vector3.zero;
+			xProgrammaticRootMotion = ProgrammaticRootMotionType.None;
+			yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
+			zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
+			triggeredEvents.Clear();
+		}
+
 		public override void UpdateState () {
 			if (animationSpeed != 1.00f) {
 				AdvanceNonStandardSpeed();
@@ -127,7 +159,7 @@ namespace SharedUnityMischief.Lifecycle {
 			if (isTargetPosition)
 				rootMotionForTriggeredAnimation -= transform.position;
 			animator.SetTrigger(hash);
-			UpdateAnimator(0f);
+			UpdateAnimator(Mathf.Epsilon);
 			rootMotionForTriggeredAnimation = Vector3.zero;
 			if (didStartNewAnimation)
 				InterpolateAnimation();

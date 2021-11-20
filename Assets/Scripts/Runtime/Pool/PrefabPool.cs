@@ -1,33 +1,18 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SharedUnityMischief.Pool {
-	public abstract class PrefabPool : MonoBehaviour {
-		public abstract int numInstances { get; protected set; }
-		public abstract int numAvailableInstances { get; }
-	}
-	
-	public abstract class PrefabPool<T> : PrefabPool where T : MonoBehaviour, IPoolable {
-		[Header("Pool Config")]
-		[SerializeField] private T prefab;
+	[Serializable]
+	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable {
+		[SerializeField] public T prefab;
 		[SerializeField] private bool collectionCheck = false;
-		[SerializeField] private int defaultCapacity = 0;
 		[SerializeField] private int maxSize = -1;
 
-		public override int numInstances { get; protected set; } = 0;
-		public override int numAvailableInstances => availableInstances.Count;
+		public int numInstances { get; private set; } = 0;
+		public int numAvailableInstances => availableInstances.Count;
 
 		private Stack<T> availableInstances = new Stack<T>();
-
-		private void Awake () {
-			for (int i = 0; i < defaultCapacity; i++)
-				DepositInstance(CreateInstance());
-		}
-
-		private void OnDestroy () {
-			foreach (T instance in availableInstances)
-				DestroyInstance(instance);
-		}
 
 		public T Withdraw () {
 			if (availableInstances.Count == 0) {
@@ -54,9 +39,16 @@ namespace SharedUnityMischief.Pool {
 
 		public void Deposit (T instance) => DepositInstance(instance);
 
+		public void Dispose () {
+			foreach (T instance in availableInstances)
+				DestroyInstance(instance);
+		}
+
 		private T CreateInstance () {
+			if (prefab == null)
+				throw new Exception("Cannot instantiate null prefab in PrefabPool");
 			numInstances++;
-			T instance = Instantiate(prefab);
+			T instance = GameObject.Instantiate(prefab);
 			instance.DepositToPool = () => {
 				if (this == null)
 					return false;
@@ -82,7 +74,8 @@ namespace SharedUnityMischief.Pool {
 		}
 
 		private void DestroyInstance (T instance) {
-			Destroy(instance.gameObject);
+			if (instance != null)
+				GameObject.Destroy(instance.gameObject);
 		}
 	}
 }

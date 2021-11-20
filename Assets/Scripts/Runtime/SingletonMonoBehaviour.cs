@@ -13,6 +13,7 @@ namespace SharedUnityMischief {
 				return instance;
 			}
 		}
+		public static bool hasInstance => instance != null;
 
 		protected static void ResetInstance () {
 			instance = null;
