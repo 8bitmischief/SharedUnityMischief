@@ -1,36 +1,43 @@
 using UnityEngine;
-using UnityEngine.Playables;
+using UnityEngine.VFX;
 using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Effects {
-	[RequireComponent(typeof(PlayableDirector))]
 	public class ParticleEffect : PoolableMonoBehavior {
-		private PlayableDirector director;
+		[SerializeField] private float duration = 1.0f;
+
+		private VisualEffect[] visualEffects;
+		private bool isPlaying = false;
+		private float playTime = 0f;
 
 		private void Awake () {
-			director = GetComponent<PlayableDirector>();
+			visualEffects = GetComponentsInChildren<VisualEffect>();
 		}
 
-		private void OnEnable () {
-			Play();
-		}
+		public override void OnWithdrawFromPool () {}
 
 		private void Update () {
-			if (director.state != PlayState.Playing)
-				DepositToPoolOrDestroy();
+			if (isPlaying) {
+				playTime += Time.deltaTime;
+				if (playTime >= duration)
+					Stop();
+			}
 		}
 
-		private void OnDisable () {
-			Stop();
-		}
+		public override void OnDepositToPool () {}
 
 		public void Play () {
-			director.Stop();
-			director.Play();
+			isPlaying = true;
+			playTime = 0f;
+			foreach (VisualEffect visualEffect in visualEffects)
+				visualEffect.Play();
 		}
 
-		public void Stop () {
-			director.Stop();
+		private void Stop () {
+			isPlaying = false;
+			foreach (VisualEffect visualEffect in visualEffects)
+				visualEffect.Stop();
+			DepositToPoolOrDestroy();
 		}
 	}
 }

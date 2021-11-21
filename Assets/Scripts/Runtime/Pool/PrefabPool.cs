@@ -44,11 +44,17 @@ namespace SharedUnityMischief.Pool {
 				DestroyInstance(instance);
 		}
 
+		public void Prewarm (int numInstances = 1) {
+			for (int i = 0; i < numInstances; i++)
+				Deposit(CreateInstance());
+		}
+
 		private T CreateInstance () {
 			if (prefab == null)
 				throw new Exception("Cannot instantiate null prefab in PrefabPool");
 			numInstances++;
 			T instance = GameObject.Instantiate(prefab);
+			instance.name = prefab.name;
 			instance.DepositToPool = () => {
 				if (this == null)
 					return false;

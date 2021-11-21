@@ -6,7 +6,9 @@ namespace SharedUnityMischief.Effects {
 	public class ParticleSystemTriggerer : MonoBehaviour {
 		[SerializeField] private bool stopEmitting = false;
 
+#pragma warning disable CS0109 // Ignore "does not hide an accessible" warning during builds
 		private new ParticleSystem particleSystem;
+#pragma warning restore CS0109
 		private bool stopEmittingLastFrame = false;
 		
 		private void Awake () {
