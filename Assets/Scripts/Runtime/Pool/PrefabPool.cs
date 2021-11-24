@@ -7,12 +7,20 @@ namespace SharedUnityMischief.Pool {
 	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable {
 		[SerializeField] public T prefab;
 		[SerializeField] private bool collectionCheck = false;
+		[SerializeField] private int defaultCapacity = 0;
 		[SerializeField] private int maxSize = -1;
 
 		public int numInstances { get; private set; } = 0;
 		public int numAvailableInstances => availableInstances.Count;
 
 		private Stack<T> availableInstances = new Stack<T>();
+
+		public void Prewarm () => Prewarm(defaultCapacity);
+
+		public void Prewarm (int numInstances) {
+			for (int i = 0; i < numInstances; i++)
+				Deposit(CreateInstance());
+		}
 
 		public T Withdraw () {
 			if (availableInstances.Count == 0) {
@@ -42,11 +50,6 @@ namespace SharedUnityMischief.Pool {
 		public void Dispose () {
 			foreach (T instance in availableInstances)
 				DestroyInstance(instance);
-		}
-
-		public void Prewarm (int numInstances = 1) {
-			for (int i = 0; i < numInstances; i++)
-				Deposit(CreateInstance());
 		}
 
 		private T CreateInstance () {

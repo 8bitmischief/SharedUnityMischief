@@ -1,12 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Lifecycle {
 	public abstract class Entity : EntityComponent, IPoolable {
+		[Header("Entity Config")]
 		[SerializeField] public bool appendSpawnIndexToName = false;
 
 		public override Entity entity => this;
+		public override int componentUpdateOrder => EntityComponent.entityUpdateOrder;
 
 		public bool isSpawned { get; private set; } = false;
 		public bool scheduledToSpawn { get; set; } = false;
@@ -15,10 +19,11 @@ namespace SharedUnityMischief.Lifecycle {
 
 		public Func<bool> DepositToPool { get; set; } = null;
 
-		private EntityComponent[] components;
+		private List<EntityComponent> components;
 
 		protected virtual void Awake () {
-			components = GetComponentsInChildren<EntityComponent>();
+			components = GetComponentsInChildren<EntityComponent>().ToList();
+			components.Sort((a, b) => a.componentUpdateOrder - b.componentUpdateOrder);
 		}
 
 		public bool Spawn () {
@@ -81,7 +86,7 @@ namespace SharedUnityMischief.Lifecycle {
 		public virtual void OnWithdrawFromPool () {
 			gameObject.SetActive(true);
 			foreach (EntityComponent component in components)
-				component.Reset();
+				component.ResetComponent();
 		}
 
 		public virtual void OnDepositToPool () {

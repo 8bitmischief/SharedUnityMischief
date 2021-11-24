@@ -5,6 +5,8 @@ using UnityEngine;
 namespace SharedUnityMischief.Lifecycle {
 	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator : EntityComponent {
+		public override int componentUpdateOrder => EntityComponent.animatorUpdateOrder;
+
 		// In order to properly trigger events, we want to overshoot each frame a tiny bit
 		// This variable controlss how much each frame gets overshot and undershot
 		protected static readonly float updateFudgeTime = UpdateLoop.timePerUpdate / 100f;
@@ -78,7 +80,7 @@ namespace SharedUnityMischief.Lifecycle {
 			UpdateAnimator(updateFudgeTime);
 		}
 
-		public override void Reset () {
+		public override void ResetComponent () {
 			foreach (AnimatorControllerParameter param in animator.parameters)
 				if (param.name == "Reset")
 					Trigger(resetHash);
@@ -152,9 +154,9 @@ namespace SharedUnityMischief.Lifecycle {
 			onChangeState?.Invoke(state, prevState);
 		}
 
-		public void Trigger (int hash) => Trigger(hash, Vector3.zero, false);
+		protected void Trigger (int hash) => Trigger(hash, Vector3.zero, false);
 
-		public void Trigger (int hash, Vector3 rootMotion, bool isTargetPosition = true) {
+		protected void Trigger (int hash, Vector3 rootMotion, bool isTargetPosition = true) {
 			rootMotionForTriggeredAnimation = rootMotion;
 			if (isTargetPosition)
 				rootMotionForTriggeredAnimation -= transform.position;

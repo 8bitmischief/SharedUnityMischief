@@ -6,15 +6,17 @@ namespace SharedUnityMischief {
 		public override void OnInspectorGUI () {
 			DrawDefaultInspector();
 
-			bool wasEnabled = GUI.enabled;
+			if (Application.isPlaying) {
+				bool wasEnabled = GUI.enabled;
 
-			GUI.enabled = Application.isPlaying;
-			DrawControls();
+				GUI.enabled = Application.isPlaying;
+				DrawControls();
 
-			GUI.enabled = false;
-			DrawState();
+				GUI.enabled = false;
+				DrawState();
 
-			GUI.enabled = wasEnabled;
+				GUI.enabled = wasEnabled;
+			}
 		}
 
 		protected virtual void DrawControls () {}

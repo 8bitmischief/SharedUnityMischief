@@ -2,6 +2,13 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle {
 	public abstract class EntityComponent : MonoBehaviour, IEntityComponent {
+		public static readonly int defaultComponentUpdateOrder = 0;
+		public static readonly int animatorUpdateOrder = -100;
+		public static readonly int entityUpdateOrder = 100;
+		public static readonly int controllerUpdateOrder = 200;
+
+		public virtual int componentUpdateOrder => defaultComponentUpdateOrder;
+
 		private Entity _entity;
 		public virtual Entity entity {
 			get {
@@ -11,7 +18,7 @@ namespace SharedUnityMischief.Lifecycle {
 			}
 		}
 
-		public virtual void Reset () {}
+		public virtual void ResetComponent () {}
 		public virtual void OnSpawn () {}
 		public virtual void EarlyUpdateState () {}
 		public virtual void UpdateState () {}
