@@ -1,7 +1,9 @@
 using UnityEngine;
 
-namespace SharedUnityMischief {
-	public enum Direction {
+namespace SharedUnityMischief
+{
+	public enum Direction
+	{
 		None = 0,
 		Up = 1,
 		Down = 2,

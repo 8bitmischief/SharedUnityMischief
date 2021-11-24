@@ -1,27 +1,32 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Input.Control {
+namespace SharedUnityMischief.Input.Control
+{
 	[CustomEditor(typeof(ButtonControl), true)]
-	public class ButtonControlEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class ButtonControlEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		private float lastPressTime = -999f;
 		private float lastReleaseTime = -999f;
 
-		private void OnEnable () {
+		private void OnEnable()
+		{
 			ButtonControl control = (ButtonControl) target;
 			control.onPress += OnPress;
 			control.onRelease += OnRelease;
 		}
 
-		private void OnDisable () {
+		private void OnDisable()
+		{
 			ButtonControl control = (ButtonControl) target;
 			control.onPress += OnPress;
 			control.onRelease += OnRelease;
 		}
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			ButtonControl control = (ButtonControl) target;
 
 			EditorGUILayout.Space();
@@ -37,11 +42,13 @@ namespace SharedUnityMischief.Input.Control {
 			EditorGUILayout.ColorField("Release", new Color(releaseHighlight, releaseHighlight, 0.0f, 1.0f));
 		}
 
-		private void OnPress () {
+		private void OnPress()
+		{
 			lastPressTime = Time.time;
 		}
 
-		private void OnRelease () {
+		private void OnRelease()
+		{
 			lastReleaseTime = Time.time;
 		}
 	}

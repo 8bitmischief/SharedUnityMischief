@@ -1,8 +1,10 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Input.Control {
-	public interface IControl {
+namespace SharedUnityMischief.Input.Control
+{
+	public interface IControl
+	{
 		bool isActuated { get; }
-		void ConsumeInstantaneousInputs ();
+		void ConsumeInstantaneousInputs();
 	}
 }

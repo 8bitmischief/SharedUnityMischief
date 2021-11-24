@@ -2,8 +2,10 @@ using UnityEngine;
 using UnityEngine.VFX;
 using SharedUnityMischief.Pool;
 
-namespace SharedUnityMischief.Effects {
-	public class ParticleEffect : PoolableMonoBehavior {
+namespace SharedUnityMischief.Effects
+{
+	public class ParticleEffect : PoolableMonoBehavior
+	{
 		[SerializeField] private float duration = 1.0f;
 
 		public bool isPlaying { get; private set; } = false;
@@ -12,46 +14,65 @@ namespace SharedUnityMischief.Effects {
 		private float playTime = 0f;
 		private EndBehavior endBehavior = EndBehavior.Destroy;
 
-		private void Awake () {
+		private void Awake()
+		{
 			visualEffects = GetComponentsInChildren<VisualEffect>();
 		}
 
-		public override void OnWithdrawFromPool () {}
-
-		private void Update () {
-			if (isPlaying) {
+		private void Update()
+		{
+			if (isPlaying)
+			{
 				playTime += Time.deltaTime;
-				if (playTime >= duration) {
+				if (playTime >= duration)
+				{
 					if (endBehavior == EndBehavior.Loop)
+					{
 						PlayEndlessly();
-					else {
+					}
+					else
+					{
 						Stop();
 						if (endBehavior == EndBehavior.Destroy)
+						{
 							DepositToPoolOrDestroy();
+						}
 					}
 				}
 			}
 		}
 
-		public override void OnDepositToPool () {}
+		public override void OnWithdrawFromPool() {}
 
-		public void Play (bool destroyWhenDonePlaying = true) => Play(destroyWhenDonePlaying ? EndBehavior.Destroy : EndBehavior.None);
-		public void PlayEndlessly () => Play(EndBehavior.Loop);
-		private void Play (EndBehavior endBehavior) {
+		public override void OnDepositToPool() {}
+
+		public void PlayEndlessly() => Play(EndBehavior.Loop);
+
+		public void Play(bool destroyWhenDonePlaying = true)
+			=> Play(destroyWhenDonePlaying ? EndBehavior.Destroy : EndBehavior.None);
+
+		private void Play(EndBehavior endBehavior)
+		{
 			isPlaying = true;
 			playTime = 0f;
 			this.endBehavior = endBehavior;
 			foreach (VisualEffect visualEffect in visualEffects)
+			{
 				visualEffect.Play();
+			}
 		}
 
-		public void Stop () {
+		public void Stop()
+		{
 			isPlaying = false;
 			foreach (VisualEffect visualEffect in visualEffects)
+			{
 				visualEffect.Stop();
+			}
 		}
 
-		private enum EndBehavior {
+		private enum EndBehavior
+		{
 			None = 0,
 			Destroy = 1,
 			Loop = 2

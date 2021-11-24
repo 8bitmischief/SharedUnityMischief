@@ -1,12 +1,14 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Lifecycle {
-	public abstract class UpdateLoop : SingletonMonoBehaviour<UpdateLoop> {
-		public static readonly int updatesPerSecond = 60;
-		public static readonly float timePerUpdate = 1f / 60f;
+namespace SharedUnityMischief.Lifecycle
+{
+	public abstract class UpdateLoop : SingletonMonoBehaviour<UpdateLoop>
+	{
+		public const int UpdatesPerSecond = 60;
+		public const float TimePerUpdate = 1f / 60f;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-		protected static void Reset () => ResetInstance();
+		private static void ResetSingletonClass() => ResetInstance();
 
 		[Header("Update Loop Config")]
 		public bool updateAutomatically = true;
@@ -17,68 +19,83 @@ namespace SharedUnityMischief.Lifecycle {
 		public float deltaTime { get; private set; } = 0f;
 		public bool isInterpolating { get; private set; } = false;
 		public bool isPaused { get; private set; } = false;
-		public float percentNextUpdateInterpolated => interpolatedTime / timePerUpdate;
+		public float percentNextUpdateInterpolated => interpolatedTime / TimePerUpdate;
 
 		private float interpolatedTime = 0f;
 		private float leftoverInterpolationTime = 0f;
 
-		private void Update () {
+		private void Update()
+		{
 			if (updateAutomatically)
+			{
 				Advance();
+			}
 		}
 
-		public virtual void Pause () => isPaused = true;
+		public virtual void Pause() => isPaused = true;
 
-		public virtual void Resume () => isPaused = false;
+		public virtual void Resume() => isPaused = false;
 
-		public void Advance (bool ignorePause = false) => Advance(Time.deltaTime, ignorePause);
+		public void Advance(bool ignorePause = false) => Advance(Time.deltaTime, ignorePause);
 
-		public void Advance (float deltaTime, bool ignorePause = false) {
+		public void Advance(float deltaTime, bool ignorePause = false)
+		{
 			deltaTime *= timeScale;
-			if (ignorePause || !isPaused) {
+			if (ignorePause || !isPaused)
+			{
 				// We haven't advanced enough to count for a full frame, so just interpolate a bit more
-				if (leftoverInterpolationTime + deltaTime < timePerUpdate) {
+				if (leftoverInterpolationTime + deltaTime < TimePerUpdate)
+				{
 					UpdateState(deltaTime, true);
 					leftoverInterpolationTime += deltaTime;
 				}
 				// We've adanced to the next frame (and possibly beyond)
 				else {
 					// Get to the next frame
-					UpdateState(timePerUpdate - leftoverInterpolationTime, false);
-					float unusedDeltaTime = deltaTime - (timePerUpdate - leftoverInterpolationTime);
+					UpdateState(TimePerUpdate - leftoverInterpolationTime, false);
+					float unusedDeltaTime = deltaTime - (TimePerUpdate - leftoverInterpolationTime);
 					// Keep advancing frames for as long as we have unused delta time left
-					while (unusedDeltaTime >= timePerUpdate) {
-						unusedDeltaTime -= timePerUpdate;
-						UpdateState(timePerUpdate, false);
+					while (unusedDeltaTime >= TimePerUpdate)
+					{
+						unusedDeltaTime -= TimePerUpdate;
+						UpdateState(TimePerUpdate, false);
 					}
 					// If we have a bit of leftover time, interpolate forward a bit
-					if (unusedDeltaTime > 0f) {
+					if (unusedDeltaTime > 0f)
+					{
 						leftoverInterpolationTime = unusedDeltaTime;
 						UpdateState(unusedDeltaTime, true);
 					}
 					else
+					{
 						leftoverInterpolationTime = 0f;
+					}
 				}
 			}
 		}
 
-		public void AdvanceOneFrame (bool ignorePause = false) {
-			if (ignorePause || !isPaused) {
+		public void AdvanceOneFrame(bool ignorePause = false)
+		{
+			if (ignorePause || !isPaused)
+			{
 				// Advance just far enough to get to the next frame
-				UpdateState(timePerUpdate - leftoverInterpolationTime, false);
+				UpdateState(TimePerUpdate - leftoverInterpolationTime, false);
 				leftoverInterpolationTime = 0f;
 			}
 		}
 
-		protected virtual void UpdateState () {}
+		protected virtual void UpdateState() {}
 
-		private void UpdateState (float deltaTime, bool isInterpolating) {
+		private void UpdateState(float deltaTime, bool isInterpolating)
+		{
 			// Set all public variables
 			time += deltaTime;
 			this.deltaTime = deltaTime;
 			this.isInterpolating = isInterpolating;
 			if (isInterpolating)
+			{
 				interpolatedTime += deltaTime;
+			}
 			else {
 				frame++;
 				interpolatedTime = 0f;

@@ -1,13 +1,15 @@
 using System;
 using UnityEngine;
 
-namespace SharedUnityMischief.Input.Control {
-	public interface IToggleControl : IControl {
+namespace SharedUnityMischief.Input.Control
+{
+	public interface IToggleControl : IControl
+	{
 		bool isOn { get; }
 		bool justToggled { get; }
 		bool justToggledOn { get; }
 		bool justToggledOff { get; }
-		Action<bool> onToggle { get; set; }
+		event Action<bool> onToggle;
 		void Toggle(bool triggerEvents = true);
 		void Toggle(bool isOn, bool triggerEvents = true);
 	}

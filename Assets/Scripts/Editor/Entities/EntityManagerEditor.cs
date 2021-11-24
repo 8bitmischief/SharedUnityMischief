@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Entities {
+namespace SharedUnityMischief.Entities
+{
 	[CustomEditor(typeof(EntityManager), true)]
-	public class EntityManagerEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class EntityManagerEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			EntityManager manager = (EntityManager) target;
 
 			EditorGUILayout.Space();

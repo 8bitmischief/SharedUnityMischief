@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Input.Control {
+namespace SharedUnityMischief.Input.Control
+{
 	[CustomEditor(typeof(LookControl), true)]
-	public class LookControlEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class LookControlEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			LookControl control = (LookControl) target;
 
 			EditorGUILayout.Space();

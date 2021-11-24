@@ -2,14 +2,17 @@ using System;
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Entities.Animated {
+namespace SharedUnityMischief.Entities.Animated
+{
 	[CustomEditor(typeof(EntityAnimator), true)]
-	public class EntityAnimatorEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class EntityAnimatorEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		private bool showAnimationDetails = true;
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			EntityAnimator animator = (EntityAnimator) target;
 
 			EditorGUILayout.Space();
@@ -19,7 +22,8 @@ namespace SharedUnityMischief.Entities.Animated {
 			EditorGUILayout.IntField("Frames In State", animator.framesInState);
 
 			showAnimationDetails = EditorGUILayout.Foldout(showAnimationDetails, "Animation");
-			if (showAnimationDetails) {
+			if (showAnimationDetails)
+			{
 				EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.FloatField("Time", animator.animationTime);
 				EditorGUILayout.FloatField(animator.animationDuration, GUILayout.Width(50));

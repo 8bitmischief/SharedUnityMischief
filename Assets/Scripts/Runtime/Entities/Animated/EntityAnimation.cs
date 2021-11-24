@@ -1,7 +1,9 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Entities.Animated {
-	public abstract class EntityAnimation<T> : StateMachineBehaviour {
+namespace SharedUnityMischief.Entities.Animated
+{
+	public abstract class EntityAnimation<T> : StateMachineBehaviour
+	{
 		[Header("Animation")]
 		[SerializeField] private T _state;
 		[SerializeField] private Vector3 _authoredRootMotion = Vector3.zero;
@@ -22,9 +24,12 @@ namespace SharedUnityMischief.Entities.Animated {
 
 		private EntityAnimator<T> animator;
 
-		public override void OnStateEnter (Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
+		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+		{
 			if (this.animator == null)
+			{
 				this.animator = animator.GetComponent<EntityAnimator<T>>();
+			}
 			this.animator.TriggerAnimationStart(this, stateInfo);
 		}
 	}

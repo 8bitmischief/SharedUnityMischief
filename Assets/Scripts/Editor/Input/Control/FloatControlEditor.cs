@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Input.Control {
+namespace SharedUnityMischief.Input.Control
+{
 	[CustomEditor(typeof(FloatControl), true)]
-	public class FloatControlEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class FloatControlEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			FloatControl control = (FloatControl) target;
 
 			EditorGUILayout.Space();

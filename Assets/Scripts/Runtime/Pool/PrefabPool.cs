@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SharedUnityMischief.Pool {
+namespace SharedUnityMischief.Pool
+{
 	[Serializable]
-	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable {
-		[SerializeField] public T prefab;
+	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable
+	{
+		public T prefab;
 		[SerializeField] private bool collectionCheck = false;
 		[SerializeField] private int defaultCapacity = 0;
 		[SerializeField] private int maxSize = -1;
@@ -15,53 +17,76 @@ namespace SharedUnityMischief.Pool {
 
 		private Stack<T> availableInstances = new Stack<T>();
 
-		public void Prewarm () => Prewarm(defaultCapacity);
+		public void Prewarm() => Prewarm(defaultCapacity);
 
-		public void Prewarm (int numInstances) {
-			for (int i = 0; i < numInstances; i++)
+		public void Prewarm(int numInstancesToCreate)
+		{
+			for (int i = 0; i < numInstancesToCreate; i++)
+			{
 				Deposit(CreateInstance());
+			}
 		}
 
-		public T Withdraw () {
-			if (availableInstances.Count == 0) {
+		public T Withdraw()
+		{
+			if (availableInstances.Count == 0)
+			{
 				if (maxSize >= 0 && numInstances > maxSize)
+				{
 					return null;
+				}
 				else
+				{
 					return CreateInstance();
+				}
 			}
 			else
+			{
 				return WithdrawInstance();
+			}
 		}
 
-		public T Withdraw (Vector3 position) {
+		public T Withdraw(Vector3 position)
+		{
 			T instance = Withdraw();
 			instance.transform.position = position;
 			return instance;
 		}
 
-		public T Withdraw (Vector3 position, Quaternion rotation) {
+		public T Withdraw(Vector3 position, Quaternion rotation)
+		{
 			T instance = Withdraw(position);
 			instance.transform.rotation = rotation;
 			return instance;
 		}
 
-		public void Deposit (T instance) => DepositInstance(instance);
+		public void Deposit(T instance) => DepositInstance(instance);
 
-		public void Dispose () {
+		public void Dispose()
+		{
 			foreach (T instance in availableInstances)
+			{
 				DestroyInstance(instance);
+			}
 		}
 
-		private T CreateInstance () {
+		private T CreateInstance()
+		{
 			if (prefab == null)
+			{
 				throw new Exception("Cannot instantiate null prefab in PrefabPool");
+			}
 			numInstances++;
+			// Create and prepare the instance
 			T instance = GameObject.Instantiate(prefab);
 			instance.name = prefab.name;
 			instance.DepositToPool = () => {
 				if (this == null)
+				{
 					return false;
-				else {
+				}
+				else
+				{
 					Deposit(instance);
 					return true;
 				}
@@ -69,22 +94,28 @@ namespace SharedUnityMischief.Pool {
 			return instance;
 		}
 
-		private T WithdrawInstance () {
+		private T WithdrawInstance()
+		{
 			T instance = availableInstances.Pop();
 			instance.OnWithdrawFromPool();
 			return instance;
 		}
 
-		private void DepositInstance (T instance) {
-			if (!collectionCheck || !availableInstances.Contains(instance)) {
+		private void DepositInstance(T instance)
+		{
+			if (!collectionCheck || !availableInstances.Contains(instance))
+			{
 				availableInstances.Push(instance);
 				instance.OnDepositToPool();
 			}
 		}
 
-		private void DestroyInstance (T instance) {
+		private void DestroyInstance(T instance)
+		{
 			if (instance != null)
+			{
 				GameObject.Destroy(instance.gameObject);
+			}
 		}
 	}
 }

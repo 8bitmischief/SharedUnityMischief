@@ -1,24 +1,29 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Input.Control {
+namespace SharedUnityMischief.Input.Control
+{
 	[CustomEditor(typeof(ToggleControl), true)]
-	public class ToggleControlEditor : BaseEditor {
-		public override bool RequiresConstantRepaint () => Application.isPlaying;
+	public class ToggleControlEditor : BaseEditor
+	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		private float lastToggleTime = -999f;
 
-		private void OnEnable () {
+		private void OnEnable()
+		{
 			ToggleControl control = (ToggleControl) target;
 			control.onToggle += OnToggle;
 		}
 
-		private void OnDisable () {
+		private void OnDisable()
+		{
 			ToggleControl control = (ToggleControl) target;
 			control.onToggle += OnToggle;
 		}
 
-		protected override void DrawState () {
+		protected override void DrawState()
+		{
 			ToggleControl control = (ToggleControl) target;
 
 			EditorGUILayout.Space();
@@ -31,7 +36,8 @@ namespace SharedUnityMischief.Input.Control {
 			EditorGUILayout.ColorField("Toggle", new Color(toggleHighlight, toggleHighlight, 0.0f, 1.0f));
 		}
 
-		private void OnToggle (bool isOn) {
+		private void OnToggle(bool isOn)
+		{
 			lastToggleTime = Time.time;
 		}
 	}

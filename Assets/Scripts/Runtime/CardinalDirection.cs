@@ -1,7 +1,9 @@
 using UnityEngine;
 
-namespace SharedUnityMischief {
-	public enum CardinalDirection {
+namespace SharedUnityMischief
+{
+	public enum CardinalDirection
+	{
 		None = 0,
 		North = 1,
 		East = 2,

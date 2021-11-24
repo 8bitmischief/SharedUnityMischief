@@ -1,8 +1,10 @@
 using UnityEngine;
 
-namespace SharedUnityMischief {
+namespace SharedUnityMischief
+{
 	[RequireComponent(typeof(Camera))]
-	public class ScrollableCamera : MonoBehaviour {
+	public class ScrollableCamera : MonoBehaviour
+	{
 		public Vector2 scroll = Vector2.zero;
 
 #pragma warning disable CS0109 // Ignore "does not hide an accessible" warning during builds
@@ -12,15 +14,26 @@ namespace SharedUnityMischief {
 		private Vector2 lastRenderedScreenSize;
 		private float lastRenderedFieldOfView;
 
-		private void Awake () {
+		private void Awake()
+		{
 			camera = GetComponent<Camera>();
 		}
 
-		private void LateUpdate () {
-			if (lastRenderedScroll != scroll || lastRenderedScreenSize.x != Screen.width || lastRenderedScreenSize.y != Screen.height || lastRenderedFieldOfView != camera.fieldOfView) {
+		private void LateUpdate()
+		{
+			// Only update the camera's projection matrix if something's changed
+			if (lastRenderedScroll != scroll ||
+				lastRenderedScreenSize.x != Screen.width ||
+				lastRenderedScreenSize.y != Screen.height ||
+				lastRenderedFieldOfView != camera.fieldOfView)
+			{
 				// Reset the projection matrix so any automatic field of view changes can take effect
-				if (lastRenderedScreenSize.x != Screen.width || lastRenderedScreenSize.y != Screen.height || lastRenderedFieldOfView != camera.fieldOfView)
+				if (lastRenderedScreenSize.x != Screen.width ||
+					lastRenderedScreenSize.y != Screen.height ||
+					lastRenderedFieldOfView != camera.fieldOfView)
+				{
 					camera.ResetProjectionMatrix();
+				}
 				// Refresh the camera's projection matrix
 				ApplyScrollToProjectionMatrix();
 				lastRenderedScroll = scroll;
@@ -29,7 +42,8 @@ namespace SharedUnityMischief {
 			}
 		}
 
-		private void ApplyScrollToProjectionMatrix () {
+		private void ApplyScrollToProjectionMatrix()
+		{
 			Matrix4x4 matrix = camera.projectionMatrix;
 			// Do some perspective math to scroll the camera around
 			var w = 2f * camera.nearClipPlane / matrix.m00;
