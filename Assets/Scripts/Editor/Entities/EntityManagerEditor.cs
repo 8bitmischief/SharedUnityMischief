@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities {
 	[CustomEditor(typeof(EntityManager), true)]
 	public class EntityManagerEditor : BaseEditor {
 		public override bool RequiresConstantRepaint () => Application.isPlaying;

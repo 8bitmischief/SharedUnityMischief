@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using SharedUnityMischief.Pool;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities {
 	public abstract class Entity : EntityComponent, IPoolable {
 		[Header("Entity Config")]
 		[SerializeField] public bool appendSpawnIndexToName = false;

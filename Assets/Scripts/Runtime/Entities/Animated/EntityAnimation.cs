@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities.Animated {
 	public abstract class EntityAnimation<T> : StateMachineBehaviour {
 		[Header("Animation")]
 		[SerializeField] private T _state;

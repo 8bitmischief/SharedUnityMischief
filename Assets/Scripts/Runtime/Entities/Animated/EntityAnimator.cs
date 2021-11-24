@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using SharedUnityMischief.Lifecycle;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities.Animated {
 	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator : EntityComponent {
 		public override int componentUpdateOrder => EntityComponent.animatorUpdateOrder;

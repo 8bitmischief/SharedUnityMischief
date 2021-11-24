@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SharedUnityMischief.Pool;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities {
 	public class EntityManager : MonoBehaviour {
 		public int numEntities => entities.Count;
 		public int numEntitiesToSpawn => entitiesToSpawn.Count;

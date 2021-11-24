@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities {
 	public interface IEntityComponent {
 		int componentUpdateOrder { get; }
 		Entity entity { get; }

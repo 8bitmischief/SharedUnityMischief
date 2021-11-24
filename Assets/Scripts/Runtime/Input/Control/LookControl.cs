@@ -12,7 +12,7 @@ namespace SharedUnityMischief.Input.Control {
 		[Header("Settings")]
 		public Vector2 mouseSensitivity = Vector2.one;
 		public Vector2 nonMouseSensitivity = Vector2.one;
-		public Curve nonMousePressureSensitivity = Curve.Linear(0f, 1f);
+		public AnimationCurve nonMousePressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
 		public override bool isActuated => vector.x != 0f || vector.y != 0f;
 		public Vector2 vector { get; private set; } = new Vector2(0f, 0f);
@@ -68,7 +68,7 @@ namespace SharedUnityMischief.Input.Control {
 
 		public override void ConsumeInstantaneousInputs () {}
 
-		private Vector2 CalculateLookVector (Vector2 vector, Vector2 sensitivity, Curve sensitivityCurve, bool denormalizeTime) {
+		private Vector2 CalculateLookVector (Vector2 vector, Vector2 sensitivity, AnimationCurve sensitivityCurve, bool denormalizeTime) {
 			if (vector.x != 0f || vector.y != 0f) {
 				if (sensitivityCurve != null) {
 					float magnitude = vector.magnitude;

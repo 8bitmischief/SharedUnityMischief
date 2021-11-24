@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities.Animated {
 	[CustomEditor(typeof(EntityAnimator), true)]
 	public class EntityAnimatorEditor : BaseEditor {
 		public override bool RequiresConstantRepaint () => Application.isPlaying;

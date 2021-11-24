@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities {
 	public abstract class EntityComponent : MonoBehaviour, IEntityComponent {
 		public static readonly int defaultComponentUpdateOrder = 0;
 		public static readonly int animatorUpdateOrder = -100;

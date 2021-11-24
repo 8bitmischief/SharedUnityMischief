@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SharedUnityMischief.Lifecycle {
+namespace SharedUnityMischief.Entities.Animated {
 	public abstract class AnimatedEntity<T, U> : Entity where U : EntityAnimator<T> {
 		public T state => animator != null ? animator.state : default(T);
 		public float timeInState => animator?.timeInState ?? 0f;

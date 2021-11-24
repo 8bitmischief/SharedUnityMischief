@@ -7,7 +7,7 @@ namespace SharedUnityMischief.Input.Control {
 		[SerializeField] private InputAction vectorInput;
 
 		[Header("Settings")]
-		public Curve pressureSensitivity = Curve.Linear(0f, 1f);
+		public AnimationCurve pressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
 		public override bool isActuated => vector.x != 0f || vector.y != 0f;
 		public Vector2 vector { get; private set; } = new Vector2(0f, 0f);
