@@ -75,19 +75,19 @@ namespace SharedUnityMischief.Input.Control
 			numReleases = 0;
 			// Read the current state of the button
 			amountHeldDown = input.ReadValue<float>();
-			 if (!isHeld && input.phase == InputActionPhase.Performed)
-			 {
-			 	isHeld = true;
-			 	justPressed = true;
-			 	timeLastPressed = Time.time;
-			 	onPress?.Invoke();
-			 }
-			 else if (isHeld && (input.phase == InputActionPhase.Waiting || input.phase == InputActionPhase.Disabled))
-			 {
-			 	isHeld = false;
-			 	justReleased = true;
-			 	onRelease?.Invoke();
-			 }
+			if (!isHeld && input.phase == InputActionPhase.Performed)
+			{
+				isHeld = true;
+				justPressed = true;
+				timeLastPressed = Time.time;
+				onPress?.Invoke();
+			}
+			else if (isHeld && (input.phase == InputActionPhase.Waiting || input.phase == InputActionPhase.Disabled))
+			{
+				isHeld = false;
+				justReleased = true;
+				onRelease?.Invoke();
+			}
 		}
 
 		protected override void OnDisable()

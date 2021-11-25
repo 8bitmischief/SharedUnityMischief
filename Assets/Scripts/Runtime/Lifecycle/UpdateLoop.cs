@@ -49,7 +49,8 @@ namespace SharedUnityMischief.Lifecycle
 					leftoverInterpolationTime += deltaTime;
 				}
 				// We've adanced to the next frame (and possibly beyond)
-				else {
+				else
+				{
 					// Get to the next frame
 					UpdateState(TimePerUpdate - leftoverInterpolationTime, false);
 					float unusedDeltaTime = deltaTime - (TimePerUpdate - leftoverInterpolationTime);
@@ -95,7 +96,8 @@ namespace SharedUnityMischief.Lifecycle
 			{
 				interpolatedTime += deltaTime;
 			}
-			else {
+			else
+			{
 				frame++;
 				interpolatedTime = 0f;
 			}
