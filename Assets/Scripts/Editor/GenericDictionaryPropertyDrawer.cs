@@ -7,14 +7,14 @@ namespace SharedUnityMischief
 	[CustomPropertyDrawer(typeof(GenericDictionary<,>))]
 	public class GenericDictionaryPropertyDrawer : PropertyDrawer
 	{
-		static float lineHeight = EditorGUIUtility.singleLineHeight;
-		static float vertSpace = EditorGUIUtility.standardVerticalSpacing;
+		private static float LineHeight = EditorGUIUtility.singleLineHeight;
+		private static float VertSpace = EditorGUIUtility.standardVerticalSpacing;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-		private static void Init()
+		private static void ResetStaticFields()
 		{
-			lineHeight = EditorGUIUtility.singleLineHeight;
-			vertSpace = EditorGUIUtility.standardVerticalSpacing;
+			LineHeight = EditorGUIUtility.singleLineHeight;
+			VertSpace = EditorGUIUtility.standardVerticalSpacing;
 		}
 
 		public override void OnGUI(Rect pos, SerializedProperty property, GUIContent label)
@@ -22,15 +22,15 @@ namespace SharedUnityMischief
 			// Draw list
 			var list = property.FindPropertyRelative("list");
 			string fieldName = ObjectNames.NicifyVariableName(fieldInfo.Name);
-			var currentPos = new Rect(lineHeight, pos.y, pos.width, lineHeight);
+			var currentPos = new Rect(LineHeight, pos.y, pos.width, LineHeight);
 			EditorGUI.PropertyField(currentPos, list, new GUIContent(fieldName), true);
 
 			// Draw key collision warning
 			var keyCollision = property.FindPropertyRelative("keyCollision").boolValue;
 			if (keyCollision)
 			{
-				currentPos.y += EditorGUI.GetPropertyHeight(list, true) + vertSpace;
-				var entryPos = new Rect(lineHeight, currentPos.y, pos.width, lineHeight * 2f);
+				currentPos.y += EditorGUI.GetPropertyHeight(list, true) + VertSpace;
+				var entryPos = new Rect(LineHeight, currentPos.y, pos.width, LineHeight * 2f);
 				EditorGUI.HelpBox(entryPos, "Duplicate keys will not be serialized.", MessageType.Warning);
 			}
 		}
@@ -47,7 +47,7 @@ namespace SharedUnityMischief
 			bool keyCollision = property.FindPropertyRelative("keyCollision").boolValue;
 			if (keyCollision)
 			{
-				totHeight += lineHeight * 2f + vertSpace;
+				totHeight += LineHeight * 2f + VertSpace;
 			}
 
 			return totHeight;

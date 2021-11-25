@@ -6,9 +6,9 @@ namespace SharedUnityMischief.Input.Control
 	[CustomEditor(typeof(ToggleControl), true)]
 	public class ToggleControlEditor : BaseEditor
 	{
-		public override bool RequiresConstantRepaint() => Application.isPlaying;
-
 		private float lastToggleTime = -999f;
+
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		private void OnEnable()
 		{

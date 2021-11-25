@@ -7,9 +7,9 @@ namespace SharedUnityMischief.Lifecycle
 	[CustomEditor(typeof(UpdateLoop), true)]
 	public class UpdateLoopEditor : BaseEditor
 	{
-		public override bool RequiresConstantRepaint() => Application.isPlaying;
-
 		private float manualAdvanceTime = 0.018f;
+
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		protected override void DrawControls()
 		{

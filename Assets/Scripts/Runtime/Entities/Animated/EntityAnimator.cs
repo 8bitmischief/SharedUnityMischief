@@ -8,12 +8,10 @@ namespace SharedUnityMischief.Entities.Animated
 	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator : EntityComponent
 	{
-		public override int componentUpdateOrder => EntityComponent.animatorUpdateOrder;
-
 		// In order to properly trigger events, we want to overshoot each frame a tiny bit
 		// This variable controlss how much each frame gets overshot and undershot
-		protected static readonly float updateFudgeTime = UpdateLoop.TimePerUpdate / 100f;
-		protected static readonly int resetHash = Animator.StringToHash("Reset");
+		protected static readonly float UpdateFudgeTime = UpdateLoop.TimePerUpdate / 100f;
+		protected static readonly int ResetHash = Animator.StringToHash("Reset");
 
 		[SerializeField] protected Vector3 rootMotionProgress = Vector3.zero;
 
@@ -36,6 +34,8 @@ namespace SharedUnityMischief.Entities.Animated
 		public bool willFinishAnimationNextFrame => !isAnimationLooping && animationFrame == animationFrameDuration - 1;
 		public bool willLoopAnimationNextFrame => isAnimationLooping && animationFrame == animationFrameDuration - 1;
 
+		public override int componentUpdateOrder => EntityComponent.AnimatorUpdateOrder;
+
 		public enum ProgrammaticRootMotionType
 		{
 			None = 0,
@@ -46,6 +46,7 @@ namespace SharedUnityMischief.Entities.Animated
 
 	public abstract class EntityAnimator<T> : EntityAnimator
 	{
+		protected Animator animator;
 		public T state { get; private set; }
 		public override string stateName => state.ToString();
 		public override float timeInState { get; protected set; } = 0f;
@@ -63,12 +64,6 @@ namespace SharedUnityMischief.Entities.Animated
 		public override Vector3 authoredRootMotion { get; protected set; } = Vector3.zero;
 		public override Vector3 programmaticRootMotion { get; protected set; } = Vector3.zero;
 		public override Vector3 programmaticRootMotionProgress { get; protected set; } = Vector3.zero;
-
-		public event Action<T> onEnterState;
-		public event Action<T> onLeaveState;
-		public event Action<T, T> onChangeState;
-
-		protected Animator animator;
 		private List<AnimationEvent> triggeredEvents = new List<AnimationEvent>();
 		private bool didStartNewAnimation = false;
 		private bool undoAuthoredRootMotion = false;
@@ -79,11 +74,15 @@ namespace SharedUnityMischief.Entities.Animated
 		private ProgrammaticRootMotionType yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 
+		public event Action<T> onEnterState;
+		public event Action<T> onLeaveState;
+		public event Action<T, T> onChangeState;
+
 		protected virtual void Awake()
 		{
 			animator = GetComponent<Animator>();
 			animator.speed = 0f;
-			UpdateAnimator(updateFudgeTime);
+			UpdateAnimator(UpdateFudgeTime);
 		}
 
 		public override void ResetComponent()
@@ -92,7 +91,7 @@ namespace SharedUnityMischief.Entities.Animated
 			{
 				if (param.name == "Reset")
 				{
-					Trigger(resetHash);
+					Trigger(ResetHash);
 				}
 			}
 			state = default(T);
@@ -214,8 +213,8 @@ namespace SharedUnityMischief.Entities.Animated
 		private void AdvanceToNextFrame()
 		{
 			// Progress the animation all the way to the next frame + a little bit beyond it (the fudge amount)
-			float deltaTime = UpdateLoop.TimePerUpdate - (animationTime % UpdateLoop.TimePerUpdate) + updateFudgeTime;
-			deltaTime = Mathf.Max(deltaTime, 2 * updateFudgeTime);
+			float deltaTime = UpdateLoop.TimePerUpdate - (animationTime % UpdateLoop.TimePerUpdate) + UpdateFudgeTime;
+			deltaTime = Mathf.Max(deltaTime, 2 * UpdateFudgeTime);
 			timeInState += deltaTime;
 			framesInState++;
 			UpdateAnimator(deltaTime);
@@ -237,9 +236,9 @@ namespace SharedUnityMischief.Entities.Animated
 		{
 			// Figure out how far we need to advance to get to the right point between frames
 			float targetTimeBetweenFrames = UpdateLoop.TimePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated;
-			if (targetTimeBetweenFrames > UpdateLoop.TimePerUpdate - updateFudgeTime)
+			if (targetTimeBetweenFrames > UpdateLoop.TimePerUpdate - UpdateFudgeTime)
 			{
-				targetTimeBetweenFrames = UpdateLoop.TimePerUpdate - updateFudgeTime;
+				targetTimeBetweenFrames = UpdateLoop.TimePerUpdate - UpdateFudgeTime;
 			}
 			float currentTimeBetweenFrames = animationTime % UpdateLoop.TimePerUpdate;
 			float deltaTime = targetTimeBetweenFrames - currentTimeBetweenFrames;

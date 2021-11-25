@@ -13,15 +13,14 @@ namespace SharedUnityMischief.Input.Control
 		public bool isHeld { get; private set; } = false;
 		public bool justReleased { get; private set; } = false;
 		public float amountHeldDown { get; private set; } = 0f;
+		private int numPresses = 0;
+		private int numReleases = 0;
+		private float timeLastPressed = 0f;
 		public float holdDuration => isHeld ? Time.time - timeLastPressed : 0f;
 		public override bool isActuated => justPressed || isHeld || justReleased;
 
 		public event Action onPress;
 		public event Action onRelease;
-
-		private int numPresses = 0;
-		private int numReleases = 0;
-		private float timeLastPressed = 0f;
 
 		private void Awake()
 		{

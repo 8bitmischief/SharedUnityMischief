@@ -4,13 +4,12 @@ namespace SharedUnityMischief.Entities
 {
 	public abstract class EntityComponent : MonoBehaviour, IEntityComponent
 	{
-		public static readonly int defaultComponentUpdateOrder = 0;
-		public static readonly int animatorUpdateOrder = -100;
-		public static readonly int entityUpdateOrder = 100;
-		public static readonly int controllerUpdateOrder = 200;
+		public const int DefaultComponentUpdateOrder = 0;
+		public const int AnimatorUpdateOrder = -100;
+		public const int EntityUpdateOrder = 100;
+		public const int ControllerUpdateOrder = 200;
 
-		public virtual int componentUpdateOrder => defaultComponentUpdateOrder;
-
+		private Entity _entity = null;
 		public virtual Entity entity
 		{
 			get
@@ -22,7 +21,7 @@ namespace SharedUnityMischief.Entities
 				return _entity;
 			}
 		}
-		private Entity _entity;
+		public virtual int componentUpdateOrder => DefaultComponentUpdateOrder;
 
 		public virtual void ResetComponent() {}
 		public virtual void OnSpawn() {}
@@ -34,17 +33,17 @@ namespace SharedUnityMischief.Entities
 
 	public abstract class EntityComponent<T> : EntityComponent where T : Entity
 	{
+		private T _typedEntity;
 		public new T entity
 		{
 			get
 			{
-				if (typedEntity == null)
+				if (_typedEntity == null)
 				{
-					typedEntity = GetComponentInParent<T>();
+					_typedEntity = GetComponentInParent<T>();
 				}
-				return typedEntity;
+				return _typedEntity;
 			}
 		}
-		private T typedEntity;
 	}
 }

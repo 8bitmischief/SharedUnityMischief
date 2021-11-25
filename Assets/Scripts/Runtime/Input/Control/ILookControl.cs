@@ -8,9 +8,9 @@ namespace SharedUnityMischief.Input.Control
 		Vector2 vector { get; }
 		bool isMouseLookEnabled { get; }
 		bool isUsingMouseLook { get; }
-		void EnableMouseLook();
-		void DisableMouseLook();
 		event Action onStartUsingMouseLook;
 		event Action onStopUsingMouseLook;
+		void EnableMouseLook();
+		void DisableMouseLook();
 	}
 }

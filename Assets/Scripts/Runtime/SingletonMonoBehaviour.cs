@@ -5,6 +5,8 @@ namespace SharedUnityMischief
 {
 	public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 	{
+		protected static T instance;
+
 		public static T I
 		{
 			get
@@ -20,12 +22,7 @@ namespace SharedUnityMischief
 				return instance;
 			}
 		}
-
-		private static T instance;
-
 		public static bool hasInstance => instance != null;
-
-		protected static void ResetInstance() => instance = null;
 
 		[Header("Singleton Config")]
 		[SerializeField] private bool indestructible = false;

@@ -7,9 +7,8 @@ namespace SharedUnityMischief.Input.Control
 	[DefaultExecutionOrder(-75)]
 	public abstract class ControlMonoBehaviour : MonoBehaviour, IControl
 	{
-		public abstract bool isActuated { get; }
-
 		private List<InputAction> inputs = new List<InputAction>();
+		public abstract bool isActuated { get; }
 
 		public abstract void ConsumeInstantaneousInputs();
 

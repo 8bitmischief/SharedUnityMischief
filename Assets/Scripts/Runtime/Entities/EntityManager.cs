@@ -6,14 +6,13 @@ namespace SharedUnityMischief.Entities
 {
 	public class EntityManager : MonoBehaviour
 	{
-		public int numEntities => entities.Count;
-		public int numEntitiesToSpawn => entitiesToSpawn.Count;
-		public int numEntitiesToDespawn => entitiesToDespawn.Count;
-
 		protected List<Entity> entities = new List<Entity>();
 		private List<Entity> entitiesToSpawn = new List<Entity>();
 		private List<Entity> entitiesToDespawn = new List<Entity>();
 		private Dictionary<string, int> entitySpawnCounts = new Dictionary<string, int>();
+		public int numEntities => entities.Count;
+		public int numEntitiesToSpawn => entitiesToSpawn.Count;
+		public int numEntitiesToDespawn => entitiesToDespawn.Count;
 
 		private void Start()
 		{
@@ -78,9 +77,9 @@ namespace SharedUnityMischief.Entities
 
 		private T ScheduleEntityToSpawn<T> (T entity) where T : Entity
 		{
-			if (!entity.scheduledToSpawn && !entity.isSpawned && !entity.scheduledToDespawn)
+			if (!entity.isScheduledToSpawn && !entity.isSpawned && !entity.isScheduledToDespawn)
 			{
-				entity.scheduledToSpawn = true;
+				entity.isScheduledToSpawn = true;
 				entitiesToSpawn.Add(entity);
 			}
 			return entity;
@@ -88,15 +87,15 @@ namespace SharedUnityMischief.Entities
 
 		public void DespawnEntity (Entity entity)
 		{
-			if (entity.scheduledToSpawn)
+			if (entity.isScheduledToSpawn)
 			{
-				entity.scheduledToSpawn = false;
+				entity.isScheduledToSpawn = false;
 				entitiesToSpawn.Remove(entity);
 				entity.DepositToPoolOrDestroy();
 			}
-			else if (entity.isSpawned && !entity.scheduledToDespawn)
+			else if (entity.isSpawned && !entity.isScheduledToDespawn)
 			{
-				entity.scheduledToDespawn = true;
+				entity.isScheduledToDespawn = true;
 				entitiesToDespawn.Add(entity);
 			}
 		}

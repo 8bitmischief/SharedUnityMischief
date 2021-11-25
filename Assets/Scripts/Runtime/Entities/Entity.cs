@@ -11,17 +11,14 @@ namespace SharedUnityMischief.Entities
 		[Header("Entity Config")]
 		[SerializeField] public bool appendSpawnIndexToName = false;
 
-		public bool isSpawned { get; private set; } = false;
-		public bool scheduledToSpawn { get; set; } = false;
-		public bool scheduledToDespawn { get; set; } = false;
-
 		public Func<bool> DepositToPool { get; set; } = null;
-
 		public bool isPooled => DepositToPool != null;
-		public override Entity entity => this;
-		public override int componentUpdateOrder => EntityComponent.entityUpdateOrder;
-
 		private List<EntityComponent> components;
+		public bool isSpawned { get; private set; } = false;
+		public bool isScheduledToSpawn { get; set; } = false;
+		public bool isScheduledToDespawn { get; set; } = false;
+		public override Entity entity => this;
+		public override int componentUpdateOrder => EntityComponent.EntityUpdateOrder;
 
 		protected virtual void Awake()
 		{
@@ -34,7 +31,7 @@ namespace SharedUnityMischief.Entities
 			if (!isSpawned)
 			{
 				isSpawned = true;
-				scheduledToSpawn = false;
+				isScheduledToSpawn = false;
 				foreach (EntityComponent component in components)
 				{
 					component.OnSpawn();
@@ -76,7 +73,7 @@ namespace SharedUnityMischief.Entities
 			if (isSpawned)
 			{
 				isSpawned = false;
-				scheduledToDespawn = false;
+				isScheduledToDespawn = false;
 				foreach (EntityComponent component in components)
 				{
 					component.OnDespawn();

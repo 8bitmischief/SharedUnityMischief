@@ -10,24 +10,22 @@ namespace SharedUnityMischief.Input.Control
 		[Header("Inputs")]
 		[SerializeField] private InputAction mouseInput;
 		[SerializeField] private InputAction buttonInput;
-
 		[Header("Settings")]
-		public Vector2 mouseSensitivity = Vector2.one;
-		public Vector2 nonMouseSensitivity = Vector2.one;
-		public AnimationCurve nonMousePressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+		[SerializeField] private Vector2 mouseSensitivity = Vector2.one;
+		[SerializeField] private Vector2 nonMouseSensitivity = Vector2.one;
+		[SerializeField] private AnimationCurve nonMousePressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
-		public Vector2 vector { get; private set; } = new Vector2(0f, 0f);
+		public Vector2 vector { get; private set; } = Vector2.zero;
 		public bool isMouseLookEnabled { get; private set; } = false;
 		public bool isUsingMouseLook { get; private set; } = false;
+		public int numMouseUpdatesToSkip { get; private set; } = 0;
+		private Vector2[] recentVectors = new Vector2[60];
+		private int nextVectorIndex = 0;
 		public override bool isActuated => vector.x != 0f || vector.y != 0f;
 		public Vector2 recentAverageVector => recentVectors.Aggregate<Vector2>((a, b) => a + b) / recentVectors.Length;
 
 		public event Action onStartUsingMouseLook;
 		public event Action onStopUsingMouseLook;
-
-		private int numMouseUpdatesToSkip = 0;
-		private Vector2[] recentVectors = new Vector2[60];
-		private int nextVectorIndex = 0;
 
 		private void Awake()
 		{

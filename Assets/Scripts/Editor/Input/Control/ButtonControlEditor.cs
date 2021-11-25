@@ -6,10 +6,10 @@ namespace SharedUnityMischief.Input.Control
 	[CustomEditor(typeof(ButtonControl), true)]
 	public class ButtonControlEditor : BaseEditor
 	{
-		public override bool RequiresConstantRepaint() => Application.isPlaying;
-
 		private float lastPressTime = -999f;
 		private float lastReleaseTime = -999f;
+
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		private void OnEnable()
 		{

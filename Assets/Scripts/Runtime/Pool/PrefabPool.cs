@@ -7,15 +7,14 @@ namespace SharedUnityMischief.Pool
 	[Serializable]
 	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable
 	{
-		public T prefab;
+		public T prefab = null;
 		[SerializeField] private bool collectionCheck = false;
 		[SerializeField] private int defaultCapacity = 0;
 		[SerializeField] private int maxSize = -1;
 
 		public int numInstances { get; private set; } = 0;
-		public int numAvailableInstances => availableInstances.Count;
-
 		private Stack<T> availableInstances = new Stack<T>();
+		public int numAvailableInstances => availableInstances.Count;
 
 		public void Prewarm() => Prewarm(defaultCapacity);
 

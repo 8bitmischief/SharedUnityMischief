@@ -7,9 +7,9 @@ namespace SharedUnityMischief.Entities.Animated
 	[CustomEditor(typeof(EntityAnimator), true)]
 	public class EntityAnimatorEditor : BaseEditor
 	{
-		public override bool RequiresConstantRepaint() => Application.isPlaying;
-
 		private bool showAnimationDetails = true;
+
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
 		protected override void DrawState()
 		{

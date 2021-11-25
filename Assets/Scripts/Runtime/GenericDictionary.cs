@@ -12,26 +12,12 @@ namespace SharedUnityMischief
 		[SerializeField] private List<KeyValuePair> list = new List<KeyValuePair>();
 		[SerializeField] private Dictionary<TKey, int> indexByKey = new Dictionary<TKey, int>();
 		[SerializeField, HideInInspector] private Dictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
-
 		#pragma warning disable 0414
 		[SerializeField, HideInInspector] private bool keyCollision = false;
 		#pragma warning restore 0414
 
 		public int Count => dict.Count;
 		public bool IsReadOnly { get; set; } = false;
-
-		[Serializable]
-		private struct KeyValuePair
-		{
-			public TKey Key;
-			public TValue Value;
-
-			public KeyValuePair(TKey Key, TValue Value)
-			{
-				this.Key = Key;
-				this.Value = Value;
-			}
-		}
 
 		public void OnBeforeSerialize() {}
 
@@ -103,15 +89,6 @@ namespace SharedUnityMischief
 			}
 		}
 
-		void UpdateIndexes(int removedIndex)
-		{
-			for (int i = removedIndex; i < list.Count; i++)
-			{
-				var key = list[i].Key;
-				indexByKey[key]--;
-			}
-		}
-
 		public bool TryGetValue(TKey key, out TValue value) => dict.TryGetValue(key, out value);
 
 		public void Add(KeyValuePair<TKey, TValue> pair) => Add(pair.Key, pair.Value);
@@ -174,5 +151,27 @@ namespace SharedUnityMischief
 
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => dict.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => dict.GetEnumerator();
+
+		private void UpdateIndexes(int removedIndex)
+		{
+			for (int i = removedIndex; i < list.Count; i++)
+			{
+				var key = list[i].Key;
+				indexByKey[key]--;
+			}
+		}
+
+		[Serializable]
+		private struct KeyValuePair
+		{
+			public TKey Key;
+			public TValue Value;
+
+			public KeyValuePair(TKey Key, TValue Value)
+			{
+				this.Key = Key;
+				this.Value = Value;
+			}
+		}
 	}
 }

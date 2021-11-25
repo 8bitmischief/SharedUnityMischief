@@ -8,15 +8,19 @@ namespace SharedUnityMischief
 		public Vector2 scroll = Vector2.zero;
 
 #pragma warning disable CS0109 // Ignore "does not hide an accessible" warning during builds
-		private new Camera camera;
+		private new Camera camera = null;
 #pragma warning restore CS0109
-		private Vector2 lastRenderedScroll;
-		private Vector2 lastRenderedScreenSize;
-		private float lastRenderedFieldOfView;
+		private Vector2 lastRenderedScroll = Vector2.zero;
+		private Vector2 lastRenderedScreenSize = Vector2.zero;
+		private float lastRenderedFieldOfView = -1f;
 
 		private void Awake()
 		{
 			camera = GetComponent<Camera>();
+			ApplyScrollToProjectionMatrix();
+			lastRenderedScroll = scroll;
+			lastRenderedScreenSize = new Vector2(Screen.width, Screen.height);
+			lastRenderedFieldOfView = camera.fieldOfView;
 		}
 
 		private void LateUpdate()

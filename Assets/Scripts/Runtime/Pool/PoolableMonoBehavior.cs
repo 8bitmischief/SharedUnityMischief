@@ -7,11 +7,11 @@ namespace SharedUnityMischief.Pool
 	{
 		public Func<bool> DepositToPool { get; set; } = null;
 
-		public bool IsPooled() => DepositToPool != null;
+		public bool isPooled => DepositToPool != null;
 
 		public bool DepositToPoolOrDestroy()
 		{
-			if (IsPooled() && DepositToPool())
+			if (isPooled && DepositToPool())
 			{
 				return true;
 			}
@@ -24,7 +24,7 @@ namespace SharedUnityMischief.Pool
 
 		public bool DepositToPoolOrDeactivate()
 		{
-			if (IsPooled() && DepositToPool())
+			if (isPooled && DepositToPool())
 			{
 				return true;
 			}

@@ -8,7 +8,7 @@ namespace SharedUnityMischief.Lifecycle
 		public const float TimePerUpdate = 1f / 60f;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-		private static void ResetSingletonClass() => ResetInstance();
+		private static void ResetSingletonClass() => instance = null;
 
 		[Header("Update Loop Config")]
 		public bool updateAutomatically = true;
@@ -19,10 +19,9 @@ namespace SharedUnityMischief.Lifecycle
 		public float deltaTime { get; private set; } = 0f;
 		public bool isInterpolating { get; private set; } = false;
 		public bool isPaused { get; private set; } = false;
-		public float percentNextUpdateInterpolated => interpolatedTime / TimePerUpdate;
-
 		private float interpolatedTime = 0f;
 		private float leftoverInterpolationTime = 0f;
+		public float percentNextUpdateInterpolated => interpolatedTime / TimePerUpdate;
 
 		private void Update()
 		{
@@ -36,7 +35,7 @@ namespace SharedUnityMischief.Lifecycle
 
 		public virtual void Resume() => isPaused = false;
 
-		public void Advance(bool ignorePause = false) => Advance(Time.deltaTime, ignorePause);
+		public void Advance(bool ignorePause = false) => Advance(UnityEngine.Time.deltaTime, ignorePause);
 
 		public void Advance(float deltaTime, bool ignorePause = false)
 		{

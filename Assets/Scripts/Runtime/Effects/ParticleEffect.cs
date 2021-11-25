@@ -8,11 +8,10 @@ namespace SharedUnityMischief.Effects
 	{
 		[SerializeField] private float duration = 1.0f;
 
-		public bool isPlaying { get; private set; } = false;
-
 		private VisualEffect[] visualEffects;
 		private float playTime = 0f;
 		private EndBehavior endBehavior = EndBehavior.Destroy;
+		public bool isPlaying { get; private set; } = false;
 
 		private void Awake()
 		{

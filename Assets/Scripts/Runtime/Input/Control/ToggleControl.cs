@@ -10,7 +10,6 @@ namespace SharedUnityMischief.Input.Control
 		[SerializeField] private ButtonControl toggleButton;
 		[SerializeField] private ButtonControl toggleOnButton;
 		[SerializeField] private ButtonControl toggleOffButton;
-
 		[Header("Settings")]
 		[SerializeField] private bool startOn = false;
 

@@ -4,11 +4,11 @@ namespace SharedUnityMischief.Entities.Animated
 {
 	public abstract class AnimatedEntity<T, U> : Entity where U : EntityAnimator<T>
 	{
+		protected U animator;
+
 		public T state => animator != null ? animator.state : default(T);
 		public float timeInState => animator?.timeInState ?? 0f;
 		public int framesInState => animator?.framesInState ?? 0;
-
-		protected U animator;
 
 		protected override void Awake()
 		{
