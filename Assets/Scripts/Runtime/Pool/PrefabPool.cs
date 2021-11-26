@@ -7,16 +7,18 @@ namespace SharedUnityMischief.Pool
 	[Serializable]
 	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable
 	{
-		public T prefab = null;
-		[SerializeField] private bool collectionCheck = false;
-		[SerializeField] private int defaultCapacity = 0;
-		[SerializeField] private int maxSize = -1;
+		[SerializeField] private T _prefab;
+		[SerializeField] private bool _collectionCheck = false;
+		[SerializeField] private int _defaultCapacity = 0;
+		[SerializeField] private int _maxSize = -1;
+		private int _numInstances = 0;
+		private Stack<T> _availableInstances { get; set; } = new Stack<T>();
 
-		public int numInstances { get; private set; } = 0;
-		private Stack<T> availableInstances = new Stack<T>();
-		public int numAvailableInstances => availableInstances.Count;
+		public T prefab => _prefab;
+		public int numInstances => _numInstances;
+		public int numAvailableInstances => _availableInstances.Count;
 
-		public void Prewarm() => Prewarm(defaultCapacity);
+		public void Prewarm() => Prewarm(_defaultCapacity);
 
 		public void Prewarm(int numInstancesToCreate)
 		{
@@ -28,9 +30,9 @@ namespace SharedUnityMischief.Pool
 
 		public T Withdraw()
 		{
-			if (availableInstances.Count == 0)
+			if (_availableInstances.Count == 0)
 			{
-				if (maxSize >= 0 && numInstances > maxSize)
+				if (_maxSize >= 0 && numInstances > _maxSize)
 				{
 					return null;
 				}
@@ -63,7 +65,7 @@ namespace SharedUnityMischief.Pool
 
 		public void Dispose()
 		{
-			foreach (T instance in availableInstances)
+			foreach (T instance in _availableInstances)
 			{
 				DestroyInstance(instance);
 			}
@@ -75,7 +77,7 @@ namespace SharedUnityMischief.Pool
 			{
 				throw new Exception("Cannot instantiate null prefab in PrefabPool");
 			}
-			numInstances++;
+			_numInstances++;
 			// Create and prepare the instance
 			T instance = GameObject.Instantiate(prefab);
 			instance.name = prefab.name;
@@ -95,16 +97,16 @@ namespace SharedUnityMischief.Pool
 
 		private T WithdrawInstance()
 		{
-			T instance = availableInstances.Pop();
+			T instance = _availableInstances.Pop();
 			instance.OnWithdrawFromPool();
 			return instance;
 		}
 
 		private void DepositInstance(T instance)
 		{
-			if (!collectionCheck || !availableInstances.Contains(instance))
+			if (!_collectionCheck || !_availableInstances.Contains(instance))
 			{
-				availableInstances.Push(instance);
+				_availableInstances.Push(instance);
 				instance.OnDepositToPool();
 			}
 		}

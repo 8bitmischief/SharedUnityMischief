@@ -8,73 +8,77 @@ namespace SharedUnityMischief.Input.Control
 	public class LookControl : ControlMonoBehaviour, ILookControl
 	{
 		[Header("Inputs")]
-		[SerializeField] private InputAction mouseInput;
-		[SerializeField] private InputAction buttonInput;
+		[SerializeField] private InputAction _mouseInput;
+		[SerializeField] private InputAction _buttonInput;
 		[Header("Settings")]
-		[SerializeField] private Vector2 mouseSensitivity = Vector2.one;
-		[SerializeField] private Vector2 nonMouseSensitivity = Vector2.one;
-		[SerializeField] private AnimationCurve nonMousePressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+		[SerializeField] private Vector2 _mouseSensitivity = Vector2.one;
+		[SerializeField] private Vector2 _nonMouseSensitivity = Vector2.one;
+		[SerializeField] private AnimationCurve _nonMousePressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+		private Vector2 _vector = Vector2.zero;
+		private bool _isMouseLookEnabled = false;
+		private bool _isUsingMouseLook = false;
+		private int _numMouseUpdatesToSkip = 0;
+		private Vector2[] _recentVectors = new Vector2[60];
+		private int _nextVectorIndex = 0;
 
-		public Vector2 vector { get; private set; } = Vector2.zero;
-		public bool isMouseLookEnabled { get; private set; } = false;
-		public bool isUsingMouseLook { get; private set; } = false;
-		public int numMouseUpdatesToSkip { get; private set; } = 0;
-		private Vector2[] recentVectors = new Vector2[60];
-		private int nextVectorIndex = 0;
-		public override bool isActuated => vector.x != 0f || vector.y != 0f;
-		public Vector2 recentAverageVector => recentVectors.Aggregate<Vector2>((a, b) => a + b) / recentVectors.Length;
+		public Vector2 vector => _vector;
+		public bool isMouseLookEnabled => _isMouseLookEnabled;
+		public bool isUsingMouseLook => _isUsingMouseLook;
+		public int numMouseUpdatesToSkip => _numMouseUpdatesToSkip;
+		public override bool isActuated => _vector.x != 0f || _vector.y != 0f;
+		public Vector2 recentAverageVector => _recentVectors.Aggregate<Vector2>((a, b) => a + b) / _recentVectors.Length;
 
 		public event Action onStartUsingMouseLook;
 		public event Action onStopUsingMouseLook;
 
 		private void Awake()
 		{
-			RegisterInput(mouseInput);
-			RegisterInput(buttonInput);
+			RegisterInput(_mouseInput);
+			RegisterInput(_buttonInput);
 		}
 
 		private void Update()
 		{
-			Vector2 mouseVector = mouseInput?.ReadValue<Vector2>() ?? Vector2.zero;
-			Vector2 buttonVector = buttonInput?.ReadValue<Vector2>() ?? Vector2.zero;
-			if (isMouseLookEnabled && buttonVector.sqrMagnitude <= 0f && numMouseUpdatesToSkip == 0)
+			Vector2 mouseVector = _mouseInput?.ReadValue<Vector2>() ?? Vector2.zero;
+			Vector2 buttonVector = _buttonInput?.ReadValue<Vector2>() ?? Vector2.zero;
+			if (_isMouseLookEnabled && buttonVector.sqrMagnitude <= 0f && _numMouseUpdatesToSkip == 0)
 			{
-				vector = CalculateLookVector(mouseVector, mouseSensitivity, null, true);
-				if (vector.sqrMagnitude > 0f && !isUsingMouseLook)
+				_vector = CalculateLookVector(mouseVector, _mouseSensitivity, null, true);
+				if (_vector.sqrMagnitude > 0f && !_isUsingMouseLook)
 				{
-					isUsingMouseLook = true;
+					_isUsingMouseLook = true;
 					onStartUsingMouseLook?.Invoke();
 				}
 			}
 			else
 			{
-				vector = CalculateLookVector(buttonVector, nonMouseSensitivity, nonMousePressureSensitivity, false);
-				if (vector.sqrMagnitude > 0f && isUsingMouseLook)
+				_vector = CalculateLookVector(buttonVector, _nonMouseSensitivity, _nonMousePressureSensitivity, false);
+				if (_vector.sqrMagnitude > 0f && _isUsingMouseLook)
 				{
-					isUsingMouseLook = false;
+					_isUsingMouseLook = false;
 					onStopUsingMouseLook?.Invoke();
 				}
 			}
-			if (mouseVector.sqrMagnitude > 0f && numMouseUpdatesToSkip > 0)
+			if (mouseVector.sqrMagnitude > 0f && _numMouseUpdatesToSkip > 0)
 			{
-				numMouseUpdatesToSkip--;
+				_numMouseUpdatesToSkip--;
 			}
-			recentVectors[nextVectorIndex] = vector;
-			nextVectorIndex = (nextVectorIndex + 1) % recentVectors.Length;
+			_recentVectors[_nextVectorIndex] = _vector;
+			_nextVectorIndex = (_nextVectorIndex + 1) % _recentVectors.Length;
 		}
 
 		public void EnableMouseLook()
 		{
-			if (!isMouseLookEnabled)
+			if (!_isMouseLookEnabled)
 			{
-				isMouseLookEnabled = true;
-				numMouseUpdatesToSkip = 4;
+				_isMouseLookEnabled = true;
+				_numMouseUpdatesToSkip = 4;
 			}
 		}
 
 		public void DisableMouseLook()
 		{
-			isMouseLookEnabled = false;
+			_isMouseLookEnabled = false;
 		}
 
 		public override void ConsumeInstantaneousInputs() {}

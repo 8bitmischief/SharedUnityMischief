@@ -6,13 +6,13 @@ namespace SharedUnityMischief.Input.Control
 	[DefaultExecutionOrder(-73)]
 	public class SimulatedButtonControl : MonoBehaviour, IButtonControl
 	{
-		[SerializeField] private ButtonControl control;
+		[SerializeField] private ButtonControl _control;
+		private SimulatedControlMode _mode = SimulatedControlMode.PassThrough;
+		private bool _simulatedJustPressed = false;
+		private bool _simulatedIsHeld = false;
+		private bool _simulatedJustReleased = false;
+		private float _simulatedHoldDuration = 0f;
 
-		private bool simulatedJustPressed = false;
-		private bool simulatedIsHeld = false;
-		private bool simulatedJustReleased = false;
-		private float simulatedHoldDuration = 0f;
-		private SimulatedControlMode _mode;
 		public SimulatedControlMode mode
 		{
 			get => _mode;
@@ -21,59 +21,59 @@ namespace SharedUnityMischief.Input.Control
 				_mode = value;
 				if (_mode == SimulatedControlMode.Simulate)
 				{
-					simulatedJustPressed = false;
-					simulatedIsHeld = control.isHeld;
-					simulatedJustReleased = false;
-					simulatedHoldDuration = control.holdDuration;
+					_simulatedJustPressed = false;
+					_simulatedIsHeld = _control.isHeld;
+					_simulatedJustReleased = false;
+					_simulatedHoldDuration = _control.holdDuration;
 				}
 			}
 		}
-		public bool isActuated => mode == SimulatedControlMode.Simulate ? simulatedJustPressed || simulatedIsHeld || simulatedJustReleased : control.isActuated;
-		public bool justPressed => mode == SimulatedControlMode.Simulate ? simulatedJustPressed : control.justPressed;
-		public bool isHeld => mode == SimulatedControlMode.Simulate ? simulatedIsHeld : control.isHeld;
-		public bool justReleased => mode == SimulatedControlMode.Simulate ? simulatedJustReleased : control.justReleased;
-		public float holdDuration => mode == SimulatedControlMode.Simulate ? simulatedHoldDuration : control.holdDuration;
-		public float amountHeldDown => mode == SimulatedControlMode.Simulate ? (simulatedIsHeld ? 1f : 0f) : control.amountHeldDown;
+		public bool isActuated => mode == SimulatedControlMode.Simulate ? _simulatedJustPressed || _simulatedIsHeld || _simulatedJustReleased : _control.isActuated;
+		public bool justPressed => mode == SimulatedControlMode.Simulate ? _simulatedJustPressed : _control.justPressed;
+		public bool isHeld => mode == SimulatedControlMode.Simulate ? _simulatedIsHeld : _control.isHeld;
+		public bool justReleased => mode == SimulatedControlMode.Simulate ? _simulatedJustReleased : _control.justReleased;
+		public float holdDuration => mode == SimulatedControlMode.Simulate ? _simulatedHoldDuration : _control.holdDuration;
+		public float amountHeldDown => mode == SimulatedControlMode.Simulate ? (_simulatedIsHeld ? 1f : 0f) : _control.amountHeldDown;
 
 		public event Action onPress;
 		public event Action onRelease;
 
 		private void OnEnable()
 		{
-			control.onPress += OnPress;
-			control.onRelease += OnRelease;
+			_control.onPress += OnPress;
+			_control.onRelease += OnRelease;
 		}
 
 		private void OnDisable()
 		{
-			control.onPress -= OnPress;
-			control.onRelease -= OnRelease;
+			_control.onPress -= OnPress;
+			_control.onRelease -= OnRelease;
 		}
 
 		public void SimulateUpdate() => SimulateUpdate(Time.deltaTime);
 
 		public void SimulateUpdate(float deltaTime)
 		{
-			if (mode == SimulatedControlMode.Simulate)
+			if (_mode == SimulatedControlMode.Simulate)
 			{
-				simulatedJustPressed = false;
-				simulatedJustReleased = false;
-				if (simulatedIsHeld)
+				_simulatedJustPressed = false;
+				_simulatedJustReleased = false;
+				if (_simulatedIsHeld)
 				{
-					simulatedHoldDuration += deltaTime;
+					_simulatedHoldDuration += deltaTime;
 				}
-				if (!simulatedIsHeld && control.isHeld)
+				if (!_simulatedIsHeld && _control.isHeld)
 				{
-					simulatedIsHeld = true;
-					simulatedJustPressed = true;
-					simulatedHoldDuration = 0f;
+					_simulatedIsHeld = true;
+					_simulatedJustPressed = true;
+					_simulatedHoldDuration = 0f;
 					onPress?.Invoke();
 				}
-				else if (simulatedIsHeld && !control.isHeld)
+				else if (_simulatedIsHeld && !_control.isHeld)
 				{
-					simulatedIsHeld = false;
-					simulatedJustReleased = true;
-					simulatedHoldDuration = 0f;
+					_simulatedIsHeld = false;
+					_simulatedJustReleased = true;
+					_simulatedHoldDuration = 0f;
 					onRelease?.Invoke();
 				}
 			}
@@ -81,24 +81,24 @@ namespace SharedUnityMischief.Input.Control
 
 		public void ConsumeInstantaneousInputs()
 		{
-			if (mode == SimulatedControlMode.Simulate)
+			if (_mode == SimulatedControlMode.Simulate)
 			{
-				simulatedJustPressed = false;
-				simulatedJustReleased = false;
+				_simulatedJustPressed = false;
+				_simulatedJustReleased = false;
 			}
 			else
 			{
-				control.ConsumeInstantaneousInputs();
+				_control.ConsumeInstantaneousInputs();
 			}
 		}
 
 		public bool ConsumePress()
 		{
-			if (mode == SimulatedControlMode.Simulate)
+			if (_mode == SimulatedControlMode.Simulate)
 			{
-				if (simulatedJustPressed)
+				if (_simulatedJustPressed)
 				{
-					simulatedJustPressed = false;
+					_simulatedJustPressed = false;
 					return true;
 				}
 				else
@@ -108,17 +108,17 @@ namespace SharedUnityMischief.Input.Control
 			}
 			else
 			{
-				return control.ConsumePress();
+				return _control.ConsumePress();
 			}
 		}
 
 		public bool ConsumeRelease()
 		{
-			if (mode == SimulatedControlMode.Simulate)
+			if (_mode == SimulatedControlMode.Simulate)
 			{
-				if (simulatedJustReleased)
+				if (_simulatedJustReleased)
 				{
-					simulatedJustReleased = false;
+					_simulatedJustReleased = false;
 					return true;
 				}
 				else
@@ -128,13 +128,13 @@ namespace SharedUnityMischief.Input.Control
 			}
 			else
 			{
-				return control.ConsumeRelease();
+				return _control.ConsumeRelease();
 			}
 		}
 
 		private void OnPress()
 		{
-			if (mode != SimulatedControlMode.Simulate)
+			if (_mode != SimulatedControlMode.Simulate)
 			{
 				onPress?.Invoke();
 			}
@@ -142,7 +142,7 @@ namespace SharedUnityMischief.Input.Control
 
 		private void OnRelease()
 		{
-			if (mode != SimulatedControlMode.Simulate)
+			if (_mode != SimulatedControlMode.Simulate)
 			{
 				onRelease?.Invoke();
 			}

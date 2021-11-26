@@ -7,32 +7,35 @@ namespace SharedUnityMischief.Input.Control
 	public class ToggleControl : ControlMonoBehaviour, IToggleControl
 	{
 		[Header("Inputs")]
-		[SerializeField] private ButtonControl toggleButton;
-		[SerializeField] private ButtonControl toggleOnButton;
-		[SerializeField] private ButtonControl toggleOffButton;
+		[SerializeField] private ButtonControl _toggleButton;
+		[SerializeField] private ButtonControl _toggleOnButton;
+		[SerializeField] private ButtonControl _toggleOffButton;
 		[Header("Settings")]
-		[SerializeField] private bool startOn = false;
+		[SerializeField] private bool _startOn = false;
+		private bool _isOn = false;
+		private bool _justToggledOn = false;
+		private bool _justToggledOff = false;
 
-		public bool isOn { get; private set; } = false;
-		public bool justToggledOn { get; private set; } = false;
-		public bool justToggledOff { get; private set; } = false;
-		public bool justToggled => justToggledOn || justToggledOff;
-		public override bool isActuated => justToggled;
+		public bool isOn => _isOn;
+		public bool justToggledOn => _justToggledOn;
+		public bool justToggledOff => _justToggledOff;
+		public bool justToggled => _justToggledOn || _justToggledOff;
+		public override bool isActuated => _justToggledOn || _justToggledOff;
 
 		public event Action<bool> onToggle;
 
 		private void Awake()
 		{
-			isOn = startOn;
+			_isOn = _startOn;
 		}
 
 		private void Update()
 		{
-			justToggledOn = false;
-			justToggledOff = false;
-			if ((toggleButton != null && toggleButton.justPressed) ||
-				(toggleOnButton != null && toggleOnButton.justPressed && !isOn) ||
-				(toggleOffButton != null && toggleOffButton.justPressed && isOn))
+			_justToggledOn = false;
+			_justToggledOff = false;
+			if ((_toggleButton != null && _toggleButton.justPressed) ||
+				(_toggleOnButton != null && _toggleOnButton.justPressed && !_isOn) ||
+				(_toggleOffButton != null && _toggleOffButton.justPressed && _isOn))
 			{
 				Toggle();
 			}
@@ -40,24 +43,24 @@ namespace SharedUnityMischief.Input.Control
 
 		public void Toggle(bool triggerEvents = true)
 		{
-			isOn = !isOn;
-			if (isOn)
+			_isOn = !_isOn;
+			if (_isOn)
 			{
-				justToggledOn = true;
+				_justToggledOn = true;
 			}
 			else
 			{
-				justToggledOff = true;
+				_justToggledOff = true;
 			}
 			if (triggerEvents)
 			{
-				onToggle?.Invoke(isOn);
+				onToggle?.Invoke(_isOn);
 			}
 		}
 
 		public void Toggle(bool isOn, bool triggerEvents = true)
 		{
-			if (isOn != this.isOn)
+			if (isOn != _isOn)
 			{
 				Toggle(triggerEvents);
 			}
@@ -71,8 +74,8 @@ namespace SharedUnityMischief.Input.Control
 
 		public override void ConsumeInstantaneousInputs()
 		{
-			justToggledOn = false;
-			justToggledOff = false;
+			_justToggledOn = false;
+			_justToggledOff = false;
 		}
 	}
 }

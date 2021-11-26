@@ -6,13 +6,14 @@ namespace SharedUnityMischief.Entities
 {
 	public class EntityManager : MonoBehaviour
 	{
-		protected List<Entity> entities = new List<Entity>();
-		private List<Entity> entitiesToSpawn = new List<Entity>();
-		private List<Entity> entitiesToDespawn = new List<Entity>();
-		private Dictionary<string, int> entitySpawnCounts = new Dictionary<string, int>();
-		public int numEntities => entities.Count;
-		public int numEntitiesToSpawn => entitiesToSpawn.Count;
-		public int numEntitiesToDespawn => entitiesToDespawn.Count;
+		private List<Entity> _entities = new List<Entity>();
+		private List<Entity> _entitiesToSpawn = new List<Entity>();
+		private List<Entity> _entitiesToDespawn = new List<Entity>();
+		private Dictionary<string, int> _entitySpawnCounts = new Dictionary<string, int>();
+
+		public int numEntities => _entities.Count;
+		public int numEntitiesToSpawn => _entitiesToSpawn.Count;
+		public int numEntitiesToDespawn => _entitiesToDespawn.Count;
 
 		private void Start()
 		{
@@ -64,12 +65,12 @@ namespace SharedUnityMischief.Entities
 		{
 			if (entity.appendSpawnIndexToName)
 			{
-				if (!entitySpawnCounts.ContainsKey(baseName))
+				if (!_entitySpawnCounts.ContainsKey(baseName))
 				{
-					entitySpawnCounts.Add(baseName, 0);
+					_entitySpawnCounts.Add(baseName, 0);
 				}
-				entitySpawnCounts[baseName]++;
-				entity.name = $"{baseName} {entitySpawnCounts[baseName]}";
+				_entitySpawnCounts[baseName]++;
+				entity.name = $"{baseName} {_entitySpawnCounts[baseName]}";
 			}
 			else
 				entity.name = baseName;
@@ -80,7 +81,7 @@ namespace SharedUnityMischief.Entities
 			if (!entity.isScheduledToSpawn && !entity.isSpawned && !entity.isScheduledToDespawn)
 			{
 				entity.isScheduledToSpawn = true;
-				entitiesToSpawn.Add(entity);
+				_entitiesToSpawn.Add(entity);
 			}
 			return entity;
 		}
@@ -90,27 +91,27 @@ namespace SharedUnityMischief.Entities
 			if (entity.isScheduledToSpawn)
 			{
 				entity.isScheduledToSpawn = false;
-				entitiesToSpawn.Remove(entity);
+				_entitiesToSpawn.Remove(entity);
 				entity.DepositToPoolOrDestroy();
 			}
 			else if (entity.isSpawned && !entity.isScheduledToDespawn)
 			{
 				entity.isScheduledToDespawn = true;
-				entitiesToDespawn.Add(entity);
+				_entitiesToDespawn.Add(entity);
 			}
 		}
 
 		protected virtual void UpdateEntities()
 		{
-			foreach (Entity entity in entities)
+			foreach (Entity entity in _entities)
 			{
 				entity.EarlyUpdateEntityState();
 			}
-			foreach (Entity entity in entities)
+			foreach (Entity entity in _entities)
 			{
 				entity.UpdateEntityState();
 			}
-			foreach (Entity entity in entities)
+			foreach (Entity entity in _entities)
 			{
 				entity.LateUpdateEntityState();
 			}
@@ -118,35 +119,35 @@ namespace SharedUnityMischief.Entities
 
 		protected void SpawnEntitiesScheduledToSpawn()
 		{
-			if (entitiesToSpawn.Count > 0)
+			if (_entitiesToSpawn.Count > 0)
 			{
-				foreach (Entity entity in entitiesToSpawn)
+				foreach (Entity entity in _entitiesToSpawn)
 				{
-					entities.Add(entity);
+					_entities.Add(entity);
 					entity.gameObject.SetActive(true);
 					entity.Spawn();
 				}
-				entitiesToSpawn.Clear();
+				_entitiesToSpawn.Clear();
 			}
 		}
 
 		protected void DespawnEntitiesScheduledToDespawn()
 		{
-			if (entitiesToDespawn.Count > 0)
+			if (_entitiesToDespawn.Count > 0)
 			{
-				foreach (Entity entity in entitiesToDespawn)
+				foreach (Entity entity in _entitiesToDespawn)
 				{
-					entities.Remove(entity);
+					_entities.Remove(entity);
 				}
-				foreach (Entity entity in entitiesToDespawn)
+				foreach (Entity entity in _entitiesToDespawn)
 				{
 					entity.Despawn();
 				}
-				foreach (Entity entity in entitiesToDespawn)
+				foreach (Entity entity in _entitiesToDespawn)
 				{
 					entity.DepositToPoolOrDestroy();
 				}
-				entitiesToDespawn.Clear();
+				_entitiesToDespawn.Clear();
 			}
 		}
 	}

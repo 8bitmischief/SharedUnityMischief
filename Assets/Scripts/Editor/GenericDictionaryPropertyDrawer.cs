@@ -20,13 +20,13 @@ namespace SharedUnityMischief
 		public override void OnGUI(Rect pos, SerializedProperty property, GUIContent label)
 		{
 			// Draw list
-			var list = property.FindPropertyRelative("list");
+			var list = property.FindPropertyRelative("_list");
 			string fieldName = ObjectNames.NicifyVariableName(fieldInfo.Name);
 			var currentPos = new Rect(LineHeight, pos.y, pos.width, LineHeight);
 			EditorGUI.PropertyField(currentPos, list, new GUIContent(fieldName), true);
 
 			// Draw key collision warning
-			var keyCollision = property.FindPropertyRelative("keyCollision").boolValue;
+			var keyCollision = property.FindPropertyRelative("_keyCollision").boolValue;
 			if (keyCollision)
 			{
 				currentPos.y += EditorGUI.GetPropertyHeight(list, true) + VertSpace;
@@ -40,11 +40,11 @@ namespace SharedUnityMischief
 			float totHeight = 0f;
 
 			// Height of KeyValue list
-			var listProp = property.FindPropertyRelative("list");
+			var listProp = property.FindPropertyRelative("_list");
 			totHeight += EditorGUI.GetPropertyHeight(listProp, true);
 
 			// Height of key collision warning
-			bool keyCollision = property.FindPropertyRelative("keyCollision").boolValue;
+			bool keyCollision = property.FindPropertyRelative("_keyCollision").boolValue;
 			if (keyCollision)
 			{
 				totHeight += LineHeight * 2f + VertSpace;

@@ -5,31 +5,31 @@ namespace SharedUnityMischief
 {
 	public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 	{
-		protected static T instance;
+		protected static T _instance;
 
 		public static T I
 		{
 			get
 			{
-				if (instance == null)
+				if (_instance == null)
 				{
-					instance = FindObjectOfType<T>();
-					if (instance == null)
+					_instance = FindObjectOfType<T>();
+					if (_instance == null)
 					{
 						throw new Exception($"Could not find {typeof(T)} singleton in the scene hierarchy");
 					}
 				}
-				return instance;
+				return _instance;
 			}
 		}
-		public static bool hasInstance => instance != null;
+		public static bool hasInstance => _instance != null;
 
 		[Header("Singleton Config")]
-		[SerializeField] private bool indestructible = false;
+		[SerializeField] private bool _indestructible = false;
 
 		protected virtual void Awake()
 		{
-			ClaimSingletonInstanceOrDestroySelf(indestructible);
+			ClaimSingletonInstanceOrDestroySelf(_indestructible);
 		}
 
 		protected virtual void OnDestroy()
@@ -39,13 +39,13 @@ namespace SharedUnityMischief
 
 		protected virtual bool ClaimSingletonInstance()
 		{
-			if (instance != null && instance != this)
+			if (_instance != null && _instance != this)
 			{
 				return false;
 			}
 			else
 			{
-				instance = this as T;
+				_instance = this as T;
 				return true;
 			}
 		}
@@ -69,9 +69,9 @@ namespace SharedUnityMischief
 
 		protected virtual bool ReleaseSingletonInstance()
 		{
-			if (instance == this)
+			if (_instance == this)
 			{
-				instance = null;
+				_instance = null;
 				return true;
 			}
 			else

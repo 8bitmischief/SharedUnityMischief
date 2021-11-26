@@ -6,25 +6,26 @@ namespace SharedUnityMischief.Input.Control
 	public class Vector2Control : ControlMonoBehaviour, IVector2Control
 	{
 		[Header("Inputs")]
-		[SerializeField] private InputAction vectorInput;
+		[SerializeField] private InputAction _vectorInput;
 		[Header("Settings")]
-		[SerializeField] private AnimationCurve pressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+		[SerializeField] private AnimationCurve _pressureSensitivity = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+		private Vector2 _vector;
 
-		public Vector2 vector { get; private set; } = Vector2.zero;
-		public override bool isActuated => vector.x != 0f || vector.y != 0f;
+		public Vector2 vector => _vector;
+		public override bool isActuated => _vector.x != 0f || _vector.y != 0f;
 
 		private void Awake()
 		{
-			RegisterInput(vectorInput);
+			RegisterInput(_vectorInput);
 		}
 
 		private void Update()
 		{
-			vector = vectorInput.ReadValue<Vector2>();
-			if (vector.sqrMagnitude > 0f)
+			_vector = _vectorInput.ReadValue<Vector2>();
+			if (_vector.sqrMagnitude > 0f)
 			{
-				float magnitude = vector.magnitude;
-				vector *= pressureSensitivity.Evaluate(Mathf.Clamp01(magnitude)) / magnitude;
+				float magnitude = _vector.magnitude;
+				_vector *= _pressureSensitivity.Evaluate(Mathf.Clamp01(magnitude)) / magnitude;
 			}
 		}
 

@@ -5,59 +5,58 @@ namespace SharedUnityMischief
 	[RequireComponent(typeof(Camera))]
 	public class ScrollableCamera : MonoBehaviour
 	{
-		public Vector2 scroll = Vector2.zero;
+		[SerializeField] private Vector2 _scroll = Vector2.zero;
+		private Camera _camera;
+		private Vector2 _lastRenderedScroll;
+		private Vector2 _lastRenderedScreenSize;
+		private float _lastRenderedFieldOfView;
 
-#pragma warning disable CS0109 // Ignore "does not hide an accessible" warning during builds
-		private new Camera camera = null;
-#pragma warning restore CS0109
-		private Vector2 lastRenderedScroll = Vector2.zero;
-		private Vector2 lastRenderedScreenSize = Vector2.zero;
-		private float lastRenderedFieldOfView = -1f;
+		public Vector2 scroll { get => _scroll; set => _scroll = value; }
 
 		private void Awake()
 		{
-			camera = GetComponent<Camera>();
+			_camera = GetComponent<Camera>();
 			ApplyScrollToProjectionMatrix();
-			lastRenderedScroll = scroll;
-			lastRenderedScreenSize = new Vector2(Screen.width, Screen.height);
-			lastRenderedFieldOfView = camera.fieldOfView;
+			_lastRenderedScroll = scroll;
+			_lastRenderedScreenSize = new Vector2(Screen.width, Screen.height);
+			_lastRenderedFieldOfView = _camera.fieldOfView;
 		}
 
 		private void LateUpdate()
 		{
 			// Only update the camera's projection matrix if something's changed
-			if (lastRenderedScroll != scroll ||
-				lastRenderedScreenSize.x != Screen.width ||
-				lastRenderedScreenSize.y != Screen.height ||
-				lastRenderedFieldOfView != camera.fieldOfView)
+			if (_lastRenderedScroll != scroll ||
+				_lastRenderedScreenSize.x != Screen.width ||
+				_lastRenderedScreenSize.y != Screen.height ||
+				_lastRenderedFieldOfView != _camera.fieldOfView)
 			{
 				// Reset the projection matrix so any automatic field of view changes can take effect
-				if (lastRenderedScreenSize.x != Screen.width ||
-					lastRenderedScreenSize.y != Screen.height ||
-					lastRenderedFieldOfView != camera.fieldOfView)
+				if (_lastRenderedScreenSize.x != Screen.width ||
+					_lastRenderedScreenSize.y != Screen.height ||
+					_lastRenderedFieldOfView != _camera.fieldOfView)
 				{
-					camera.ResetProjectionMatrix();
+					_camera.ResetProjectionMatrix();
 				}
 				// Refresh the camera's projection matrix
 				ApplyScrollToProjectionMatrix();
-				lastRenderedScroll = scroll;
-				lastRenderedScreenSize = new Vector2(Screen.width, Screen.height);
-				lastRenderedFieldOfView = camera.fieldOfView;
+				_lastRenderedScroll = scroll;
+				_lastRenderedScreenSize = new Vector2(Screen.width, Screen.height);
+				_lastRenderedFieldOfView = _camera.fieldOfView;
 			}
 		}
 
 		private void ApplyScrollToProjectionMatrix()
 		{
-			Matrix4x4 matrix = camera.projectionMatrix;
+			Matrix4x4 matrix = _camera.projectionMatrix;
 			// Do some perspective math to scroll the camera around
-			var w = 2f * camera.nearClipPlane / matrix.m00;
-			var h = 2f * camera.nearClipPlane / matrix.m11;
+			var w = 2f * _camera.nearClipPlane / matrix.m00;
+			var h = 2f * _camera.nearClipPlane / matrix.m11;
 			var left = -w / 2f + scroll.x / 100f;
 			var right = left + w;
 			var bottom = -h / 2f + scroll.y / 100f;
 			var top = bottom + h;
-			float near = camera.nearClipPlane;
-			float far = camera.farClipPlane;
+			float near = _camera.nearClipPlane;
+			float far = _camera.farClipPlane;
 			float x = (2f * near) / (right - left);
 			float y = (2f * near) / (top - bottom);
 			float a = (right + left) / (right - left);
@@ -70,7 +69,7 @@ namespace SharedUnityMischief
 			matrix[1,0] = 0f;	matrix[1,1] = y;	matrix[1,2] = b;	matrix[1,3] = 0f;
 			matrix[2,0] = 0f;	matrix[2,1] = 0f;	matrix[2,2] = c;	matrix[2,3] = d;
 			matrix[3,0] = 0f;	matrix[3,1] = 0f;	matrix[3,2] = e;	matrix[3,3] = 0f;
-			camera.projectionMatrix = matrix;
+			_camera.projectionMatrix = matrix;
 		}
 	}
 }

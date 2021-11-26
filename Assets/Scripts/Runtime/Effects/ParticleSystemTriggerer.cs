@@ -6,34 +6,31 @@ namespace SharedUnityMischief.Effects
 	[RequireComponent(typeof(ParticleSystem))]
 	public class ParticleSystemTriggerer : MonoBehaviour
 	{
-		[SerializeField] private bool stopEmitting = false;
-
-#pragma warning disable CS0109 // Ignore "does not hide an accessible" warning during builds
-		private new ParticleSystem particleSystem;
-#pragma warning restore CS0109
-		private bool stopEmittingLastFrame = false;
+		[SerializeField] private bool _stopEmitting = false;
+		private ParticleSystem _particleSystem;
+		private bool _stopEmittingLastFrame = false;
 		
 		private void Awake()
 		{
-			particleSystem = GetComponent<ParticleSystem>();
+			_particleSystem = GetComponent<ParticleSystem>();
 		}
 
 		private void OnEnable()
 		{
-			stopEmittingLastFrame = stopEmitting;
-			if (particleSystem != null)
+			_stopEmittingLastFrame = _stopEmitting;
+			if (_particleSystem != null)
 			{
-				particleSystem.Play(true);
+				_particleSystem.Play(true);
 			}
 		}
 
 		private void Update()
 		{
-			if (stopEmitting && !stopEmittingLastFrame && particleSystem != null)
+			if (_stopEmitting && !_stopEmittingLastFrame && _particleSystem != null)
 			{
-				particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+				_particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 			}
-			stopEmittingLastFrame = stopEmitting;
+			_stopEmittingLastFrame = _stopEmitting;
 		}
 
 		private void OnDisable() {}

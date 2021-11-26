@@ -5,8 +5,7 @@ namespace SharedUnityMischief.Pool
 {
 	public abstract class PoolableMonoBehavior : MonoBehaviour, IPoolable
 	{
-		public Func<bool> DepositToPool { get; set; } = null;
-
+		public Func<bool> DepositToPool { get; set; }
 		public bool isPooled => DepositToPool != null;
 
 		public bool DepositToPoolOrDestroy()

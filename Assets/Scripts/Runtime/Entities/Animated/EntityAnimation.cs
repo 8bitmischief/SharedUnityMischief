@@ -5,24 +5,30 @@ namespace SharedUnityMischief.Entities.Animated
 	public abstract class EntityAnimation<T> : StateMachineBehaviour
 	{
 		[Header("Animation")]
-		public T state;
-		public Vector3 authoredRootMotion = Vector3.zero;
-		public bool undoAuthoredRootMotion = false;
+		[SerializeField] private T _state;
+		[SerializeField] private Vector3 _authoredRootMotion = Vector3.zero;
+		[SerializeField] private bool _undoAuthoredRootMotion = false;
 		[Header("Programmatic Root Motion")]
-		public EntityAnimator.ProgrammaticRootMotionType xRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
-		public EntityAnimator.ProgrammaticRootMotionType yRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
-		public EntityAnimator.ProgrammaticRootMotionType zRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
+		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _xRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
+		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _yRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
+		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _zRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
+		private EntityAnimator<T> _animator;
 
-		private EntityAnimator<T> animator;
-		public string stateName => state.ToString();
+		public T state => _state;
+		public string stateName => _state.ToString();
+		public Vector3 authoredRootMotion => _authoredRootMotion;
+		public bool undoAuthoredRootMotion => _undoAuthoredRootMotion;
+		public EntityAnimator.ProgrammaticRootMotionType xRootMotion => _xRootMotion;
+		public EntityAnimator.ProgrammaticRootMotionType yRootMotion => _yRootMotion;
+		public EntityAnimator.ProgrammaticRootMotionType zRootMotion => _zRootMotion;
 
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 		{
-			if (this.animator == null)
+			if (_animator == null)
 			{
-				this.animator = animator.GetComponent<EntityAnimator<T>>();
+				_animator = animator.GetComponent<EntityAnimator<T>>();
 			}
-			this.animator.TriggerAnimationStart(this, stateInfo);
+			_animator.TriggerAnimationStart(this, stateInfo);
 		}
 	}
 }

@@ -9,7 +9,8 @@ namespace SharedUnityMischief.Entities
 		public const int EntityUpdateOrder = 100;
 		public const int ControllerUpdateOrder = 200;
 
-		private Entity _entity = null;
+		private Entity _entity;
+
 		public virtual Entity entity
 		{
 			get
@@ -34,6 +35,7 @@ namespace SharedUnityMischief.Entities
 	public abstract class EntityComponent<T> : EntityComponent where T : Entity
 	{
 		private T _typedEntity;
+
 		public new T entity
 		{
 			get

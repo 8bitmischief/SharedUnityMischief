@@ -7,7 +7,7 @@ namespace SharedUnityMischief.Lifecycle
 	[CustomEditor(typeof(UpdateLoop), true)]
 	public class UpdateLoopEditor : BaseEditor
 	{
-		private float manualAdvanceTime = 0.018f;
+		private float _manualAdvanceTime = 0.018f;
 
 		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
@@ -30,14 +30,14 @@ namespace SharedUnityMischief.Lifecycle
 				}
 			}
 			EditorGUILayout.BeginHorizontal();
-			manualAdvanceTime = EditorGUILayout.FloatField(manualAdvanceTime);
+			_manualAdvanceTime = EditorGUILayout.FloatField(_manualAdvanceTime);
 			if (GUILayout.Button("Update"))
 			{
 				if (!loop.isPaused)
 				{
 					loop.Pause();
 				}
-				loop.Advance(manualAdvanceTime, true);
+				loop.Advance(_manualAdvanceTime, true);
 			}
 			if (GUILayout.Button("Next Frame"))
 			{

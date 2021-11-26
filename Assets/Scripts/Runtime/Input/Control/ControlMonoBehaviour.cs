@@ -7,14 +7,15 @@ namespace SharedUnityMischief.Input.Control
 	[DefaultExecutionOrder(-75)]
 	public abstract class ControlMonoBehaviour : MonoBehaviour, IControl
 	{
-		private List<InputAction> inputs = new List<InputAction>();
+		private List<InputAction> _inputs = new List<InputAction>();
+
 		public abstract bool isActuated { get; }
 
 		public abstract void ConsumeInstantaneousInputs();
 
 		protected virtual void OnEnable()
 		{
-			foreach (InputAction input in inputs)
+			foreach (InputAction input in _inputs)
 			{
 				input.Enable();
 			}
@@ -22,7 +23,7 @@ namespace SharedUnityMischief.Input.Control
 
 		protected virtual void OnDisable()
 		{
-			foreach (InputAction input in inputs)
+			foreach (InputAction input in _inputs)
 			{
 				input.Disable();
 			}
@@ -30,7 +31,7 @@ namespace SharedUnityMischief.Input.Control
 
 		protected virtual void OnDestroy()
 		{
-			foreach (InputAction input in inputs)
+			foreach (InputAction input in _inputs)
 			{
 				input.Dispose();
 			}
@@ -40,7 +41,7 @@ namespace SharedUnityMischief.Input.Control
 		{
 			if (input != null)
 			{
-				inputs.Add(input);
+				_inputs.Add(input);
 			}
 		}
 	}

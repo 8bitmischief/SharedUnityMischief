@@ -7,7 +7,7 @@ namespace SharedUnityMischief.Entities.Animated
 	[CustomEditor(typeof(EntityAnimator), true)]
 	public class EntityAnimatorEditor : BaseEditor
 	{
-		private bool showAnimationDetails = true;
+		private bool _showAnimationDetails = true;
 
 		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
@@ -21,8 +21,8 @@ namespace SharedUnityMischief.Entities.Animated
 			EditorGUILayout.FloatField("Time In State", animator.timeInState);
 			EditorGUILayout.IntField("Frames In State", animator.framesInState);
 
-			showAnimationDetails = EditorGUILayout.Foldout(showAnimationDetails, "Animation");
-			if (showAnimationDetails)
+			_showAnimationDetails = EditorGUILayout.Foldout(_showAnimationDetails, "Animation");
+			if (_showAnimationDetails)
 			{
 				EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.FloatField("Time", animator.animationTime);

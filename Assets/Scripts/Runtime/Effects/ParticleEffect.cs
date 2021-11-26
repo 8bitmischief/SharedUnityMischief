@@ -6,33 +6,32 @@ namespace SharedUnityMischief.Effects
 {
 	public class ParticleEffect : PoolableMonoBehavior
 	{
-		[SerializeField] private float duration = 1.0f;
-
-		private VisualEffect[] visualEffects;
-		private float playTime = 0f;
-		private EndBehavior endBehavior = EndBehavior.Destroy;
-		public bool isPlaying { get; private set; } = false;
+		[SerializeField] private float _duration = 1.0f;
+		private VisualEffect[] _visualEffects;
+		private float _playTime = 0f;
+		private EndBehavior _endBehavior = EndBehavior.Destroy;
+		public bool _isPlaying { get; private set; } = false;
 
 		private void Awake()
 		{
-			visualEffects = GetComponentsInChildren<VisualEffect>();
+			_visualEffects = GetComponentsInChildren<VisualEffect>();
 		}
 
 		private void Update()
 		{
-			if (isPlaying)
+			if (_isPlaying)
 			{
-				playTime += Time.deltaTime;
-				if (playTime >= duration)
+				_playTime += Time.deltaTime;
+				if (_playTime >= _duration)
 				{
-					if (endBehavior == EndBehavior.Loop)
+					if (_endBehavior == EndBehavior.Loop)
 					{
 						PlayEndlessly();
 					}
 					else
 					{
 						Stop();
-						if (endBehavior == EndBehavior.Destroy)
+						if (_endBehavior == EndBehavior.Destroy)
 						{
 							DepositToPoolOrDestroy();
 						}
@@ -52,10 +51,10 @@ namespace SharedUnityMischief.Effects
 
 		private void Play(EndBehavior endBehavior)
 		{
-			isPlaying = true;
-			playTime = 0f;
-			this.endBehavior = endBehavior;
-			foreach (VisualEffect visualEffect in visualEffects)
+			_isPlaying = true;
+			_playTime = 0f;
+			this._endBehavior = endBehavior;
+			foreach (VisualEffect visualEffect in _visualEffects)
 			{
 				visualEffect.Play();
 			}
@@ -63,8 +62,8 @@ namespace SharedUnityMischief.Effects
 
 		public void Stop()
 		{
-			isPlaying = false;
-			foreach (VisualEffect visualEffect in visualEffects)
+			_isPlaying = false;
+			foreach (VisualEffect visualEffect in _visualEffects)
 			{
 				visualEffect.Stop();
 			}

@@ -6,7 +6,7 @@ namespace SharedUnityMischief.Input.Control
 	[CustomEditor(typeof(ToggleControl), true)]
 	public class ToggleControlEditor : BaseEditor
 	{
-		private float lastToggleTime = -999f;
+		private float _lastToggleTime = -999f;
 
 		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
@@ -32,13 +32,13 @@ namespace SharedUnityMischief.Input.Control
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
-			float toggleHighlight = 1f - Math.Map(Time.time - lastToggleTime, 0.1f, 0.4f, 0f, 1f, true);
+			float toggleHighlight = 1f - Math.Map(Time.time - _lastToggleTime, 0.1f, 0.4f, 0f, 1f, true);
 			EditorGUILayout.ColorField("Toggle", new Color(toggleHighlight, toggleHighlight, 0.0f, 1.0f));
 		}
 
 		private void OnToggle(bool isOn)
 		{
-			lastToggleTime = Time.time;
+			_lastToggleTime = Time.time;
 		}
 	}
 }

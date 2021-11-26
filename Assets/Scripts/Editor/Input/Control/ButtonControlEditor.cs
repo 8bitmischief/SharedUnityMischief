@@ -6,8 +6,8 @@ namespace SharedUnityMischief.Input.Control
 	[CustomEditor(typeof(ButtonControl), true)]
 	public class ButtonControlEditor : BaseEditor
 	{
-		private float lastPressTime = -999f;
-		private float lastReleaseTime = -999f;
+		private float _lastPressTime = -999f;
+		private float _lastReleaseTime = -999f;
 
 		public override bool RequiresConstantRepaint() => Application.isPlaying;
 
@@ -36,20 +36,20 @@ namespace SharedUnityMischief.Input.Control
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
-			float pressHighlight = 1f - Math.Map(Time.time - lastPressTime, 0.1f, 0.4f, 0f, 1f, true);
+			float pressHighlight = 1f - Math.Map(Time.time - _lastPressTime, 0.1f, 0.4f, 0f, 1f, true);
 			EditorGUILayout.ColorField("Press", new Color(pressHighlight, pressHighlight, 0.0f, 1.0f));
-			float releaseHighlight = 1f - Math.Map(Time.time - lastReleaseTime, 0.1f, 0.4f, 0f, 1f, true);
+			float releaseHighlight = 1f - Math.Map(Time.time - _lastReleaseTime, 0.1f, 0.4f, 0f, 1f, true);
 			EditorGUILayout.ColorField("Release", new Color(releaseHighlight, releaseHighlight, 0.0f, 1.0f));
 		}
 
 		private void OnPress()
 		{
-			lastPressTime = Time.time;
+			_lastPressTime = Time.time;
 		}
 
 		private void OnRelease()
 		{
-			lastReleaseTime = Time.time;
+			_lastReleaseTime = Time.time;
 		}
 	}
 }

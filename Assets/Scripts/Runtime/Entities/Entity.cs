@@ -9,30 +9,34 @@ namespace SharedUnityMischief.Entities
 	public abstract class Entity : EntityComponent, IPoolable
 	{
 		[Header("Entity Config")]
-		[SerializeField] public bool appendSpawnIndexToName = false;
+		[SerializeField] private bool _appendSpawnIndexToName = false;
+		private List<EntityComponent> _components;
+		private bool _isSpawned = false;
+		private bool _isScheduledToSpawn = false;
+		private bool _isScheduledToDespawn = false;
 
-		public Func<bool> DepositToPool { get; set; } = null;
+		public bool appendSpawnIndexToName => _appendSpawnIndexToName;
+		public Func<bool> DepositToPool { get; set; }
 		public bool isPooled => DepositToPool != null;
-		private List<EntityComponent> components;
-		public bool isSpawned { get; private set; } = false;
-		public bool isScheduledToSpawn { get; set; } = false;
-		public bool isScheduledToDespawn { get; set; } = false;
+		public bool isSpawned => _isSpawned;
+		public bool isScheduledToSpawn { get => _isScheduledToSpawn; set => _isScheduledToSpawn = value; }
+		public bool isScheduledToDespawn { get => _isScheduledToDespawn; set => _isScheduledToDespawn = value; }
 		public override Entity entity => this;
 		public override int componentUpdateOrder => EntityComponent.EntityUpdateOrder;
 
 		protected virtual void Awake()
 		{
-			components = GetComponentsInChildren<EntityComponent>().ToList();
-			components.Sort((a, b) => a.componentUpdateOrder - b.componentUpdateOrder);
+			_components = GetComponentsInChildren<EntityComponent>().ToList();
+			_components.Sort((a, b) => a.componentUpdateOrder - b.componentUpdateOrder);
 		}
 
 		public bool Spawn()
 		{
-			if (!isSpawned)
+			if (!_isSpawned)
 			{
-				isSpawned = true;
-				isScheduledToSpawn = false;
-				foreach (EntityComponent component in components)
+				_isSpawned = true;
+				_isScheduledToSpawn = false;
+				foreach (EntityComponent component in _components)
 				{
 					component.OnSpawn();
 				}
@@ -46,7 +50,7 @@ namespace SharedUnityMischief.Entities
 
 		public void EarlyUpdateEntityState()
 		{
-			foreach (EntityComponent component in components)
+			foreach (EntityComponent component in _components)
 			{
 				component.EarlyUpdateState();
 			}
@@ -54,7 +58,7 @@ namespace SharedUnityMischief.Entities
 
 		public void UpdateEntityState()
 		{
-			foreach (EntityComponent component in components)
+			foreach (EntityComponent component in _components)
 			{
 				component.UpdateState();
 			}
@@ -62,7 +66,7 @@ namespace SharedUnityMischief.Entities
 
 		public void LateUpdateEntityState()
 		{
-			foreach (EntityComponent component in components)
+			foreach (EntityComponent component in _components)
 			{
 				component.LateUpdateState();
 			}
@@ -70,11 +74,11 @@ namespace SharedUnityMischief.Entities
 
 		public bool Despawn()
 		{
-			if (isSpawned)
+			if (_isSpawned)
 			{
-				isSpawned = false;
-				isScheduledToDespawn = false;
-				foreach (EntityComponent component in components)
+				_isSpawned = false;
+				_isScheduledToDespawn = false;
+				foreach (EntityComponent component in _components)
 				{
 					component.OnDespawn();
 				}
@@ -115,7 +119,7 @@ namespace SharedUnityMischief.Entities
 		public virtual void OnWithdrawFromPool()
 		{
 			gameObject.SetActive(true);
-			foreach (EntityComponent component in components)
+			foreach (EntityComponent component in _components)
 			{
 				component.ResetComponent();
 			}

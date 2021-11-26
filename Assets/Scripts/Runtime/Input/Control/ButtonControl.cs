@@ -7,47 +7,51 @@ namespace SharedUnityMischief.Input.Control
 	public class ButtonControl : ControlMonoBehaviour, IButtonControl
 	{
 		[Header("Inputs")]
-		[SerializeField] private InputAction input;
-
-		public bool justPressed { get; private set; } = false;
-		public bool isHeld { get; private set; } = false;
-		public bool justReleased { get; private set; } = false;
-		public float amountHeldDown { get; private set; } = 0f;
-		private int numPresses = 0;
-		private int numReleases = 0;
+		[SerializeField] private InputAction _input;
+		private bool _justPressed = false;
+		private bool _isHeld = false;
+		private bool _justReleased = false;
+		private float _amountHeldDown = 0f;
+		private int _numPresses = 0;
+		private int _numReleases = 0;
 		private float timeLastPressed = 0f;
-		public float holdDuration => isHeld ? Time.time - timeLastPressed : 0f;
-		public override bool isActuated => justPressed || isHeld || justReleased;
+
+		public bool justPressed => _justPressed;
+		public bool isHeld => _isHeld;
+		public bool justReleased => _justReleased;
+		public float amountHeldDown => _amountHeldDown;
+		public float holdDuration => _isHeld ? Time.time - timeLastPressed : 0f;
+		public override bool isActuated => _justPressed || _isHeld || _justReleased;
 
 		public event Action onPress;
 		public event Action onRelease;
 
 		private void Awake()
 		{
-			RegisterInput(input);
+			RegisterInput(_input);
 		}
 
 		protected override void OnEnable()
 		{
 			base.OnEnable();
-			input.started += OnPress;
-			input.canceled += OnRelease;
+			_input.started += OnPress;
+			_input.canceled += OnRelease;
 		}
 
 		private void Update()
 		{
-			justPressed = false;
-			justReleased = false;
+			_justPressed = false;
+			_justReleased = false;
 			// Trigger releases/presses
-			while (numPresses > 0 || numReleases > 0)
+			while (_numPresses > 0 || _numReleases > 0)
 			{
-				if (isHeld)
+				if (_isHeld)
 				{
-					if (numReleases > 0)
+					if (_numReleases > 0)
 					{
-						numReleases--;
-						isHeld = false;
-						justReleased = true;
+						_numReleases--;
+						_isHeld = false;
+						_justReleased = true;
 						onRelease?.Invoke();
 					}
 					else
@@ -57,11 +61,11 @@ namespace SharedUnityMischief.Input.Control
 				}
 				else
 				{
-					if (numPresses > 0)
+					if (_numPresses > 0)
 					{
-						numPresses--;
-						isHeld = true;
-						justPressed = true;
+						_numPresses--;
+						_isHeld = true;
+						_justPressed = true;
 						timeLastPressed = Time.time;
 						onPress?.Invoke();
 					}
@@ -71,43 +75,43 @@ namespace SharedUnityMischief.Input.Control
 					}
 				}
 			}
-			numPresses = 0;
-			numReleases = 0;
+			_numPresses = 0;
+			_numReleases = 0;
 			// Read the current state of the button
-			amountHeldDown = input.ReadValue<float>();
-			if (!isHeld && input.phase == InputActionPhase.Performed)
+			_amountHeldDown = _input.ReadValue<float>();
+			if (!_isHeld && _input.phase == InputActionPhase.Performed)
 			{
-				isHeld = true;
-				justPressed = true;
+				_isHeld = true;
+				_justPressed = true;
 				timeLastPressed = Time.time;
 				onPress?.Invoke();
 			}
-			else if (isHeld && (input.phase == InputActionPhase.Waiting || input.phase == InputActionPhase.Disabled))
+			else if (_isHeld && (_input.phase == InputActionPhase.Waiting || _input.phase == InputActionPhase.Disabled))
 			{
-				isHeld = false;
-				justReleased = true;
+				_isHeld = false;
+				_justReleased = true;
 				onRelease?.Invoke();
 			}
 		}
 
 		protected override void OnDisable()
 		{
-			input.started -= OnPress;
-			input.canceled -= OnRelease;
+			_input.started -= OnPress;
+			_input.canceled -= OnRelease;
 			base.OnDisable();
 		}
 
 		public override void ConsumeInstantaneousInputs()
 		{
-			justPressed = false;
-			justReleased = false;
+			_justPressed = false;
+			_justReleased = false;
 		}
 
 		public bool ConsumePress()
 		{
-			if (justPressed)
+			if (_justPressed)
 			{
-				justPressed = false;
+				_justPressed = false;
 				return true;
 			}
 			else
@@ -118,9 +122,9 @@ namespace SharedUnityMischief.Input.Control
 
 		public bool ConsumeRelease()
 		{
-			if (justReleased)
+			if (_justReleased)
 			{
-				justReleased = false;
+				_justReleased = false;
 				return true;
 			}
 			else
@@ -131,12 +135,12 @@ namespace SharedUnityMischief.Input.Control
 
 		private void OnPress (InputAction.CallbackContext context)
 		{
-			numPresses++;
+			_numPresses++;
 		}
 
 		private void OnRelease (InputAction.CallbackContext context)
 		{
-			numReleases++;
+			_numReleases++;
 		}
 	}
 }
