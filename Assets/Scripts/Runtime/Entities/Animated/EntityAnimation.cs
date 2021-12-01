@@ -2,20 +2,20 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Entities.Animated
 {
-	public abstract class EntityAnimation<T> : StateMachineBehaviour
+	public abstract class EntityAnimation<TAnimation> : StateMachineBehaviour
 	{
 		[Header("Animation")]
-		[SerializeField] private T _state;
+		[SerializeField] private TAnimation _animation;
 		[SerializeField] private Vector3 _authoredRootMotion = Vector3.zero;
 		[SerializeField] private bool _undoAuthoredRootMotion = false;
 		[Header("Programmatic Root Motion")]
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _xRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _yRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _zRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
-		private EntityAnimator<T> _animator;
+		private EntityAnimator<TAnimation> _animator;
 
-		public T state => _state;
-		public string stateName => _state.ToString();
+		public TAnimation animation => _animation;
+		public string animationName => _animation.ToString();
 		public Vector3 authoredRootMotion => _authoredRootMotion;
 		public bool undoAuthoredRootMotion => _undoAuthoredRootMotion;
 		public EntityAnimator.ProgrammaticRootMotionType xRootMotion => _xRootMotion;
@@ -26,7 +26,7 @@ namespace SharedUnityMischief.Entities.Animated
 		{
 			if (_animator == null)
 			{
-				_animator = animator.GetComponent<EntityAnimator<T>>();
+				_animator = animator.GetComponent<EntityAnimator<TAnimation>>();
 			}
 			_animator.TriggerAnimationStart(this, stateInfo);
 		}

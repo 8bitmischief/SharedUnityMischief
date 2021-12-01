@@ -17,9 +17,9 @@ namespace SharedUnityMischief.Entities.Animated
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Animator State", EditorStyles.boldLabel);
-			EditorGUILayout.TextField("State", animator.stateName);
-			EditorGUILayout.FloatField("Time In State", animator.timeInState);
-			EditorGUILayout.IntField("Frames In State", animator.framesInState);
+			EditorGUILayout.TextField("Animation", animator.animationName);
+			EditorGUILayout.FloatField("Total Time", animator.totalAnimationTime);
+			EditorGUILayout.IntField("Total Frames", animator.totalAnimationFrames);
 
 			_showAnimationDetails = EditorGUILayout.Foldout(_showAnimationDetails, "Animation");
 			if (_showAnimationDetails)
@@ -36,7 +36,7 @@ namespace SharedUnityMischief.Entities.Animated
 				EditorGUILayout.Toggle("Has Completed", animator.hasAnimationCompleted);
 				EditorGUILayout.Toggle("Is Looping", animator.isAnimationLooping);
 				EditorGUILayout.Toggle("Has Looped", animator.hasAnimationLooped);
-				EditorGUILayout.TextField("Percent Into Frame", String.Format("{0:0.00%}", animator.percentInterpolated));
+				EditorGUILayout.TextField("Percent Into Frame", String.Format("{0:0.00%}", animator.percentAnimationInterpolated));
 				EditorGUILayout.TextField("Animation Speed", String.Format("{0:0%}", animator.animationSpeed));
 				EditorGUILayout.Vector3Field("Root Motion", animator.programmaticRootMotion);
 				EditorGUILayout.Vector3Field("Root Motion Progress", animator.programmaticRootMotionProgress);

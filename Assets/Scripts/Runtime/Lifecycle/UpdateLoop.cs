@@ -8,7 +8,7 @@ namespace SharedUnityMischief.Lifecycle
 		public const float TimePerUpdate = 1f / 60f;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-		private static void ResetSingletonClass() => _instance = null;
+		private static void ResetSingletonClass() => ClearInstance();
 
 		[Header("Update Loop Config")]
 		[SerializeField] private bool _updateAutomatically = true;

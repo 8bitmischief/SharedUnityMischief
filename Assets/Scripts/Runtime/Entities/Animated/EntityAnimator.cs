@@ -13,9 +13,10 @@ namespace SharedUnityMischief.Entities.Animated
 		protected static readonly float UpdateFudgeTime = UpdateLoop.TimePerUpdate / 100f;
 		protected static readonly int ResetHash = Animator.StringToHash("Reset");
 
-		public abstract string stateName { get; }
-		public abstract float timeInState { get; }
-		public abstract int framesInState { get; }
+		protected abstract Animator animator { get; }
+		public abstract string animationName { get; }
+		public abstract float totalAnimationTime { get; }
+		public abstract int totalAnimationFrames { get; }
 		public abstract float animationTime { get; }
 		public abstract float animationDuration { get; }
 		public abstract float percentAnimationCompleted { get; }
@@ -24,7 +25,7 @@ namespace SharedUnityMischief.Entities.Animated
 		public abstract bool hasAnimationLooped { get; }
 		public abstract int animationFrame { get; }
 		public abstract int animationFrameDuration { get; }
-		public abstract float percentInterpolated { get; }
+		public abstract float percentAnimationInterpolated { get; }
 		public abstract float animationSpeed { get; set; }
 		public abstract Vector3 authoredRootMotion { get; }
 		public abstract Vector3 programmaticRootMotion { get; }
@@ -41,19 +42,19 @@ namespace SharedUnityMischief.Entities.Animated
 		}
 	}
 
-	public abstract class EntityAnimator<T> : EntityAnimator
+	public abstract class EntityAnimator<TAnimation> : EntityAnimator
 	{
 		[SerializeField] protected Vector3 _rootMotionProgress = Vector3.zero;
-		private T _state;
-		protected Animator _animator;
+		private TAnimation _animation;
+		private Animator _animator;
 		private List<AnimationEvent> _triggeredEvents = new List<AnimationEvent>();
 		private bool _didStartNewAnimation = false;
 		private bool _undoAuthoredRootMotion = false;
 		private Vector3 _authoredRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _programmaticRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _rootMotionForTriggeredAnimation = Vector3.zero;
-		private float _timeInState = 0f;
-		private int _framesInState = 0;
+		private float _totalAnimationTime = 0f;
+		private int _totalAnimationFrames = 0;
 		private float _animationTime = 0f;
 		private float _animationDuration = 0f;
 		private float _percentAnimationCompleted = 0f;
@@ -62,7 +63,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private bool _hasAnimationLooped = false;
 		private int _animationFrame = 0;
 		private int _animationFrameDuration = 0;
-		private float _percentInterpolated = 0f;
+		private float _percentAnimationInterpolated = 0f;
 		private float _animationSpeed = 1.00f;
 		private Vector3 _authoredRootMotion = Vector3.zero;
 		private Vector3 _programmaticRootMotion = Vector3.zero;
@@ -71,10 +72,11 @@ namespace SharedUnityMischief.Entities.Animated
 		private ProgrammaticRootMotionType _yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType _zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 
-		public T state => _state;
-		public override string stateName => _state.ToString();
-		public override float timeInState => _timeInState;
-		public override int framesInState => _framesInState;
+		protected override Animator animator => _animator;
+		public new TAnimation animation => _animation;
+		public override string animationName => _animation.ToString();
+		public override float totalAnimationTime => _totalAnimationTime;
+		public override int totalAnimationFrames => _totalAnimationFrames;
 		public override float animationTime => _animationTime;
 		public override float animationDuration => _animationDuration;
 		public override float percentAnimationCompleted => _percentAnimationCompleted;
@@ -83,15 +85,15 @@ namespace SharedUnityMischief.Entities.Animated
 		public override bool hasAnimationLooped => _hasAnimationLooped;
 		public override int animationFrame => _animationFrame;
 		public override int animationFrameDuration => _animationFrameDuration;
-		public override float percentInterpolated => _percentInterpolated;
+		public override float percentAnimationInterpolated => _percentAnimationInterpolated;
 		public override float animationSpeed { get => _animationSpeed; set => _animationSpeed = value; }
 		public override Vector3 authoredRootMotion => _authoredRootMotion;
 		public override Vector3 programmaticRootMotion => _programmaticRootMotion;
 		public override Vector3 programmaticRootMotionProgress => _programmaticRootMotionProgress;
 
-		public event Action<T> onEnterState;
-		public event Action<T> onLeaveState;
-		public event Action<T, T> onChangeState;
+		public event Action<TAnimation> onStartAnimation;
+		public event Action<TAnimation> onEndAnimation;
+		public event Action<TAnimation, TAnimation> onChangeAnimation;
 
 		protected virtual void Awake()
 		{
@@ -109,9 +111,9 @@ namespace SharedUnityMischief.Entities.Animated
 					Trigger(ResetHash);
 				}
 			}
-			_state = default(T);
-			_timeInState = 0f;
-			_framesInState = 0;
+			_animation = default(TAnimation);
+			_totalAnimationTime = 0f;
+			_totalAnimationFrames = 0;
 			_animationTime = 0f;
 			_animationDuration = 0f;
 			_percentAnimationCompleted = 0f;
@@ -120,7 +122,7 @@ namespace SharedUnityMischief.Entities.Animated
 			_hasAnimationLooped = false;
 			_animationFrame = 0;
 			_animationFrameDuration = 0;
-			_percentInterpolated = 0f;
+			_percentAnimationInterpolated = 0f;
 			_animationSpeed = 1.00f;
 			_authoredRootMotion = Vector3.zero;
 			_programmaticRootMotion = Vector3.zero;
@@ -157,17 +159,17 @@ namespace SharedUnityMischief.Entities.Animated
 			}
 		}
 
-		public void TriggerAnimationStart(EntityAnimation<T> animation, AnimatorStateInfo stateInfo)
+		public void TriggerAnimationStart(EntityAnimation<TAnimation> animation, AnimatorStateInfo stateInfo)
 		{
 			_didStartNewAnimation = true;
-			T prevState = _state;
-			// Leave the previous state
-			OnLeaveState(_state);
-			onLeaveState?.Invoke(_state);
-			// Enter the new state
-			_state = animation.state;
-			_timeInState = 0f;
-			_framesInState = 0;
+			TAnimation prevAnimation = _animation;
+			// End the previous animation
+			OnEndAnimation(_animation);
+			onEndAnimation?.Invoke(_animation);
+			// Start the new animation
+			_animation = animation.animation;
+			_totalAnimationTime = 0f;
+			_totalAnimationFrames = 0;
 			_undoAuthoredRootMotion = animation.undoAuthoredRootMotion;
 			_authoredRootMotion = animation.authoredRootMotion;
 			_authoredRootMotionTraveledSoFar = Vector3.zero;
@@ -182,11 +184,11 @@ namespace SharedUnityMischief.Entities.Animated
 			_yProgrammaticRootMotion = animation.yRootMotion;
 			_zProgrammaticRootMotion = animation.zRootMotion;
 			RefreshAnimationState(stateInfo);
-			OnEnterState(_state);
-			onEnterState?.Invoke(_state);
-			// Trigger change states
-			OnChangeState(_state, prevState);
-			onChangeState?.Invoke(_state, prevState);
+			OnStartAnimation(_animation);
+			onStartAnimation?.Invoke(_animation);
+			// Trigger animation changes
+			OnChangeAnimation(_animation, prevAnimation);
+			onChangeAnimation?.Invoke(_animation, prevAnimation);
 		}
 
 		protected void Trigger(int hash) => Trigger(hash, Vector3.zero, false);
@@ -220,9 +222,9 @@ namespace SharedUnityMischief.Entities.Animated
 			}
 		}
 
-		protected virtual void OnEnterState(T state) {}
-		protected virtual void OnLeaveState(T state) {}
-		protected virtual void OnChangeState(T state, T prevState) {}
+		protected virtual void OnStartAnimation(TAnimation animation) {}
+		protected virtual void OnEndAnimation(TAnimation animation) {}
+		protected virtual void OnChangeAnimation(TAnimation animation, TAnimation prevAnimation) {}
 		protected virtual void OnAnimationEvent(AnimationEvent evt) {}
 
 		private void AdvanceToNextFrame()
@@ -230,8 +232,8 @@ namespace SharedUnityMischief.Entities.Animated
 			// Progress the animation all the way to the next frame + a little bit beyond it (the fudge amount)
 			float deltaTime = UpdateLoop.TimePerUpdate - (_animationTime % UpdateLoop.TimePerUpdate) + UpdateFudgeTime;
 			deltaTime = Mathf.Max(deltaTime, 2 * UpdateFudgeTime);
-			_timeInState += deltaTime;
-			_framesInState++;
+			_totalAnimationTime += deltaTime;
+			_totalAnimationFrames++;
 			UpdateAnimator(deltaTime);
 			if (_didStartNewAnimation)
 			{
@@ -241,8 +243,8 @@ namespace SharedUnityMischief.Entities.Animated
 
 		private void AdvanceNonStandardSpeed()
 		{
-			_timeInState += UpdateLoop.I.deltaTime;
-			_framesInState = Mathf.FloorToInt(_timeInState / UpdateLoop.TimePerUpdate);
+			_totalAnimationTime += UpdateLoop.I.deltaTime;
+			_totalAnimationFrames = Mathf.FloorToInt(_totalAnimationTime / UpdateLoop.TimePerUpdate);
 			float deltaTime = UpdateLoop.I.deltaTime * _animationSpeed;
 			UpdateAnimator(deltaTime);
 		}
@@ -259,7 +261,7 @@ namespace SharedUnityMischief.Entities.Animated
 			float deltaTime = targetTimeBetweenFrames - currentTimeBetweenFrames;
 			if (deltaTime >= UpdateLoop.TimePerUpdate / 100f)
 			{
-				_timeInState += deltaTime;
+				_totalAnimationTime += deltaTime;
 				UpdateAnimator(deltaTime);
 				if (_didStartNewAnimation && allowedRecursions > 0)
 				{
@@ -345,7 +347,7 @@ namespace SharedUnityMischief.Entities.Animated
 				{
 					_animationFrame = Mathf.Min(_animationFrame, _animationFrameDuration - 1);
 				}
-				_percentInterpolated = (_animationTime % UpdateLoop.TimePerUpdate) / UpdateLoop.TimePerUpdate;
+				_percentAnimationInterpolated = (_animationTime % UpdateLoop.TimePerUpdate) / UpdateLoop.TimePerUpdate;
 				_hasAnimationCompleted = !_isAnimationLooping && _animationFrame == _animationFrameDuration - 1;
 				return true;
 			}
@@ -361,19 +363,19 @@ namespace SharedUnityMischief.Entities.Animated
 		}
 	}
 
-	public abstract class EntityAnimator<T, U> : EntityAnimator<U> where T : Entity
+	public abstract class EntityAnimator<TEntity, TAnimation> : EntityAnimator<TAnimation> where TEntity : Entity
 	{
-		protected new T entity
+		protected new TEntity entity
 		{
 			get
 			{
 				if (_typedEntity == null)
 				{
-					_typedEntity = GetComponentInParent<T>();
+					_typedEntity = GetComponentInParent<TEntity>();
 				}
 				return _typedEntity;
 			}
 		}
-		private T _typedEntity = null;
+		private TEntity _typedEntity = null;
 	}
 }

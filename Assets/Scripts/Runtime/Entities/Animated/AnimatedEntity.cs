@@ -2,36 +2,60 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Entities.Animated
 {
-	public abstract class AnimatedEntity<T, U> : Entity where U : EntityAnimator<T>
+	public abstract class AnimatedEntity<TAnimator, TAnimation> : Entity where TAnimator : EntityAnimator<TAnimation>
 	{
-		protected U _animator;
+		private TAnimator _animator;
 
-		public T state => _animator != null ? _animator.state : default(T);
-		public float timeInState => _animator?.timeInState ?? 0f;
-		public int framesInState => _animator?.framesInState ?? 0;
+		public TAnimator animator => _animator;
+		protected new TAnimation animation => _animator != null ? _animator.animation : default(TAnimation);
+		protected float totalAnimationTime => _animator?.totalAnimationTime ?? 0f;
+		protected int totalAnimationFrames => _animator?.totalAnimationFrames ?? 0;
+		protected float animationTime => _animator?.animationTime ?? 0f;
+		protected float animationDuration => _animator?.animationDuration ?? 0f;
+		protected float percentAnimationCompleted => _animator?.percentAnimationCompleted ?? 0f;
+		protected bool hasAnimationCompleted => _animator?.hasAnimationCompleted ?? false;
+		protected bool isAnimationLooping => _animator?.isAnimationLooping ?? false;
+		protected bool hasAnimationLooped => _animator?.hasAnimationLooped ?? false;
+		protected int animationFrame => _animator?.animationFrame ?? 0;
+		protected int animationFrameDuration => _animator?.animationFrameDuration ?? 0;
+		protected float percentAnimationInterpolated => _animator?.percentAnimationInterpolated ?? 0f;
+		protected float animationSpeed
+		{
+			get => _animator?.animationSpeed ?? 1f;
+			set
+			{
+				if (_animator != null)
+				{
+					_animator.animationSpeed = value;
+				}
+			}
+		}
+		protected Vector3 authoredRootMotion => _animator?.authoredRootMotion ?? Vector3.zero;
+		protected Vector3 programmaticRootMotion => _animator?.programmaticRootMotion ?? Vector3.zero;
+		protected Vector3 programmaticRootMotionProgress => _animator?.programmaticRootMotionProgress ?? Vector3.zero;
 
 		protected override void Awake()
 		{
 			base.Awake();
-			_animator = GetComponent<U>();
+			_animator = GetComponent<TAnimator>();
 		}
 
 		protected virtual void OnEnable()
 		{
-			_animator.onEnterState += OnEnterState;
-			_animator.onLeaveState += OnLeaveState;
-			_animator.onChangeState += OnChangeState;
+			_animator.onStartAnimation += OnStartAnimation;
+			_animator.onEndAnimation += OnEndAnimation;
+			_animator.onChangeAnimation += OnChangeAnimation;
 		}
 
 		protected virtual void OnDisable()
 		{
-			_animator.onEnterState -= OnEnterState;
-			_animator.onLeaveState -= OnLeaveState;
-			_animator.onChangeState -= OnChangeState;
+			_animator.onStartAnimation -= OnStartAnimation;
+			_animator.onEndAnimation -= OnEndAnimation;
+			_animator.onChangeAnimation -= OnChangeAnimation;
 		}
 
-		protected virtual void OnEnterState(T state) {}
-		protected virtual void OnLeaveState(T state) {}
-		protected virtual void OnChangeState(T state, T prevState) {}
+		protected virtual void OnStartAnimation(TAnimation animation) {}
+		protected virtual void OnEndAnimation(TAnimation animation) {}
+		protected virtual void OnChangeAnimation(TAnimation animation, TAnimation prevAnimation) {}
 	}
 }
