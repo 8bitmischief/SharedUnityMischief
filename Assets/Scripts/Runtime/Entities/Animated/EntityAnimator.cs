@@ -23,6 +23,7 @@ namespace SharedUnityMischief.Entities.Animated
 		public abstract bool hasAnimationCompleted { get; }
 		public abstract bool isAnimationLooping { get; }
 		public abstract bool hasAnimationLooped { get; }
+		public abstract int numAnimationLoops { get; }
 		public abstract int animationFrame { get; }
 		public abstract int animationFrameDuration { get; }
 		public abstract float percentAnimationInterpolated { get; }
@@ -60,7 +61,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private float _percentAnimationCompleted = 0f;
 		private bool _hasAnimationCompleted = false;
 		private bool _isAnimationLooping = false;
-		private bool _hasAnimationLooped = false;
+		private int _numAnimationLoops = 0;
 		private int _animationFrame = 0;
 		private int _animationFrameDuration = 0;
 		private float _percentAnimationInterpolated = 0f;
@@ -82,7 +83,8 @@ namespace SharedUnityMischief.Entities.Animated
 		public override float percentAnimationCompleted => _percentAnimationCompleted;
 		public override bool hasAnimationCompleted => _hasAnimationCompleted;
 		public override bool isAnimationLooping => _isAnimationLooping;
-		public override bool hasAnimationLooped => _hasAnimationLooped;
+		public override bool hasAnimationLooped => numAnimationLoops > 0;
+		public override int numAnimationLoops => _numAnimationLoops;
 		public override int animationFrame => _animationFrame;
 		public override int animationFrameDuration => _animationFrameDuration;
 		public override float percentAnimationInterpolated => _percentAnimationInterpolated;
@@ -119,7 +121,7 @@ namespace SharedUnityMischief.Entities.Animated
 			_percentAnimationCompleted = 0f;
 			_hasAnimationCompleted = false;
 			_isAnimationLooping = false;
-			_hasAnimationLooped = false;
+			_numAnimationLoops = 0;
 			_animationFrame = 0;
 			_animationFrameDuration = 0;
 			_percentAnimationInterpolated = 0f;
@@ -319,15 +321,20 @@ namespace SharedUnityMischief.Entities.Animated
 
 		private float CalculateRootMotionComponent(ProgrammaticRootMotionType type, float authoredRootMotionTraveledSoFar, float authoredRootMotion, float rootMotionProgress)
 		{
+			float rootMotion;
 			switch (type)
 			{
 				case ProgrammaticRootMotionType.UseAuthoredRootMotion:
-					return authoredRootMotion == 0f ? 0f : authoredRootMotionTraveledSoFar / authoredRootMotion;
+					rootMotion = authoredRootMotion == 0f ? 0f : authoredRootMotionTraveledSoFar / authoredRootMotion;
+					break;
 				case ProgrammaticRootMotionType.UseRootMotionProgress:
-					return rootMotionProgress;
+					rootMotion = rootMotionProgress;
+					break;
 				default:
-					return 0f;
+					rootMotion = 0f;
+					break;
 			}
+			return rootMotion + ((float) _numAnimationLoops);
 		}
 
 		private bool RefreshAnimationState() => RefreshAnimationState(_animator.GetCurrentAnimatorStateInfo(0));
@@ -337,7 +344,7 @@ namespace SharedUnityMischief.Entities.Animated
 			if (!float.IsInfinity(stateInfo.length))
 			{
 				_isAnimationLooping = stateInfo.loop;
-				_hasAnimationLooped = _isAnimationLooping && stateInfo.normalizedTime >= 1f;
+				_numAnimationLoops = _isAnimationLooping ? Mathf.FloorToInt(stateInfo.normalizedTime) : 0;
 				_animationDuration = stateInfo.length;
 				_percentAnimationCompleted = _isAnimationLooping ? stateInfo.normalizedTime % 1f : Mathf.Min(stateInfo.normalizedTime, 1f);
 				_animationTime = _percentAnimationCompleted * _animationDuration;

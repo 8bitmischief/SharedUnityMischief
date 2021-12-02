@@ -36,6 +36,7 @@ namespace SharedUnityMischief.Entities.Animated
 				EditorGUILayout.Toggle("Has Completed", animator.hasAnimationCompleted);
 				EditorGUILayout.Toggle("Is Looping", animator.isAnimationLooping);
 				EditorGUILayout.Toggle("Has Looped", animator.hasAnimationLooped);
+				EditorGUILayout.IntField("Loops", animator.numAnimationLoops);
 				EditorGUILayout.TextField("Percent Into Frame", String.Format("{0:0.00%}", animator.percentAnimationInterpolated));
 				EditorGUILayout.TextField("Animation Speed", String.Format("{0:0%}", animator.animationSpeed));
 				EditorGUILayout.Vector3Field("Root Motion", animator.programmaticRootMotion);
