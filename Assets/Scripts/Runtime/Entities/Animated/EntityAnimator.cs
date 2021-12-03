@@ -50,6 +50,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private Animator _animator;
 		private List<AnimationEvent> _triggeredEvents = new List<AnimationEvent>();
 		private bool _didStartNewAnimation = false;
+		private bool _skipFirstFrame = false;
 		private bool _undoAuthoredRootMotion = false;
 		private Vector3 _authoredRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _programmaticRootMotionTraveledSoFar = Vector3.zero;
@@ -130,6 +131,7 @@ namespace SharedUnityMischief.Entities.Animated
 			_programmaticRootMotion = Vector3.zero;
 			_programmaticRootMotionProgress = Vector3.zero;
 			_didStartNewAnimation = false;
+			_skipFirstFrame = false;
 			_undoAuthoredRootMotion = false;
 			_authoredRootMotionTraveledSoFar = Vector3.zero;
 			_programmaticRootMotionTraveledSoFar = Vector3.zero;
@@ -164,6 +166,7 @@ namespace SharedUnityMischief.Entities.Animated
 		public void TriggerAnimationStart(EntityAnimation<TAnimation> animation, AnimatorStateInfo stateInfo)
 		{
 			_didStartNewAnimation = true;
+			_skipFirstFrame = animation.skipFirstFrame;
 			TAnimation prevAnimation = _animation;
 			// End the previous animation
 			OnEndAnimation(_animation);
@@ -207,6 +210,10 @@ namespace SharedUnityMischief.Entities.Animated
 			_rootMotionForTriggeredAnimation = Vector3.zero;
 			if (_didStartNewAnimation)
 			{
+				if (_skipFirstFrame)
+				{
+					UpdateAnimator(UpdateLoop.TimePerUpdate);
+				}
 				InterpolateAnimation();
 			}
 		}
@@ -239,6 +246,10 @@ namespace SharedUnityMischief.Entities.Animated
 			UpdateAnimator(deltaTime);
 			if (_didStartNewAnimation)
 			{
+				if (_skipFirstFrame)
+				{
+					UpdateAnimator(UpdateLoop.TimePerUpdate);
+				}
 				InterpolateAnimation();
 			}
 		}
@@ -249,6 +260,10 @@ namespace SharedUnityMischief.Entities.Animated
 			_totalAnimationFrames = Mathf.FloorToInt(_totalAnimationTime / UpdateLoop.TimePerUpdate);
 			float deltaTime = UpdateLoop.I.deltaTime * _animationSpeed;
 			UpdateAnimator(deltaTime);
+			if (_didStartNewAnimation && _skipFirstFrame)
+			{
+				UpdateAnimator(UpdateLoop.TimePerUpdate * _animationSpeed);
+			}
 		}
 
 		private void InterpolateAnimation(int allowedRecursions = 3)
@@ -265,9 +280,16 @@ namespace SharedUnityMischief.Entities.Animated
 			{
 				_totalAnimationTime += deltaTime;
 				UpdateAnimator(deltaTime);
-				if (_didStartNewAnimation && allowedRecursions > 0)
+				if (_didStartNewAnimation)
 				{
-					InterpolateAnimation(allowedRecursions - 1);
+					if (_skipFirstFrame)
+					{
+						UpdateAnimator(UpdateLoop.TimePerUpdate);
+					}
+					if (allowedRecursions > 0)
+					{
+						InterpolateAnimation(allowedRecursions - 1);
+					}
 				}
 			}
 		}
@@ -285,12 +307,32 @@ namespace SharedUnityMischief.Entities.Animated
 		private void UpdateAnimator(float deltaTime)
 		{
 			Vector3 prevPosition = transform.position;
+			Vector3 prevAuthoredRootMotion = _authoredRootMotion;
+			Vector3 prevAuthoredRootMotionTraveledSoFar = _authoredRootMotionTraveledSoFar;
+			Vector3 prevProgrammaticRootMotion = _programmaticRootMotion;
+			Vector3 prevProgrammaticRootMotionTraveledSoFar = _programmaticRootMotionTraveledSoFar;
+			bool wasAnimationCompleted = _hasAnimationCompleted;
 			_didStartNewAnimation = false;
+			_skipFirstFrame = false;
 			// Have to do a silly trick to update the animator manually
 			_animator.speed = 1f;
 			_animator.Update(deltaTime);
 			_animator.speed = 0f;
-			if (!_didStartNewAnimation)
+			if (_didStartNewAnimation)
+			{
+				if (wasAnimationCompleted)
+				{
+					Vector3 authoredRootMotionLeftUntraveled = prevAuthoredRootMotion - prevAuthoredRootMotionTraveledSoFar;
+					Vector3 programmaticRootMotionLeftUntraveled = prevProgrammaticRootMotion - prevProgrammaticRootMotionTraveledSoFar;
+					Vector3 rootMotionLeftUntraveled = programmaticRootMotionLeftUntraveled + new Vector3(
+						authoredRootMotionLeftUntraveled.x * (transform.localScale.x == 0f ? 0f : 1f / transform.localScale.x),
+						authoredRootMotionLeftUntraveled.y * (transform.localScale.y == 0f ? 0f : 1f / transform.localScale.y),
+						authoredRootMotionLeftUntraveled.z * (transform.localScale.z == 0f ? 0f : 1f / transform.localScale.z));
+					transform.position += rootMotionLeftUntraveled;
+					prevPosition = transform.position;
+				}
+			}
+			else
 			{
 				RefreshAnimationState();
 			}
@@ -306,16 +348,16 @@ namespace SharedUnityMischief.Entities.Animated
 				CalculateRootMotionComponent(_xProgrammaticRootMotion, _authoredRootMotionTraveledSoFar.x, _authoredRootMotion.x, _rootMotionProgress.x),
 				CalculateRootMotionComponent(_yProgrammaticRootMotion, _authoredRootMotionTraveledSoFar.y, _authoredRootMotion.y, _rootMotionProgress.y),
 				CalculateRootMotionComponent(_zProgrammaticRootMotion, _authoredRootMotionTraveledSoFar.z, _authoredRootMotion.z, _rootMotionProgress.z));
-			Vector3 prevProgrammaticRootMotionTraveledSoFar = _programmaticRootMotionTraveledSoFar;
+			Vector3 currProgrammaticRootMotionTraveledSoFar = _programmaticRootMotionTraveledSoFar;
 			_programmaticRootMotionTraveledSoFar = Vector3.Scale(_programmaticRootMotion, _programmaticRootMotionProgress);
 			// Apply root motion
 			if (_undoAuthoredRootMotion)
 			{
-				transform.position = prevPosition + _programmaticRootMotionTraveledSoFar - prevProgrammaticRootMotionTraveledSoFar;
+				transform.position = prevPosition + _programmaticRootMotionTraveledSoFar - currProgrammaticRootMotionTraveledSoFar;
 			}
 			else
 			{
-				transform.position += _programmaticRootMotionTraveledSoFar - prevProgrammaticRootMotionTraveledSoFar;
+				transform.position += _programmaticRootMotionTraveledSoFar - currProgrammaticRootMotionTraveledSoFar;
 			}
 		}
 

@@ -8,6 +8,7 @@ namespace SharedUnityMischief.Entities.Animated
 		[SerializeField] private TAnimation _animation;
 		[SerializeField] private Vector3 _authoredRootMotion = Vector3.zero;
 		[SerializeField] private bool _undoAuthoredRootMotion = false;
+		[SerializeField] private bool _skipFirstFrame = false;
 		[Header("Programmatic Root Motion")]
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _xRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _yRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
@@ -18,6 +19,7 @@ namespace SharedUnityMischief.Entities.Animated
 		public string animationName => _animation.ToString();
 		public Vector3 authoredRootMotion => _authoredRootMotion;
 		public bool undoAuthoredRootMotion => _undoAuthoredRootMotion;
+		public bool skipFirstFrame => _skipFirstFrame;
 		public EntityAnimator.ProgrammaticRootMotionType xRootMotion => _xRootMotion;
 		public EntityAnimator.ProgrammaticRootMotionType yRootMotion => _yRootMotion;
 		public EntityAnimator.ProgrammaticRootMotionType zRootMotion => _zRootMotion;
