@@ -136,6 +136,9 @@ namespace SharedUnityMischief.Entities
 		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool);
 		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position);
 		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
+		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool);
+		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position);
+		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
 		protected T SpawnEntityFromGameObject<T>(T entity) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity);
 		protected T SpawnEntityFromGameObject<T>(T entity, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity, position);
 		protected T SpawnEntityFromGameObject<T>(T entity, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity, position, rotation);

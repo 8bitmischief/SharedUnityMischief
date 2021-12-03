@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Pool
 {
-	public abstract class PoolableMonoBehavior : MonoBehaviour, IPoolable
+	public abstract class PoolableMonoBehaviour : MonoBehaviour, IPoolable
 	{
 		public Func<bool> DepositToPool { get; set; }
 		public bool isPooled => DepositToPool != null;

@@ -4,7 +4,7 @@ using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Effects
 {
-	public class ParticleEffect : PoolableMonoBehavior
+	public class ParticleEffect : PoolableMonoBehaviour
 	{
 		[SerializeField] private float _duration = 1.0f;
 		private VisualEffect[] _visualEffects;

@@ -41,6 +41,10 @@ namespace SharedUnityMischief.Entities
 			return SpawnEntityFromGameObject(entity, position, rotation);
 		}
 
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool) where T : Entity => SpawnEntityFromPool(pool.pool);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position) where T : Entity => SpawnEntityFromPool(pool.pool, position);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position, Quaternion rotation) where T : Entity => SpawnEntityFromPool(pool.pool, position, rotation);
+
 		public T SpawnEntityFromGameObject<T>(T entity) where T : Entity => SpawnEntityFromGameObject(entity, Vector3.zero);
 		public T SpawnEntityFromGameObject<T>(T entity, Vector3 position) where T : Entity => SpawnEntityFromGameObject(entity, position, Quaternion.identity);
 		public T SpawnEntityFromGameObject<T>(T entity, Vector3 position, Quaternion rotation) where T : Entity
