@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SharedUnityMischief.Lifecycle
@@ -28,6 +29,9 @@ namespace SharedUnityMischief.Lifecycle
 		public bool isInterpolating => _isInterpolating;
 		public bool isPaused => _isPaused;
 		public float percentNextUpdateInterpolated => _interpolatedTime / TimePerUpdate;
+
+		public event Action onPreUpdateState;
+		public event Action onPostUpdateState;
 
 		private void Update()
 		{
@@ -108,7 +112,9 @@ namespace SharedUnityMischief.Lifecycle
 				_interpolatedTime = 0f;
 			}
 			// Actually update the game state
+			onPreUpdateState?.Invoke();
 			UpdateState();
+			onPostUpdateState?.Invoke();
 		}
 	}
 }
