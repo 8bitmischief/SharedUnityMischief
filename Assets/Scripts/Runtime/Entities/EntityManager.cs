@@ -125,7 +125,7 @@ namespace SharedUnityMischief.Entities
 				{
 					_entities.Add(entity);
 					entity.gameObject.SetActive(true);
-					entity.Spawn();
+					entity.Spawn(this);
 				}
 				_entitiesToSpawn.Clear();
 			}
