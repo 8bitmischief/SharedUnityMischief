@@ -33,7 +33,7 @@ namespace SharedUnityMischief.Lifecycle
 		public event Action onPreUpdateState;
 		public event Action onPostUpdateState;
 
-		private void Update()
+		protected virtual void Update()
 		{
 			if (_updateAutomatically)
 			{
@@ -45,7 +45,7 @@ namespace SharedUnityMischief.Lifecycle
 
 		public virtual void Resume() => _isPaused = false;
 
-		public void Advance(bool ignorePause = false) => Advance(UnityEngine.Time.deltaTime, ignorePause);
+		public void Advance(bool ignorePause = false) => Advance(Time.deltaTime, ignorePause);
 
 		public void Advance(float deltaTime, bool ignorePause = false)
 		{

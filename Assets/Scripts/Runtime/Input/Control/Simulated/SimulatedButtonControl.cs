@@ -18,13 +18,16 @@ namespace SharedUnityMischief.Input.Control
 			get => _mode;
 			set
 			{
-				_mode = value;
-				if (_mode == SimulatedControlMode.Simulate)
+				if (_mode != value)
 				{
-					_simulatedJustPressed = false;
-					_simulatedIsHeld = _control.isHeld;
-					_simulatedJustReleased = false;
-					_simulatedHoldDuration = _control.holdDuration;
+					_mode = value;
+					if (_mode == SimulatedControlMode.Simulate)
+					{
+						_simulatedJustPressed = false;
+						_simulatedIsHeld = _control.isHeld;
+						_simulatedJustReleased = false;
+						_simulatedHoldDuration = _control.holdDuration;
+					}
 				}
 			}
 		}
