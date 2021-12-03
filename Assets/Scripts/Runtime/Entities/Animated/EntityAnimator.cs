@@ -75,7 +75,9 @@ namespace SharedUnityMischief.Entities.Animated
 		private ProgrammaticRootMotionType _zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 
 		protected override Animator animator => _animator;
+		#pragma warning disable CS0109 // Ignore "does not hide an accessible member" warnings
 		public new TAnimation animation => _animation;
+		#pragma warning restore CS0109
 		public override string animationName => _animation.ToString();
 		public override float totalAnimationTime => _totalAnimationTime;
 		public override int totalAnimationFrames => _totalAnimationFrames;

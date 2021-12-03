@@ -3,8 +3,8 @@ using UnityEditor;
 
 namespace SharedUnityMischief.Input.Control
 {
-	[CustomEditor(typeof(ButtonControl), true)]
-	public class ButtonControlEditor : BaseEditor
+	[CustomEditor(typeof(SimulatedButtonControl), true)]
+	public class SimulatedButtonControlEditor : BaseEditor
 	{
 		private float _lastPressTime = -999f;
 		private float _lastReleaseTime = -999f;
@@ -13,21 +13,21 @@ namespace SharedUnityMischief.Input.Control
 
 		private void OnEnable()
 		{
-			ButtonControl control = (ButtonControl) target;
+			SimulatedButtonControl control = (SimulatedButtonControl) target;
 			control.onPress += OnPress;
 			control.onRelease += OnRelease;
 		}
 
 		private void OnDisable()
 		{
-			ButtonControl control = (ButtonControl) target;
+			SimulatedButtonControl control = (SimulatedButtonControl) target;
 			control.onPress += OnPress;
 			control.onRelease += OnRelease;
 		}
 
 		protected override void DrawState()
 		{
-			ButtonControl control = (ButtonControl) target;
+			SimulatedButtonControl control = (SimulatedButtonControl) target;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("State", EditorStyles.boldLabel);
