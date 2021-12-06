@@ -49,6 +49,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private TAnimation _animation;
 		private Animator _animator;
 		private List<AnimationEvent> _triggeredEvents = new List<AnimationEvent>();
+		private List<Action> _nextFrameCallbacks = new List<Action>();
 		private bool _didStartNewAnimation = false;
 		private bool _skipFirstFrame = false;
 		private bool _undoAuthoredRootMotion = false;
@@ -142,6 +143,7 @@ namespace SharedUnityMischief.Entities.Animated
 			_yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 			_zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 			_triggeredEvents.Clear();
+			_nextFrameCallbacks.Clear();
 		}
 
 		public override void UpdateState()
@@ -151,7 +153,7 @@ namespace SharedUnityMischief.Entities.Animated
 				AdvanceNonStandardSpeed();
 				if (!UpdateLoop.I.isInterpolating)
 				{
-					TriggerEvents();
+					TriggerEventsAndCallbacks();
 				}
 			}
 			else if (UpdateLoop.I.isInterpolating)
@@ -161,7 +163,7 @@ namespace SharedUnityMischief.Entities.Animated
 			else
 			{
 				AdvanceToNextFrame();
-				TriggerEvents();
+				TriggerEventsAndCallbacks();
 			}
 		}
 
@@ -238,6 +240,11 @@ namespace SharedUnityMischief.Entities.Animated
 		protected virtual void OnChangeAnimation(TAnimation animation, TAnimation prevAnimation) {}
 		protected virtual void OnAnimationEvent(AnimationEvent evt) {}
 
+		public virtual void OnNextFrame(Action callback)
+		{
+			_nextFrameCallbacks.Add(callback);
+		}
+
 		private void AdvanceToNextFrame()
 		{
 			// Progress the animation all the way to the next frame + a little bit beyond it (the fudge amount)
@@ -296,7 +303,7 @@ namespace SharedUnityMischief.Entities.Animated
 			}
 		}
 
-		private void TriggerEvents()
+		private void TriggerEventsAndCallbacks()
 		{
 			// Handle animation events that were triggered by moving into the next frame
 			foreach (AnimationEvent evt in _triggeredEvents)
@@ -304,6 +311,11 @@ namespace SharedUnityMischief.Entities.Animated
 				OnAnimationEvent(evt);
 			}
 			_triggeredEvents.Clear();
+			foreach (Action callback in _nextFrameCallbacks)
+			{
+				callback.Invoke();
+			}
+			_nextFrameCallbacks.Clear();
 		}
 
 		private void UpdateAnimator(float deltaTime)
