@@ -28,7 +28,7 @@ namespace SharedUnityMischief.Entities
 
 		protected virtual void Awake()
 		{
-			_components = GetComponentsInChildren<EntityComponent>().ToList();
+			_components = GetComponentsInChildren<EntityComponent>(true).ToList();
 			_components.Sort((a, b) => a.componentUpdateOrder - b.componentUpdateOrder);
 		}
 
@@ -40,9 +40,8 @@ namespace SharedUnityMischief.Entities
 				_isSpawned = true;
 				_isScheduledToSpawn = false;
 				foreach (EntityComponent component in _components)
-				{
-					component.OnSpawn();
-				}
+					if (component.isActiveAndEnabled)
+						component.OnSpawn();
 				return true;
 			}
 			else
@@ -54,25 +53,22 @@ namespace SharedUnityMischief.Entities
 		public void EarlyUpdateEntityState()
 		{
 			foreach (EntityComponent component in _components)
-			{
-				component.EarlyUpdateState();
-			}
+				if (component.isActiveAndEnabled)
+					component.EarlyUpdateState();
 		}
 
 		public void UpdateEntityState()
 		{
 			foreach (EntityComponent component in _components)
-			{
-				component.UpdateState();
-			}
+				if (component.isActiveAndEnabled)
+					component.UpdateState();
 		}
 
 		public void LateUpdateEntityState()
 		{
 			foreach (EntityComponent component in _components)
-			{
-				component.LateUpdateState();
-			}
+				if (component.isActiveAndEnabled)
+					component.LateUpdateState();
 		}
 
 		public bool Despawn()
@@ -82,9 +78,8 @@ namespace SharedUnityMischief.Entities
 				_isSpawned = false;
 				_isScheduledToDespawn = false;
 				foreach (EntityComponent component in _components)
-				{
-					component.OnDespawn();
-				}
+					if (component.isActiveAndEnabled)
+						component.OnDespawn();
 				return true;
 			}
 			else
@@ -123,9 +118,7 @@ namespace SharedUnityMischief.Entities
 		{
 			gameObject.SetActive(true);
 			foreach (EntityComponent component in _components)
-			{
 				component.ResetComponent();
-			}
 		}
 
 		public virtual void OnDepositToPool()
