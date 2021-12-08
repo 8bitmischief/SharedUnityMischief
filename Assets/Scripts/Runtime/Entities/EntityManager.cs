@@ -24,17 +24,41 @@ namespace SharedUnityMischief.Entities
 			SpawnEntitiesScheduledToSpawn();
 		}
 
-		public virtual void UpdateState()
+		public void EarlyUpdateEntities()
 		{
-			UpdateEntities();
+			foreach (Entity entity in _entities)
+				entity.DoEarlyUpdateState();
+		}
+
+		public void UpdateEntities()
+		{
+			foreach (Entity entity in _entities)
+				entity.DoUpdateState();
+		}
+
+		public void CheckEntityInteractions()
+		{
+			foreach (Entity entity in _entities)
+				entity.DoCheckInteractions();
+		}
+
+		public void LateUpdateEntities()
+		{
+			foreach (Entity entity in _entities)
+				entity.DoLateUpdateState();
+		}
+
+		public void RenderEntities()
+		{
+			foreach (Entity entity in _entities)
+				entity.DoRender();
+		}
+
+		public void SpawnAndDespawnEntities()
+		{
 			DespawnEntitiesScheduledToDespawn();
 			SpawnEntitiesScheduledToSpawn();
 			DespawnEntitiesScheduledToDespawn();
-		}
-
-		public virtual void Render()
-		{
-			RenderEntities();
 		}
 
 		public T SpawnEntityFromPool<T>(PrefabPool<T> pool) where T : Entity => SpawnEntityFromPool(pool, Vector3.zero);
@@ -108,24 +132,6 @@ namespace SharedUnityMischief.Entities
 				entity.isScheduledToDespawn = true;
 				_entitiesToDespawn.Add(entity);
 			}
-		}
-
-		protected virtual void UpdateEntities()
-		{
-			foreach (Entity entity in _entities)
-				entity.DoEarlyUpdateState();
-			foreach (Entity entity in _entities)
-				entity.DoUpdateState();
-			foreach (Entity entity in _entities)
-				entity.DoCheckInteractions();
-			foreach (Entity entity in _entities)
-				entity.DoLateUpdateState();
-		}
-
-		protected virtual void RenderEntities()
-		{
-			foreach (Entity entity in _entities)
-				entity.DoRender();
 		}
 
 		protected void SpawnEntitiesScheduledToSpawn()
