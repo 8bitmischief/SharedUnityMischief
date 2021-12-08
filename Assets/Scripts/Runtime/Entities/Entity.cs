@@ -50,25 +50,39 @@ namespace SharedUnityMischief.Entities
 			}
 		}
 
-		public void EarlyUpdateEntityState()
+		public void DoEarlyUpdateState()
 		{
 			foreach (EntityComponent component in _components)
 				if (component.isActiveAndEnabled)
 					component.EarlyUpdateState();
 		}
 
-		public void UpdateEntityState()
+		public void DoUpdateState()
 		{
 			foreach (EntityComponent component in _components)
 				if (component.isActiveAndEnabled)
 					component.UpdateState();
 		}
 
-		public void LateUpdateEntityState()
+		public void DoCheckInteractions()
+		{
+			foreach (EntityComponent component in _components)
+				if (component.isActiveAndEnabled)
+					component.CheckInteractions();
+		}
+
+		public void DoLateUpdateState()
 		{
 			foreach (EntityComponent component in _components)
 				if (component.isActiveAndEnabled)
 					component.LateUpdateState();
+		}
+
+		public void DoRender()
+		{
+			foreach (EntityComponent component in _components)
+				if (component.isActiveAndEnabled)
+					component.Render();
 		}
 
 		public bool Despawn()

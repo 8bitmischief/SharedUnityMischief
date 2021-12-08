@@ -10,7 +10,9 @@ namespace SharedUnityMischief.Entities
 		void OnSpawn();
 		void EarlyUpdateState();
 		void UpdateState();
+		void CheckInteractions();
 		void LateUpdateState();
+		void Render();
 		void OnDespawn();
 	}
 }

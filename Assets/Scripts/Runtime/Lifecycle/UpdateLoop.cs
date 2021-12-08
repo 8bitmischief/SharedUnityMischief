@@ -18,6 +18,7 @@ namespace SharedUnityMischief.Lifecycle
 		private int _frame = 0;
 		private float _deltaTime = 0f;
 		private bool _isInterpolating = false;
+		private bool _isFinalUpdateThisFrame = false;
 		private bool _isPaused = false;
 		private float _interpolatedTime = 0f;
 		private float _leftoverInterpolationTime = 0f;
@@ -27,6 +28,7 @@ namespace SharedUnityMischief.Lifecycle
 		public int frame => _frame;
 		public float deltaTime => _deltaTime;
 		public bool isInterpolating => _isInterpolating;
+		public bool isFinalUpdateThisFrame => _isFinalUpdateThisFrame;
 		public bool isPaused => _isPaused;
 		public float percentNextUpdateInterpolated => _interpolatedTime / TimePerUpdate;
 
@@ -55,6 +57,7 @@ namespace SharedUnityMischief.Lifecycle
 				// We haven't advanced enough to count for a full frame, so just interpolate a bit more
 				if (_leftoverInterpolationTime + deltaTime < TimePerUpdate)
 				{
+					_isFinalUpdateThisFrame = true;
 					UpdateState(deltaTime, true);
 					_leftoverInterpolationTime += deltaTime;
 				}
@@ -62,18 +65,21 @@ namespace SharedUnityMischief.Lifecycle
 				else
 				{
 					// Get to the next frame
-					UpdateState(TimePerUpdate - _leftoverInterpolationTime, false);
 					float unusedDeltaTime = deltaTime - (TimePerUpdate - _leftoverInterpolationTime);
+					_isFinalUpdateThisFrame = unusedDeltaTime <= 0f;
+					UpdateState(TimePerUpdate - _leftoverInterpolationTime, false);
 					// Keep advancing frames for as long as we have unused delta time left
 					while (unusedDeltaTime >= TimePerUpdate)
 					{
 						unusedDeltaTime -= TimePerUpdate;
+						_isFinalUpdateThisFrame = unusedDeltaTime <= 0f;
 						UpdateState(TimePerUpdate, false);
 					}
 					// If we have a bit of leftover time, interpolate forward a bit
 					if (unusedDeltaTime > 0f)
 					{
 						_leftoverInterpolationTime = unusedDeltaTime;
+						_isFinalUpdateThisFrame = true;
 						UpdateState(unusedDeltaTime, true);
 					}
 					else
@@ -89,6 +95,7 @@ namespace SharedUnityMischief.Lifecycle
 			if (ignorePause || !_isPaused)
 			{
 				// Advance just far enough to get to the next frame
+				_isFinalUpdateThisFrame = true;
 				UpdateState(TimePerUpdate - _leftoverInterpolationTime, false);
 				_leftoverInterpolationTime = 0f;
 			}

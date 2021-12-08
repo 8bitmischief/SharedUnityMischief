@@ -32,6 +32,11 @@ namespace SharedUnityMischief.Entities
 			DespawnEntitiesScheduledToDespawn();
 		}
 
+		public virtual void Render()
+		{
+			RenderEntities();
+		}
+
 		public T SpawnEntityFromPool<T>(PrefabPool<T> pool) where T : Entity => SpawnEntityFromPool(pool, Vector3.zero);
 		public T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position) where T : Entity => SpawnEntityFromPool(pool, position, Quaternion.identity);
 		public T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position, Quaternion rotation) where T : Entity
@@ -108,17 +113,19 @@ namespace SharedUnityMischief.Entities
 		protected virtual void UpdateEntities()
 		{
 			foreach (Entity entity in _entities)
-			{
-				entity.EarlyUpdateEntityState();
-			}
+				entity.DoEarlyUpdateState();
 			foreach (Entity entity in _entities)
-			{
-				entity.UpdateEntityState();
-			}
+				entity.DoUpdateState();
 			foreach (Entity entity in _entities)
-			{
-				entity.LateUpdateEntityState();
-			}
+				entity.DoCheckInteractions();
+			foreach (Entity entity in _entities)
+				entity.DoLateUpdateState();
+		}
+
+		protected virtual void RenderEntities()
+		{
+			foreach (Entity entity in _entities)
+				entity.DoRender();
 		}
 
 		protected void SpawnEntitiesScheduledToSpawn()

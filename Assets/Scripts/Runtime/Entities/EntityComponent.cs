@@ -28,7 +28,9 @@ namespace SharedUnityMischief.Entities
 		public virtual void OnSpawn() {}
 		public virtual void EarlyUpdateState() {}
 		public virtual void UpdateState() {}
+		public virtual void CheckInteractions() {}
 		public virtual void LateUpdateState() {}
+		public virtual void Render() {}
 		public virtual void OnDespawn() {}
 	}
 
