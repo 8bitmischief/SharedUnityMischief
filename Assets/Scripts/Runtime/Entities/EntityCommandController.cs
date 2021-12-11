@@ -33,7 +33,6 @@ namespace StrikeOut.BossFight.Entities
 			if (command is Command<TEntity>)
 				(command as Command<TEntity>).entity = entity;
 			command.hasStarted = false;
-			command.Reset();
 			_commands.Enqueue(command);
 		}
 
@@ -55,6 +54,7 @@ namespace StrikeOut.BossFight.Entities
 				Command command = _commands.Peek();
 				if (!command.hasStarted)
 				{
+					command.Reset();
 					command.Start();
 					command.hasStarted = true;
 				}
@@ -63,6 +63,7 @@ namespace StrikeOut.BossFight.Entities
 				{
 					_commands.Dequeue();
 					command.End();
+					command.hasStarted = false;
 				}
 				else
 				{
