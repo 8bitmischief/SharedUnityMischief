@@ -56,6 +56,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private Vector3 _authoredRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _programmaticRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _rootMotionForTriggeredAnimation = Vector3.zero;
+		private bool _applyRootMotionToTriggeredAnimation = false;
 		private float _totalAnimationTime = 0f;
 		private int _totalAnimationFrames = 0;
 		private float _animationTime = 0f;
@@ -182,11 +183,12 @@ namespace SharedUnityMischief.Entities.Animated
 			_undoAuthoredRootMotion = animation.undoAuthoredRootMotion;
 			_authoredRootMotion = animation.authoredRootMotion;
 			_authoredRootMotionTraveledSoFar = Vector3.zero;
-			_programmaticRootMotion = _rootMotionForTriggeredAnimation;
+			if (_applyRootMotionToTriggeredAnimation)
+				_programmaticRootMotion = _rootMotionForTriggeredAnimation;
+			else
+				_programmaticRootMotion = Vector3.Scale(_authoredRootMotion, transform.localScale);
 			if (!_undoAuthoredRootMotion)
-			{
 				_programmaticRootMotion -= Vector3.Scale(_authoredRootMotion, transform.localScale);
-			}
 			_programmaticRootMotionTraveledSoFar = Vector3.zero;
 			_programmaticRootMotionProgress = Vector3.zero;
 			_xProgrammaticRootMotion = animation.xRootMotion;
@@ -200,24 +202,33 @@ namespace SharedUnityMischief.Entities.Animated
 			onChangeAnimation?.Invoke(_animation, prevAnimation);
 		}
 
-		protected void Trigger(int hash) => Trigger(hash, Vector3.zero, false);
+		protected void Trigger(int hash)
+		{
+			_applyRootMotionToTriggeredAnimation = false;
+			_animator.SetTrigger(hash);
+			UpdateAnimator(Mathf.Epsilon);
+			if (_didStartNewAnimation)
+			{
+				if (_skipFirstFrame)
+					UpdateAnimator(UpdateLoop.TimePerUpdate);
+				InterpolateAnimation();
+			}
+		}
 
 		protected void Trigger(int hash, Vector3 rootMotion, bool isTargetPosition = true)
 		{
+			_applyRootMotionToTriggeredAnimation = true;
 			_rootMotionForTriggeredAnimation = rootMotion;
 			if (isTargetPosition)
-			{
 				_rootMotionForTriggeredAnimation -= transform.position;
-			}
 			_animator.SetTrigger(hash);
 			UpdateAnimator(Mathf.Epsilon);
+			_applyRootMotionToTriggeredAnimation = false;
 			_rootMotionForTriggeredAnimation = Vector3.zero;
 			if (_didStartNewAnimation)
 			{
 				if (_skipFirstFrame)
-				{
 					UpdateAnimator(UpdateLoop.TimePerUpdate);
-				}
 				InterpolateAnimation();
 			}
 		}
