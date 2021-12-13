@@ -16,14 +16,14 @@ namespace SharedUnityMischief.Entities
 		private bool _isScheduledToSpawn = false;
 		private bool _isScheduledToDespawn = false;
 
-		public EntityManager entityManager => _entityManager;
+		public override Entity entity => this;
+		public override EntityManager entityManager => _entityManager;
 		public bool appendSpawnIndexToName => _appendSpawnIndexToName;
 		public Func<bool> DepositToPool { get; set; }
 		public bool isPooled => DepositToPool != null;
 		public bool isSpawned => _isSpawned;
 		public bool isScheduledToSpawn { get => _isScheduledToSpawn; set => _isScheduledToSpawn = value; }
 		public bool isScheduledToDespawn { get => _isScheduledToDespawn; set => _isScheduledToDespawn = value; }
-		public override Entity entity => this;
 		public override int componentUpdateOrder => EntityComponent.EntityUpdateOrder;
 
 		protected virtual void Awake()
@@ -139,19 +139,5 @@ namespace SharedUnityMischief.Entities
 		{
 			gameObject.SetActive(false);
 		}
-
-		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool);
-		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position);
-		protected T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
-		protected T SpawnEntityFromGameObject<T>(T entity) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity);
-		protected T SpawnEntityFromGameObject<T>(T entity, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity, position);
-		protected T SpawnEntityFromGameObject<T>(T entity, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromGameObject<T>(entity, position, rotation);
-		protected T SpawnEntityFromPrefab<T>(T entityPrefab) where T : Entity => _entityManager.SpawnEntityFromPrefab<T>(entityPrefab);
-		protected T SpawnEntityFromPrefab<T>(T entityPrefab, Vector3 position) where T : Entity => _entityManager.SpawnEntityFromPrefab<T>(entityPrefab, position);
-		protected T SpawnEntityFromPrefab<T>(T entityPrefab, Vector3 position, Quaternion rotation) where T : Entity => _entityManager.SpawnEntityFromPrefab<T>(entityPrefab, position, rotation);
-		protected void DespawnEntity(Entity entity) => _entityManager.DespawnEntity(entity);
 	}
 }

@@ -5,16 +5,16 @@ using UnityEngine;
 namespace SharedUnityMischief.Pool
 {
 	[Serializable]
-	public class PrefabPool<T> : IDisposable where T : MonoBehaviour, IPoolable
+	public class PrefabPool : IDisposable
 	{
-		[SerializeField] private T _prefab;
+		[SerializeField] private MonoBehaviour _prefab;
 		[SerializeField] private bool _collectionCheck = false;
 		[SerializeField] private int _defaultCapacity = 0;
 		[SerializeField] private int _maxSize = -1;
 		private int _numInstances = 0;
-		private Stack<T> _availableInstances { get; set; } = new Stack<T>();
+		private Queue<MonoBehaviour> _availableInstances { get; set; } = new Queue<MonoBehaviour>();
 
-		public T prefab => _prefab;
+		public MonoBehaviour prefab => _prefab;
 		public int numInstances => _numInstances;
 		public int numAvailableInstances => _availableInstances.Count;
 
@@ -23,23 +23,17 @@ namespace SharedUnityMischief.Pool
 		public void Prewarm(int numInstancesToCreate)
 		{
 			for (int i = 0; i < numInstancesToCreate; i++)
-			{
 				Deposit(CreateInstance());
-			}
 		}
 
-		public T Withdraw()
+		public MonoBehaviour Withdraw()
 		{
 			if (_availableInstances.Count == 0)
 			{
-				if (_maxSize >= 0 && numInstances > _maxSize)
-				{
+				if (_maxSize >= 0 && numInstances >= _maxSize)
 					return null;
-				}
 				else
-				{
 					return CreateInstance();
-				}
 			}
 			else
 			{
@@ -47,76 +41,87 @@ namespace SharedUnityMischief.Pool
 			}
 		}
 
-		public T Withdraw(Vector3 position)
+		public MonoBehaviour Withdraw(Vector3 position)
 		{
-			T instance = Withdraw();
+			MonoBehaviour instance = Withdraw();
 			instance.transform.position = position;
 			return instance;
 		}
 
-		public T Withdraw(Vector3 position, Quaternion rotation)
+		public MonoBehaviour Withdraw(Vector3 position, Quaternion rotation)
 		{
-			T instance = Withdraw(position);
+			MonoBehaviour instance = Withdraw(position);
 			instance.transform.rotation = rotation;
 			return instance;
 		}
 
-		public void Deposit(T instance) => DepositInstance(instance);
+		public T Withdraw<T>() where T : MonoBehaviour => GetComponent<T>(Withdraw());
+		public T Withdraw<T>(Vector3 position) where T : MonoBehaviour => GetComponent<T>(Withdraw(position));
+		public T Withdraw<T>(Vector3 position, Quaternion rotation) where T : MonoBehaviour => GetComponent<T>(Withdraw(position, rotation));
+
+		public void Deposit(MonoBehaviour instance) => DepositInstance(instance);
 
 		public void Dispose()
 		{
-			foreach (T instance in _availableInstances)
-			{
+			foreach (MonoBehaviour instance in _availableInstances)
 				DestroyInstance(instance);
-			}
 		}
 
-		private T CreateInstance()
+		private MonoBehaviour CreateInstance()
 		{
 			if (prefab == null)
-			{
 				throw new Exception("Cannot instantiate null prefab in PrefabPool");
-			}
 			_numInstances++;
 			// Create and prepare the instance
-			T instance = GameObject.Instantiate(prefab);
+			MonoBehaviour instance = GameObject.Instantiate(prefab);
 			instance.name = prefab.name;
-			instance.DepositToPool = () => {
-				if (this == null)
-				{
-					return false;
-				}
-				else
-				{
-					Deposit(instance);
-					return true;
-				}
-			};
+			if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+			{
+				poolableInstance.DepositToPool = () => {
+					if (this == null)
+					{
+						return false;
+					}
+					else
+					{
+						Deposit(instance);
+						return true;
+					}
+				};
+			}
 			return instance;
 		}
 
-		private T WithdrawInstance()
+		private MonoBehaviour WithdrawInstance()
 		{
-			T instance = _availableInstances.Pop();
-			instance.OnWithdrawFromPool();
+			MonoBehaviour instance = _availableInstances.Dequeue();
+			if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+				poolableInstance.OnWithdrawFromPool();
 			return instance;
 		}
 
-		private void DepositInstance(T instance)
+		private void DepositInstance(MonoBehaviour instance)
 		{
 			if (!_collectionCheck || !_availableInstances.Contains(instance))
 			{
-				_availableInstances.Push(instance);
-				instance.OnDepositToPool();
+				_availableInstances.Enqueue(instance);
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnDepositToPool();
 			}
 		}
 
-		private void DestroyInstance(T instance)
+		private void DestroyInstance(MonoBehaviour instance)
 		{
 			if (instance != null)
-			{
 				GameObject.Destroy(instance.gameObject);
-			}
+		}
+
+		private T GetComponent<T>(MonoBehaviour instance) where T : MonoBehaviour
+		{
+			if (instance.TryGetComponent<T>(out T component))
+				return component;
+			else
+				throw new Exception($"Prefab {prefab.name} does not have a {typeof(T).Name} component");
 		}
 	}
 }

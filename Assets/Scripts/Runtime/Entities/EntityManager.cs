@@ -18,9 +18,7 @@ namespace SharedUnityMischief.Entities
 		private void Start()
 		{
 			foreach (Entity entity in FindObjectsOfType<Entity>())
-			{
 				ScheduleEntityToSpawn(entity);
-			}
 			SpawnEntitiesScheduledToSpawn();
 		}
 
@@ -61,40 +59,81 @@ namespace SharedUnityMischief.Entities
 			DespawnEntitiesScheduledToDespawn();
 		}
 
-		public T SpawnEntityFromPool<T>(PrefabPool<T> pool) where T : Entity => SpawnEntityFromPool(pool, Vector3.zero);
-		public T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position) where T : Entity => SpawnEntityFromPool(pool, position, Quaternion.identity);
-		public T SpawnEntityFromPool<T>(PrefabPool<T> pool, Vector3 position, Quaternion rotation) where T : Entity
+
+		public Entity SpawnEntityFromPool(PrefabPool pool) => SpawnEntityFromPool<Entity>(pool);
+		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
+		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
+		public T SpawnEntityFromPool<T>(PrefabPool pool) where T : Entity
 		{
-			T entity = pool.Withdraw();
+			T entity = pool.Withdraw<T>();
+			RenameEntity(entity, pool.prefab.name);
+			return SpawnEntityFromGameObject(entity);
+		}
+		public T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position) where T : Entity
+		{
+			T entity = pool.Withdraw<T>();
+			RenameEntity(entity, pool.prefab.name);
+			return SpawnEntityFromGameObject(entity, position);
+		}
+		public T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position, Quaternion rotation) where T : Entity
+		{
+			T entity = pool.Withdraw<T>();
 			RenameEntity(entity, pool.prefab.name);
 			return SpawnEntityFromGameObject(entity, position, rotation);
 		}
 
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool) where T : Entity => SpawnEntityFromPool(pool.pool);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position) where T : Entity => SpawnEntityFromPool(pool.pool, position);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour<T> pool, Vector3 position, Quaternion rotation) where T : Entity => SpawnEntityFromPool(pool.pool, position, rotation);
+		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool) => SpawnEntityFromPool<Entity>(pool);
+		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
+		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool) where T : Entity => SpawnEntityFromPool<T>(pool.pool);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position) where T : Entity => SpawnEntityFromPool<T>(pool.pool, position);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) where T : Entity => SpawnEntityFromPool<T>(pool.pool, position, rotation);
 
-		public T SpawnEntityFromGameObject<T>(T entity) where T : Entity => SpawnEntityFromGameObject(entity, Vector3.zero);
-		public T SpawnEntityFromGameObject<T>(T entity, Vector3 position) where T : Entity => SpawnEntityFromGameObject(entity, position, Quaternion.identity);
+		public Entity SpawnEntityFromGameObject(Entity entity) => SpawnEntityFromGameObject<Entity>(entity);
+		public Entity SpawnEntityFromGameObject(Entity entity, Vector3 position) => SpawnEntityFromGameObject<Entity>(entity, position);
+		public Entity SpawnEntityFromGameObject(Entity entity, Vector3 position, Quaternion rotation) => SpawnEntityFromGameObject<Entity>(entity, position, rotation);
+		public T SpawnEntityFromGameObject<T>(T entity) where T : Entity
+		{
+			return SetUpEntityToSpawn<T>(entity);
+		}
+		public T SpawnEntityFromGameObject<T>(T entity, Vector3 position) where T : Entity
+		{
+			entity.transform.position = position;
+			return SpawnEntityFromGameObject(entity);
+		}
 		public T SpawnEntityFromGameObject<T>(T entity, Vector3 position, Quaternion rotation) where T : Entity
 		{
 			entity.transform.position = position;
 			entity.transform.rotation = rotation;
-			entity.gameObject.SetActive(true);
-			return ScheduleEntityToSpawn(entity);
+			return SpawnEntityFromGameObject(entity);
 		}
 
-		public T SpawnEntityFromPrefab<T>(T entityPrefab) where T : Entity => SpawnEntityFromPrefab(entityPrefab, Vector3.zero);
-		public T SpawnEntityFromPrefab<T>(T entityPrefab, Vector3 position) where T : Entity => SpawnEntityFromPrefab(entityPrefab, position, Quaternion.identity);
+		public Entity SpawnEntityFromPrefab(Entity entityPrefab) => SpawnEntityFromPrefab<Entity>(entityPrefab);
+		public Entity SpawnEntityFromPrefab(Entity entityPrefab, Vector3 position) => SpawnEntityFromPrefab<Entity>(entityPrefab, position);
+		public Entity SpawnEntityFromPrefab(Entity entityPrefab, Vector3 position, Quaternion rotation) => SpawnEntityFromPrefab<Entity>(entityPrefab, position, rotation);
+		public T SpawnEntityFromPrefab<T>(T entityPrefab) where T : Entity
+		{
+			return SetUpEntityToSpawn<T>(Instantiate(entityPrefab), entityPrefab.name);
+		}
+		public T SpawnEntityFromPrefab<T>(T entityPrefab, Vector3 position) where T : Entity
+		{
+			return SetUpEntityToSpawn<T>(Instantiate(entityPrefab, position, Quaternion.identity), entityPrefab.name);
+		}
 		public T SpawnEntityFromPrefab<T>(T entityPrefab, Vector3 position, Quaternion rotation) where T : Entity
 		{
-			T entity = Instantiate(entityPrefab, position, rotation);
-			RenameEntity(entity, entityPrefab.name);
-			entity.gameObject.SetActive(true);
-			return ScheduleEntityToSpawn(entity);
+			return SetUpEntityToSpawn<T>(Instantiate(entityPrefab, position, rotation), entityPrefab.name);
 		}
 
-		private void RenameEntity<T>(T entity, string baseName) where T : Entity
+		private T SetUpEntityToSpawn<T>(T entity, string name = null) where T : Entity
+		{
+			if (name != null)
+				RenameEntity(entity, name);
+			entity.gameObject.SetActive(true);
+			ScheduleEntityToSpawn(entity);
+			return entity;
+		}
+
+		private void RenameEntity(Entity entity, string baseName)
 		{
 			if (entity.appendSpawnIndexToName)
 			{
@@ -109,14 +148,13 @@ namespace SharedUnityMischief.Entities
 				entity.name = baseName;
 		}
 
-		private T ScheduleEntityToSpawn<T>(T entity) where T : Entity
+		private void ScheduleEntityToSpawn(Entity entity)
 		{
 			if (!entity.isScheduledToSpawn && !entity.isSpawned && !entity.isScheduledToDespawn)
 			{
 				entity.isScheduledToSpawn = true;
 				_entitiesToSpawn.Add(entity);
 			}
-			return entity;
 		}
 
 		public void DespawnEntity(Entity entity)
@@ -153,17 +191,11 @@ namespace SharedUnityMischief.Entities
 			if (_entitiesToDespawn.Count > 0)
 			{
 				foreach (Entity entity in _entitiesToDespawn)
-				{
 					_entities.Remove(entity);
-				}
 				foreach (Entity entity in _entitiesToDespawn)
-				{
 					entity.Despawn();
-				}
 				foreach (Entity entity in _entitiesToDespawn)
-				{
 					entity.DepositToPoolOrDestroy();
-				}
 				_entitiesToDespawn.Clear();
 			}
 		}

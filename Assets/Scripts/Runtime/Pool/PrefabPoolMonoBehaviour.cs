@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Pool
 {
-	public class PrefabPoolMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour, IPoolable
+	public class PrefabPoolMonoBehaviour : MonoBehaviour
 	{
-		[SerializeField] private PrefabPool<T> _pool;
+		[SerializeField] private PrefabPool _pool;
 
-		public PrefabPool<T> pool => _pool;
+		public PrefabPool pool => _pool;
 
 		private void Start()
 		{
