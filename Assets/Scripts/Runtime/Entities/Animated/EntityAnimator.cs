@@ -80,7 +80,7 @@ namespace SharedUnityMischief.Entities.Animated
 		#pragma warning disable CS0109 // Ignore "does not hide an accessible member" warnings
 		public new TAnimation animation => _animation;
 		#pragma warning restore CS0109
-		public override string animationName => _animation.ToString();
+		public override string animationName => _animation?.ToString() ?? "null";
 		public override float totalAnimationTime => _totalAnimationTime;
 		public override int totalAnimationFrames => _totalAnimationFrames;
 		public override float animationTime => _animationTime;
@@ -202,6 +202,7 @@ namespace SharedUnityMischief.Entities.Animated
 			onChangeAnimation?.Invoke(_animation, prevAnimation);
 		}
 
+		protected void Trigger(string trigger) => Trigger(Animator.StringToHash(trigger));
 		protected void Trigger(int hash)
 		{
 			_applyRootMotionToTriggeredAnimation = false;
@@ -215,6 +216,7 @@ namespace SharedUnityMischief.Entities.Animated
 			}
 		}
 
+		protected void Trigger(string trigger, Vector3 rootMotion, bool isTargetPosition = true) => Trigger(Animator.StringToHash(trigger), rootMotion, isTargetPosition);
 		protected void Trigger(int hash, Vector3 rootMotion, bool isTargetPosition = true)
 		{
 			_applyRootMotionToTriggeredAnimation = true;
