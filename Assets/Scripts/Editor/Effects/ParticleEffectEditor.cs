@@ -14,16 +14,24 @@ namespace SharedUnityMischief.Effects
 			EditorGUILayout.LabelField("Particle Effect Controls", EditorStyles.boldLabel);
 			if (GUILayout.Button("Play"))
 			{
-				effect.Play(false);
+				effect.Play();
 			}
-			if (GUILayout.Button("Play Endlessly"))
+			if (GUILayout.Button(effect.isPlayingEndlessly ? "Stop Playing Endlessly" : "Play Endlessly"))
 			{
-				effect.PlayEndlessly();
+				if (effect.isPlayingEndlessly)
+					effect.Stop();
+				else
+					effect.PlayEndlessly();
 			}
 			if (GUILayout.Button("Stop"))
 			{
 				effect.Stop();
 			}
+		}
+
+		protected override void DrawEditModeControls()
+		{
+			DrawControls();
 		}
 	}
 }

@@ -17,9 +17,14 @@ namespace SharedUnityMischief
 				DrawState();
 				GUI.enabled = wasEnabled;
 			}
+			else
+			{
+				DrawEditModeControls();
+			}
 		}
 
 		protected virtual void DrawControls() {}
+		protected virtual void DrawEditModeControls() {}
 		protected virtual void DrawState() {}
 	}
 }

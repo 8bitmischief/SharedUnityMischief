@@ -4,13 +4,17 @@ using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Effects
 {
+	[ExecuteInEditMode]
 	public class ParticleEffect : PoolableMonoBehaviour
 	{
 		[SerializeField] private float _duration = 1.0f;
 		private VisualEffect[] _visualEffects;
 		private float _playTime = 0f;
 		private EndBehavior _endBehavior = EndBehavior.Destroy;
-		public bool _isPlaying { get; private set; } = false;
+		private bool _isPlaying = false;
+
+		public bool isPlaying => _isPlaying;
+		public bool isPlayingEndlessly => _isPlaying && _endBehavior == EndBehavior.Loop;
 
 		private void Awake()
 		{
@@ -46,7 +50,7 @@ namespace SharedUnityMischief.Effects
 
 		public void PlayEndlessly() => Play(EndBehavior.Loop);
 
-		public void Play(bool destroyWhenDonePlaying = true)
+		public void Play(bool destroyWhenDonePlaying = false)
 			=> Play(destroyWhenDonePlaying ? EndBehavior.Destroy : EndBehavior.None);
 
 		private void Play(EndBehavior endBehavior)
