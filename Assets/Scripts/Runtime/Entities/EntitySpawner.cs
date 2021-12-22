@@ -14,7 +14,7 @@ namespace SharedUnityMischief.Entities
 
 		public event Action<Entity> onSpawnChild;
 
-		private void Start()
+		private void Awake()
 		{
 			if (entity is ISpawner)
 				_spawnerEntity = entity as ISpawner;
