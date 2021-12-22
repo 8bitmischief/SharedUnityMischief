@@ -15,9 +15,7 @@ namespace SharedUnityMischief
 				{
 					_instance = FindObjectOfType<T>();
 					if (_instance == null)
-					{
 						throw new Exception($"Could not find {typeof(T)} singleton in the scene hierarchy");
-					}
 				}
 				return _instance;
 			}
@@ -65,9 +63,7 @@ namespace SharedUnityMischief
 			else
 			{
 				if (makeIndestructible)
-				{
 					DontDestroyOnLoad(this);
-				}
 				return true;
 			}
 		}

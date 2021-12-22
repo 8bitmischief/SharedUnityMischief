@@ -8,11 +8,6 @@ namespace SharedUnityMischief.Entities.Animated
 	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator : EntityComponent
 	{
-		// In order to properly trigger events, we want to overshoot each frame a tiny bit
-		// This variable controls how much each frame gets overshot and undershot
-		protected static readonly float UpdateFudgeTime = UpdateLoop.TimePerUpdate / 100f;
-		protected static readonly int ResetHash = Animator.StringToHash("Reset");
-
 		protected abstract Animator animator { get; }
 		public abstract string animationName { get; }
 		public abstract float totalAnimationTime { get; }
@@ -43,20 +38,22 @@ namespace SharedUnityMischief.Entities.Animated
 		}
 	}
 
+	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator<TAnimation> : EntityAnimator
 	{
+		// In order to properly trigger events, we want to overshoot each frame a tiny bit
+		// This variable controls how much each frame gets overshot and undershot
+		private static readonly float UpdateFudgeTime = UpdateLoop.TimePerUpdate / 100f;
+
 		[SerializeField] protected Vector3 _rootMotionProgress = Vector3.zero;
 		private TAnimation _animation;
 		private Animator _animator;
-		private List<AnimationEvent> _triggeredEvents = new List<AnimationEvent>();
-		private List<Action> _nextFrameCallbacks = new List<Action>();
 		private bool _didStartNewAnimation = false;
 		private bool _skipFirstFrame = false;
-		private bool _undoAuthoredRootMotion = false;
 		private Vector3 _authoredRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _programmaticRootMotionTraveledSoFar = Vector3.zero;
 		private Vector3 _rootMotionForTriggeredAnimation = Vector3.zero;
-		private bool _applyRootMotionToTriggeredAnimation = false;
+		private bool _shouldApplyRootMotionToTriggeredAnimation = false;
 		private float _totalAnimationTime = 0f;
 		private int _totalAnimationFrames = 0;
 		private float _animationTime = 0f;
@@ -105,18 +102,19 @@ namespace SharedUnityMischief.Entities.Animated
 		protected virtual void Awake()
 		{
 			_animator = GetComponent<Animator>();
+			// Immediately pause the animator since we'll be hijacking how it updates
 			_animator.speed = 0f;
+			// Manually update the animator a teensy bit to get it on track
 			UpdateAnimator(UpdateFudgeTime);
 		}
 
 		public override void ResetComponent()
 		{
+			// Reset the animator (if it provides a trigger for it)
 			foreach (AnimatorControllerParameter param in _animator.parameters)
 			{
 				if (param.name == "Reset")
-				{
-					Trigger(ResetHash);
-				}
+					Trigger("Reset");
 			}
 			_animation = default(TAnimation);
 			_totalAnimationTime = 0f;
@@ -136,126 +134,101 @@ namespace SharedUnityMischief.Entities.Animated
 			_programmaticRootMotionProgress = Vector3.zero;
 			_didStartNewAnimation = false;
 			_skipFirstFrame = false;
-			_undoAuthoredRootMotion = false;
 			_authoredRootMotionTraveledSoFar = Vector3.zero;
 			_programmaticRootMotionTraveledSoFar = Vector3.zero;
 			_rootMotionForTriggeredAnimation = Vector3.zero;
 			_xProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 			_yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 			_zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
-			_triggeredEvents.Clear();
-			_nextFrameCallbacks.Clear();
 		}
 
 		public override void UpdateState()
 		{
 			if (_animationSpeed != 1.00f)
-			{
 				AdvanceNonStandardSpeed();
-				if (!UpdateLoop.I.isInterpolating)
-				{
-					TriggerEventsAndCallbacks();
-				}
-			}
 			else if (UpdateLoop.I.isInterpolating)
-			{
 				InterpolateAnimation();
-			}
 			else
-			{
 				AdvanceToNextFrame();
-				TriggerEventsAndCallbacks();
-			}
 		}
 
-		public void TriggerAnimationStart(EntityAnimation<TAnimation> animation, AnimatorStateInfo stateInfo)
+		public void OnAnimationStart(EntityAnimation<TAnimation> animation, AnimatorStateInfo stateInfo)
 		{
+			// OnAnimationStart is called when a new animation starts, likely as a result of a call to UpdateAnimator
 			_didStartNewAnimation = true;
 			_skipFirstFrame = animation.skipFirstFrame;
 			TAnimation prevAnimation = _animation;
-			// End the previous animation
+			// Trigger OnEndAnimation
 			OnEndAnimation(_animation);
 			onEndAnimation?.Invoke(_animation);
-			// Start the new animation
+			// Set up everything for the new animation
 			_animation = animation.animation;
-			_totalAnimationTime = 0f;
-			_totalAnimationFrames = 0;
-			_undoAuthoredRootMotion = animation.undoAuthoredRootMotion;
 			_authoredRootMotion = animation.authoredRootMotion;
-			_authoredRootMotionTraveledSoFar = Vector3.zero;
-			if (_applyRootMotionToTriggeredAnimation)
-				_programmaticRootMotion = _rootMotionForTriggeredAnimation;
-			else
-				_programmaticRootMotion = Vector3.Scale(_authoredRootMotion, transform.localScale);
-			if (!_undoAuthoredRootMotion)
-				_programmaticRootMotion -= Vector3.Scale(_authoredRootMotion, transform.localScale);
-			_programmaticRootMotionTraveledSoFar = Vector3.zero;
-			_programmaticRootMotionProgress = Vector3.zero;
 			_xProgrammaticRootMotion = animation.xRootMotion;
 			_yProgrammaticRootMotion = animation.yRootMotion;
 			_zProgrammaticRootMotion = animation.zRootMotion;
+			_totalAnimationTime = 0f;
+			_totalAnimationFrames = 0;
+			if (_shouldApplyRootMotionToTriggeredAnimation)
+				_programmaticRootMotion = _rootMotionForTriggeredAnimation - Vector3.Scale(_authoredRootMotion, transform.localScale);
+			else
+				_programmaticRootMotion = Vector3.zero;
+			_authoredRootMotionTraveledSoFar = Vector3.zero;
+			_programmaticRootMotionTraveledSoFar = Vector3.zero;
+			_programmaticRootMotionProgress = Vector3.zero;
 			RefreshAnimationState(stateInfo);
+			// Trigger OnStartAnimation
 			OnStartAnimation(_animation);
 			onStartAnimation?.Invoke(_animation);
-			// Trigger animation changes
+			// Trigger OnChangeAnimation
 			OnChangeAnimation(_animation, prevAnimation);
 			onChangeAnimation?.Invoke(_animation, prevAnimation);
+		}
+
+		public void SetRootMotion(Vector3 rootMotion, bool isRelativeRootMotion = true)
+		{
+			_programmaticRootMotion = rootMotion - Vector3.Scale(_authoredRootMotion, transform.localScale);
+			if (!isRelativeRootMotion)
+				_programmaticRootMotion -= transform.position;
 		}
 
 		protected void Trigger(string trigger) => Trigger(Animator.StringToHash(trigger));
 		protected void Trigger(int hash)
 		{
-			_applyRootMotionToTriggeredAnimation = false;
-			_animator.SetTrigger(hash);
-			UpdateAnimator(Mathf.Epsilon);
-			if (_didStartNewAnimation)
-			{
-				if (_skipFirstFrame)
-					UpdateAnimator(UpdateLoop.TimePerUpdate);
-				InterpolateAnimation();
-			}
+			_shouldApplyRootMotionToTriggeredAnimation = false;
+			SetTriggerAndCheckForTriggeredAnimation(hash);
 		}
 
-		protected void Trigger(string trigger, Vector3 rootMotion, bool isTargetPosition = true) => Trigger(Animator.StringToHash(trigger), rootMotion, isTargetPosition);
-		protected void Trigger(int hash, Vector3 rootMotion, bool isTargetPosition = true)
+		protected void Trigger(string trigger, Vector3 rootMotion, bool isRelativeRootMotion = true) => Trigger(Animator.StringToHash(trigger), rootMotion, isRelativeRootMotion);
+		protected void Trigger(int hash, Vector3 rootMotion, bool isRelativeRootMotion = true)
 		{
-			_applyRootMotionToTriggeredAnimation = true;
+			// Store the root motion that'll get applied to whatever animation begins as a result of the trigger
+			_shouldApplyRootMotionToTriggeredAnimation = true;
 			_rootMotionForTriggeredAnimation = rootMotion;
-			if (isTargetPosition)
+			if (!isRelativeRootMotion)
 				_rootMotionForTriggeredAnimation -= transform.position;
-			_animator.SetTrigger(hash);
-			UpdateAnimator(Mathf.Epsilon);
-			_applyRootMotionToTriggeredAnimation = false;
-			_rootMotionForTriggeredAnimation = Vector3.zero;
-			if (_didStartNewAnimation)
-			{
-				if (_skipFirstFrame)
-					UpdateAnimator(UpdateLoop.TimePerUpdate);
-				InterpolateAnimation();
-			}
-		}
-
-		public void SetRootMotion(Vector3 rootMotion, bool isTargetPosition = true)
-		{
-			_programmaticRootMotion = rootMotion;
-			if (isTargetPosition)
-			{
-				_programmaticRootMotion -= transform.position;
-			}
-			if (!_undoAuthoredRootMotion)
-			{
-				_programmaticRootMotion -= Vector3.Scale(_authoredRootMotion, transform.localScale);
-			}
+			SetTriggerAndCheckForTriggeredAnimation(hash);
 		}
 
 		protected virtual void OnStartAnimation(TAnimation animation) {}
 		protected virtual void OnEndAnimation(TAnimation animation) {}
 		protected virtual void OnChangeAnimation(TAnimation animation, TAnimation prevAnimation) {}
-		protected virtual void OnAnimationEvent(AnimationEvent evt) {}
 
-		public virtual void OnNextFrame(Action callback)
+		private void SetTriggerAndCheckForTriggeredAnimation(int hash)
 		{
-			_nextFrameCallbacks.Add(callback);
+			// Trigger the trigger
+			_animator.SetTrigger(hash);
+			// Advance the animator the teeniest bit in order to trigger StateMachineBehaviour.OnStateEnter
+			UpdateAnimator(Mathf.Epsilon);
+			_shouldApplyRootMotionToTriggeredAnimation = false;
+			_rootMotionForTriggeredAnimation = Vector3.zero;
+			// The call to UpdateAnimator resulted in a new animation starting!
+			if (_didStartNewAnimation)
+			{
+				if (_skipFirstFrame)
+					UpdateAnimator(UpdateLoop.TimePerUpdate);
+				InterpolateAnimation();
+			}
 		}
 
 		private void AdvanceToNextFrame()
@@ -269,66 +242,48 @@ namespace SharedUnityMischief.Entities.Animated
 			if (_didStartNewAnimation)
 			{
 				if (_skipFirstFrame)
-				{
 					UpdateAnimator(UpdateLoop.TimePerUpdate);
-				}
 				InterpolateAnimation();
 			}
 		}
 
 		private void AdvanceNonStandardSpeed()
 		{
+			// Total animation time + frames intentionally not scaled with animation speed
 			_totalAnimationTime += UpdateLoop.I.deltaTime;
 			_totalAnimationFrames = Mathf.FloorToInt(_totalAnimationTime / UpdateLoop.TimePerUpdate);
 			float deltaTime = UpdateLoop.I.deltaTime * _animationSpeed;
-			UpdateAnimator(deltaTime);
-			if (_didStartNewAnimation && _skipFirstFrame)
+			UpdateAnimator(UpdateLoop.I.deltaTime * _animationSpeed);
+			if (_didStartNewAnimation)
 			{
-				UpdateAnimator(UpdateLoop.TimePerUpdate * _animationSpeed);
+				if (_skipFirstFrame)
+					UpdateAnimator(UpdateLoop.TimePerUpdate * _animationSpeed);
 			}
 		}
 
 		private void InterpolateAnimation(int allowedRecursions = 3)
 		{
 			// Figure out how far we need to advance to get to the right point between frames
-			float targetTimeBetweenFrames = UpdateLoop.TimePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated;
-			if (targetTimeBetweenFrames > UpdateLoop.TimePerUpdate - UpdateFudgeTime)
-			{
-				targetTimeBetweenFrames = UpdateLoop.TimePerUpdate - UpdateFudgeTime;
-			}
+			float targetTimeBetweenFrames = Mathf.Min(UpdateLoop.TimePerUpdate * UpdateLoop.I.percentNextUpdateInterpolated, UpdateLoop.TimePerUpdate - UpdateFudgeTime);
 			float currentTimeBetweenFrames = _animationTime % UpdateLoop.TimePerUpdate;
 			float deltaTime = targetTimeBetweenFrames - currentTimeBetweenFrames;
 			if (deltaTime >= UpdateLoop.TimePerUpdate / 100f)
 			{
 				_totalAnimationTime += deltaTime;
+				// Update the animator
 				UpdateAnimator(deltaTime);
+				// Updating the animator resulted in a new animation being triggered!
+				// This is unexpected since we're just interpolating, but technically possible
 				if (_didStartNewAnimation)
 				{
+					Debug.LogWarning($"EntityAnimator.InterpolateAnimation resulted in {name} beginning a new animation: {_animation}! This is unexpected");
 					if (_skipFirstFrame)
-					{
 						UpdateAnimator(UpdateLoop.TimePerUpdate);
-					}
+					// Interpolate the new animation to the correct spot
 					if (allowedRecursions > 0)
-					{
 						InterpolateAnimation(allowedRecursions - 1);
-					}
 				}
 			}
-		}
-
-		private void TriggerEventsAndCallbacks()
-		{
-			// Handle animation events that were triggered by moving into the next frame
-			foreach (AnimationEvent evt in _triggeredEvents)
-			{
-				OnAnimationEvent(evt);
-			}
-			_triggeredEvents.Clear();
-			foreach (Action callback in _nextFrameCallbacks)
-			{
-				callback.Invoke();
-			}
-			_nextFrameCallbacks.Clear();
 		}
 
 		private void UpdateAnimator(float deltaTime)
@@ -345,23 +300,23 @@ namespace SharedUnityMischief.Entities.Animated
 			_animator.speed = 1f;
 			_animator.Update(deltaTime);
 			_animator.speed = 0f;
-			if (_didStartNewAnimation)
-			{
-				if (wasAnimationCompleted)
-				{
-					Vector3 authoredRootMotionLeftUntraveled = prevAuthoredRootMotion - prevAuthoredRootMotionTraveledSoFar;
-					Vector3 programmaticRootMotionLeftUntraveled = prevProgrammaticRootMotion - prevProgrammaticRootMotionTraveledSoFar;
-					Vector3 rootMotionLeftUntraveled = programmaticRootMotionLeftUntraveled + new Vector3(
-						authoredRootMotionLeftUntraveled.x * (transform.localScale.x == 0f ? 0f : 1f / transform.localScale.x),
-						authoredRootMotionLeftUntraveled.y * (transform.localScale.y == 0f ? 0f : 1f / transform.localScale.y),
-						authoredRootMotionLeftUntraveled.z * (transform.localScale.z == 0f ? 0f : 1f / transform.localScale.z));
-					transform.position += rootMotionLeftUntraveled;
-					prevPosition = transform.position;
-				}
-			}
-			else
+			// When a new animation starts, we're given an AnimatorStateInfo that we can refresh the animation state with
+			// So if no new animation started, that means we have to refresh the animation state manually
+			if (!_didStartNewAnimation)
 			{
 				RefreshAnimationState();
+			}
+			else if (wasAnimationCompleted)
+			{
+				// We finished an animation so apply any remaining root motion
+				Vector3 authoredRootMotionLeftUntraveled = prevAuthoredRootMotion - prevAuthoredRootMotionTraveledSoFar;
+				Vector3 programmaticRootMotionLeftUntraveled = prevProgrammaticRootMotion - prevProgrammaticRootMotionTraveledSoFar;
+				Vector3 rootMotionLeftUntraveled = programmaticRootMotionLeftUntraveled + new Vector3(
+					authoredRootMotionLeftUntraveled.x * (transform.localScale.x == 0f ? 0f : 1f / transform.localScale.x),
+					authoredRootMotionLeftUntraveled.y * (transform.localScale.y == 0f ? 0f : 1f / transform.localScale.y),
+					authoredRootMotionLeftUntraveled.z * (transform.localScale.z == 0f ? 0f : 1f / transform.localScale.z));
+				transform.position += rootMotionLeftUntraveled;
+				prevPosition = transform.position;
 			}
 			// Calculate the authored root motion that's been traveled so far
 			Vector3 changeInPosition = transform.position - prevPosition;
@@ -377,15 +332,8 @@ namespace SharedUnityMischief.Entities.Animated
 				CalculateRootMotionComponent(_zProgrammaticRootMotion, _authoredRootMotionTraveledSoFar.z, _authoredRootMotion.z, _rootMotionProgress.z));
 			Vector3 currProgrammaticRootMotionTraveledSoFar = _programmaticRootMotionTraveledSoFar;
 			_programmaticRootMotionTraveledSoFar = Vector3.Scale(_programmaticRootMotion, _programmaticRootMotionProgress);
-			// Apply root motion
-			if (_undoAuthoredRootMotion)
-			{
-				transform.position = prevPosition + _programmaticRootMotionTraveledSoFar - currProgrammaticRootMotionTraveledSoFar;
-			}
-			else
-			{
-				transform.position += _programmaticRootMotionTraveledSoFar - currProgrammaticRootMotionTraveledSoFar;
-			}
+			// Apply programmatic root motion
+			transform.position += _programmaticRootMotionTraveledSoFar - currProgrammaticRootMotionTraveledSoFar;
 		}
 
 		private float CalculateRootMotionComponent(ProgrammaticRootMotionType type, float authoredRootMotionTraveledSoFar, float authoredRootMotion, float rootMotionProgress)
@@ -403,13 +351,14 @@ namespace SharedUnityMischief.Entities.Animated
 					rootMotion = 0f;
 					break;
 			}
+			// We add _numAnimation loops to get the root motion to keep applying for looping animations
 			return rootMotion + ((float) _numAnimationLoops);
 		}
 
 		private bool RefreshAnimationState() => RefreshAnimationState(_animator.GetCurrentAnimatorStateInfo(0));
-
 		private bool RefreshAnimationState(AnimatorStateInfo stateInfo)
 		{
+			// Sometimes Unity returns an invalid state info, still trying to figure out when exactly that happens
 			if (!float.IsInfinity(stateInfo.length))
 			{
 				_isAnimationLooping = stateInfo.loop;
@@ -420,9 +369,7 @@ namespace SharedUnityMischief.Entities.Animated
 				_animationFrame = Mathf.FloorToInt(_animationTime / UpdateLoop.TimePerUpdate);
 				_animationFrameDuration = Mathf.FloorToInt(_animationDuration / UpdateLoop.TimePerUpdate + 0.01f);
 				if (!_isAnimationLooping)
-				{
 					_animationFrame = Mathf.Min(_animationFrame, _animationFrameDuration - 1);
-				}
 				_percentAnimationInterpolated = (_animationTime % UpdateLoop.TimePerUpdate) / UpdateLoop.TimePerUpdate;
 				_hasAnimationCompleted = !_isAnimationLooping && _animationFrame == _animationFrameDuration - 1;
 				return true;
@@ -432,13 +379,9 @@ namespace SharedUnityMischief.Entities.Animated
 				return false;
 			}
 		}
-
-		private void ANIMATION_TriggerAnimationEvent(AnimationEvent evt)
-		{
-			_triggeredEvents.Add(evt);
-		}
 	}
 
+	[RequireComponent(typeof(Animator))]
 	public abstract class EntityAnimator<TEntity, TAnimation> : EntityAnimator<TAnimation> where TEntity : Entity
 	{
 		protected new TEntity entity
@@ -446,9 +389,7 @@ namespace SharedUnityMischief.Entities.Animated
 			get
 			{
 				if (_typedEntity == null)
-				{
 					_typedEntity = GetComponentInParent<TEntity>();
-				}
 				return _typedEntity;
 			}
 		}

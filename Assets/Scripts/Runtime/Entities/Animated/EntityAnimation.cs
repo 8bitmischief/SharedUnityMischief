@@ -7,7 +7,6 @@ namespace SharedUnityMischief.Entities.Animated
 		[Header("Animation")]
 		[SerializeField] private TAnimation _animation;
 		[SerializeField] private Vector3 _authoredRootMotion = Vector3.zero;
-		[SerializeField] private bool _undoAuthoredRootMotion = false;
 		[SerializeField] private bool _skipFirstFrame = false;
 		[Header("Programmatic Root Motion")]
 		[SerializeField] private EntityAnimator.ProgrammaticRootMotionType _xRootMotion = EntityAnimator.ProgrammaticRootMotionType.UseRootMotionProgress;
@@ -18,7 +17,6 @@ namespace SharedUnityMischief.Entities.Animated
 		public TAnimation animation => _animation;
 		public string animationName => _animation.ToString();
 		public Vector3 authoredRootMotion => _authoredRootMotion;
-		public bool undoAuthoredRootMotion => _undoAuthoredRootMotion;
 		public bool skipFirstFrame => _skipFirstFrame;
 		public EntityAnimator.ProgrammaticRootMotionType xRootMotion => _xRootMotion;
 		public EntityAnimator.ProgrammaticRootMotionType yRootMotion => _yRootMotion;
@@ -27,10 +25,8 @@ namespace SharedUnityMischief.Entities.Animated
 		public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 		{
 			if (_animator == null)
-			{
 				_animator = animator.GetComponent<EntityAnimator<TAnimation>>();
-			}
-			_animator.TriggerAnimationStart(this, stateInfo);
+			_animator.OnAnimationStart(this, stateInfo);
 		}
 	}
 }
