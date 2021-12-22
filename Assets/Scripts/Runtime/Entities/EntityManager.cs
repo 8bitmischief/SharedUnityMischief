@@ -59,7 +59,6 @@ namespace SharedUnityMischief.Entities
 			DespawnEntitiesScheduledToDespawn();
 		}
 
-
 		public Entity SpawnEntityFromPool(PrefabPool pool) => SpawnEntityFromPool<Entity>(pool);
 		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
 		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
@@ -85,9 +84,24 @@ namespace SharedUnityMischief.Entities
 		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool) => SpawnEntityFromPool<Entity>(pool);
 		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
 		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool) where T : Entity => SpawnEntityFromPool<T>(pool.pool);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position) where T : Entity => SpawnEntityFromPool<T>(pool.pool, position);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) where T : Entity => SpawnEntityFromPool<T>(pool.pool, position, rotation);
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool) where T : Entity
+		{
+			T entity = pool.Withdraw<T>();
+			RenameEntity(entity, pool.prefab.name);
+			return SpawnEntityFromGameObject(entity);
+		}
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position) where T : Entity
+		{
+			T entity = pool.Withdraw<T>();
+			RenameEntity(entity, pool.prefab.name);
+			return SpawnEntityFromGameObject(entity, position);
+		}
+		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) where T : Entity
+		{
+			T entity = pool.Withdraw<T>();
+			RenameEntity(entity, pool.prefab.name);
+			return SpawnEntityFromGameObject(entity, position, rotation);
+		}
 
 		public Entity SpawnEntityFromGameObject(Entity entity) => SpawnEntityFromGameObject<Entity>(entity);
 		public Entity SpawnEntityFromGameObject(Entity entity, Vector3 position) => SpawnEntityFromGameObject<Entity>(entity, position);
@@ -138,9 +152,7 @@ namespace SharedUnityMischief.Entities
 			if (entity.appendSpawnIndexToName)
 			{
 				if (!_entitySpawnCounts.ContainsKey(baseName))
-				{
 					_entitySpawnCounts.Add(baseName, 0);
-				}
 				_entitySpawnCounts[baseName]++;
 				entity.name = $"{baseName} {_entitySpawnCounts[baseName]}";
 			}
