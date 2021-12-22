@@ -186,30 +186,24 @@ namespace SharedUnityMischief.Entities
 
 		protected void SpawnEntitiesScheduledToSpawn()
 		{
-			if (_entitiesToSpawn.Count > 0)
+			foreach (Entity entity in _entitiesToSpawn)
 			{
-				foreach (Entity entity in _entitiesToSpawn)
-				{
-					_entities.Add(entity);
-					entity.gameObject.SetActive(true);
-					entity.Spawn(this);
-				}
-				_entitiesToSpawn.Clear();
+				_entities.Add(entity);
+				entity.gameObject.SetActive(true);
+				entity.Spawn(this);
 			}
+			_entitiesToSpawn.Clear();
 		}
 
 		protected void DespawnEntitiesScheduledToDespawn()
 		{
-			if (_entitiesToDespawn.Count > 0)
-			{
-				foreach (Entity entity in _entitiesToDespawn)
-					_entities.Remove(entity);
-				foreach (Entity entity in _entitiesToDespawn)
-					entity.Despawn();
-				foreach (Entity entity in _entitiesToDespawn)
-					entity.DepositToPoolOrDestroy();
-				_entitiesToDespawn.Clear();
-			}
+			foreach (Entity entity in _entitiesToDespawn)
+				_entities.Remove(entity);
+			foreach (Entity entity in _entitiesToDespawn)
+				entity.Despawn();
+			foreach (Entity entity in _entitiesToDespawn)
+				entity.DepositToPoolOrDestroy();
+			_entitiesToDespawn.Clear();
 		}
 	}
 }

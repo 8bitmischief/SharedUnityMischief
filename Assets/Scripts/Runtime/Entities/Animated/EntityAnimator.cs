@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using SharedUnityMischief.Lifecycle;
 
@@ -276,7 +275,7 @@ namespace SharedUnityMischief.Entities.Animated
 				// This is unexpected since we're just interpolating, but technically possible
 				if (_didStartNewAnimation)
 				{
-					Debug.LogWarning($"EntityAnimator.InterpolateAnimation resulted in {name} beginning a new animation: {_animation}! This is unexpected");
+					Debug.LogWarning($"EntityAnimator.InterpolateAnimation resulted in {name} beginning a new animation: {_animation}! This is unexpected but not impossible");
 					if (_skipFirstFrame)
 						UpdateAnimator(UpdateLoop.TimePerUpdate);
 					// Interpolate the new animation to the correct spot

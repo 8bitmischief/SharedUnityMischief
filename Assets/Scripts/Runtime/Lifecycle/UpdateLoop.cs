@@ -13,7 +13,6 @@ namespace SharedUnityMischief.Lifecycle
 
 		[Header("Update Loop Config")]
 		[SerializeField] private bool _updateAutomatically = true;
-		[SerializeField, Range(0, 2)] private float _timeScale = 1.00f;
 		private float _time = 0f;
 		private int _frame = 0;
 		private float _deltaTime = 0f;
@@ -23,7 +22,6 @@ namespace SharedUnityMischief.Lifecycle
 		private float _interpolatedTime = 0f;
 		private float _leftoverInterpolationTime = 0f;
 
-		public bool updateAutomatically => _updateAutomatically;
 		public float time => _time;
 		public int frame => _frame;
 		public float deltaTime => _deltaTime;
@@ -38,9 +36,7 @@ namespace SharedUnityMischief.Lifecycle
 		protected virtual void Update()
 		{
 			if (_updateAutomatically)
-			{
 				Advance();
-			}
 		}
 
 		public virtual void Pause() => _isPaused = true;
@@ -51,7 +47,6 @@ namespace SharedUnityMischief.Lifecycle
 
 		public void Advance(float deltaTime, bool ignorePause = false)
 		{
-			deltaTime *= _timeScale;
 			if (ignorePause || !_isPaused)
 			{
 				// We haven't advanced enough to count for a full frame, so just interpolate a bit more
