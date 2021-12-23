@@ -36,9 +36,7 @@ namespace SharedUnityMischief.Effects
 					{
 						Stop();
 						if (_endBehavior == EndBehavior.Destroy)
-						{
 							DepositToPoolOrDestroy();
-						}
 					}
 				}
 			}
@@ -55,22 +53,22 @@ namespace SharedUnityMischief.Effects
 
 		private void Play(EndBehavior endBehavior)
 		{
+			if (!Application.isPlaying)
+				_visualEffects = GetComponentsInChildren<VisualEffect>();
 			_isPlaying = true;
 			_playTime = 0f;
 			this._endBehavior = endBehavior;
 			foreach (VisualEffect visualEffect in _visualEffects)
-			{
 				visualEffect.Play();
-			}
 		}
 
 		public void Stop()
 		{
+			if (!Application.isPlaying)
+				_visualEffects = GetComponentsInChildren<VisualEffect>();
 			_isPlaying = false;
 			foreach (VisualEffect visualEffect in _visualEffects)
-			{
 				visualEffect.Stop();
-			}
 		}
 
 		private enum EndBehavior
