@@ -31,9 +31,11 @@ namespace SharedUnityMischief.Effects
 			}
 		}
 
-		public ParticleEffect SpawnParticleEffect()
+		public ParticleEffect SpawnParticleEffect() => SpawnParticleEffect(transform.position, transform.rotation);
+		public ParticleEffect SpawnParticleEffect(Vector3 position) => SpawnParticleEffect(position, transform.rotation);
+		public ParticleEffect SpawnParticleEffect(Vector3 position, Quaternion rotation)
 		{
-			ParticleEffect effect = _pool.Withdraw<ParticleEffect>(transform.position, transform.rotation);
+			ParticleEffect effect = _pool.Withdraw<ParticleEffect>(position, rotation);
 			effect.Play(true);
 			return effect;
 		}
