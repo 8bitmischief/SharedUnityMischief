@@ -75,6 +75,7 @@ namespace SharedUnityMischief.Pool
 			// Create and prepare the instance
 			MonoBehaviour instance = GameObject.Instantiate(prefab);
 			instance.name = prefab.name;
+			instance.gameObject.SetActive(true);
 			if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
 			{
 				poolableInstance.DepositToPool = () => {

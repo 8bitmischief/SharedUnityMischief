@@ -8,6 +8,7 @@ namespace SharedUnityMischief.Effects
 	public class ParticleEffect : PoolableMonoBehaviour
 	{
 		[SerializeField] private float _duration = 1.0f;
+		[SerializeField] private bool _playOnEnable = false;
 		private VisualEffect[] _visualEffects;
 		private float _playTime = 0f;
 		private EndBehavior _endBehavior = EndBehavior.Destroy;
@@ -19,6 +20,12 @@ namespace SharedUnityMischief.Effects
 		private void Awake()
 		{
 			_visualEffects = GetComponentsInChildren<VisualEffect>();
+		}
+
+		private void OnEnable()
+		{
+			if (_playOnEnable)
+				Play();
 		}
 
 		private void Update()
@@ -42,9 +49,17 @@ namespace SharedUnityMischief.Effects
 			}
 		}
 
-		public override void OnWithdrawFromPool() {}
+		public override void OnWithdrawFromPool()
+		{
+			if (name.EndsWith(" (In Pool)"))
+				name = name.Substring(0, name.Length - " (In Pool)".Length);
+		}
 
-		public override void OnDepositToPool() {}
+		public override void OnDepositToPool()
+		{
+			if (!name.EndsWith(" (In Pool)"))
+				name = $"{name} (In Pool)";
+		}
 
 		public void PlayEndlessly() => Play(EndBehavior.Loop);
 
