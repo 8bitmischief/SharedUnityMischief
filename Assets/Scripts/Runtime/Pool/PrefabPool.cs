@@ -5,9 +5,10 @@ using UnityEngine;
 namespace SharedUnityMischief.Pool
 {
 	[Serializable]
-	public class PrefabPool : IDisposable
+	public class PrefabPool : IPool, IDisposable
 	{
 		[SerializeField] private MonoBehaviour _prefab;
+		[SerializeField] private bool _isActualPrefab = false;
 		[SerializeField] private bool _collectionCheck = false;
 		[SerializeField] private int _defaultCapacity = 0;
 		[SerializeField] private int _maxSize = -1;
@@ -15,6 +16,7 @@ namespace SharedUnityMischief.Pool
 		private Queue<MonoBehaviour> _availableInstances { get; set; } = new Queue<MonoBehaviour>();
 
 		public MonoBehaviour prefab => _prefab;
+		public bool isActualPrefab => _isActualPrefab;
 		public int numInstances => _numInstances;
 		public int numAvailableInstances => _availableInstances.Count;
 

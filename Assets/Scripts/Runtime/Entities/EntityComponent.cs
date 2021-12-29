@@ -33,18 +33,12 @@ namespace SharedUnityMischief.Entities
 		public virtual void Render() {}
 		public virtual void OnDespawn() {}
 
-		protected Entity SpawnEntityFromPool(PrefabPool pool) => entityManager.SpawnEntityFromPool(pool);
-		protected Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position) => entityManager.SpawnEntityFromPool(pool, position);
-		protected Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position, Quaternion rotation) => entityManager.SpawnEntityFromPool(pool, position, rotation);
-		protected T SpawnEntityFromPool<T>(PrefabPool pool) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool);
-		protected T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position);
-		protected T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position, Quaternion rotation) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
-		protected Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool) => entityManager.SpawnEntityFromPool(pool);
-		protected Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position) => entityManager.SpawnEntityFromPool(pool, position);
-		protected Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) => entityManager.SpawnEntityFromPool(pool, position, rotation);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position);
-		protected T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
+		protected Entity SpawnEntityFromPool(IPool pool) => entityManager.SpawnEntityFromPool(pool);
+		protected Entity SpawnEntityFromPool(IPool pool, Vector3 position) => entityManager.SpawnEntityFromPool(pool, position);
+		protected Entity SpawnEntityFromPool(IPool pool, Vector3 position, Quaternion rotation) => entityManager.SpawnEntityFromPool(pool, position, rotation);
+		protected T SpawnEntityFromPool<T>(IPool pool) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool);
+		protected T SpawnEntityFromPool<T>(IPool pool, Vector3 position) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position);
+		protected T SpawnEntityFromPool<T>(IPool pool, Vector3 position, Quaternion rotation) where T : Entity => entityManager.SpawnEntityFromPool<T>(pool, position, rotation);
 		protected Entity SpawnEntityFromGameObject(Entity entity) => entityManager.SpawnEntityFromGameObject(entity);
 		protected Entity SpawnEntityFromGameObject(Entity entity, Vector3 position) => entityManager.SpawnEntityFromGameObject(entity, position);
 		protected Entity SpawnEntityFromGameObject(Entity entity, Vector3 position, Quaternion rotation) => entityManager.SpawnEntityFromGameObject(entity, position, rotation);
@@ -70,9 +64,7 @@ namespace SharedUnityMischief.Entities
 			get
 			{
 				if (_typedEntity == null)
-				{
 					_typedEntity = GetComponentInParent<T>();
-				}
 				return _typedEntity;
 			}
 		}

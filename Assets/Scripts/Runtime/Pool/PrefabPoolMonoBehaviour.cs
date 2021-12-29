@@ -2,15 +2,16 @@ using UnityEngine;
 
 namespace SharedUnityMischief.Pool
 {
-	public class PrefabPoolMonoBehaviour : MonoBehaviour
+	public class PrefabPoolMonoBehaviour : MonoBehaviour, IPool
 	{
 		[SerializeField] private PrefabPool _pool;
 
 		public MonoBehaviour prefab => _pool.prefab;
+		public bool isActualPrefab => _pool.isActualPrefab;
 		public int numInstances => _pool.numInstances;
 		public int numAvailableInstances => _pool.numAvailableInstances;
 
-		private void Start()
+		private void Awake()
 		{
 			_pool.Prewarm();
 		}

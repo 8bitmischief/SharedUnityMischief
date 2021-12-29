@@ -59,44 +59,22 @@ namespace SharedUnityMischief.Entities
 			DespawnEntitiesScheduledToDespawn();
 		}
 
-		public Entity SpawnEntityFromPool(PrefabPool pool) => SpawnEntityFromPool<Entity>(pool);
-		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
-		public Entity SpawnEntityFromPool(PrefabPool pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
-		public T SpawnEntityFromPool<T>(PrefabPool pool) where T : Entity
+		public Entity SpawnEntityFromPool(IPool pool) => SpawnEntityFromPool<Entity>(pool);
+		public Entity SpawnEntityFromPool(IPool pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
+		public Entity SpawnEntityFromPool(IPool pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
+		public T SpawnEntityFromPool<T>(IPool pool) where T : Entity
 		{
 			T entity = pool.Withdraw<T>();
 			RenameEntity(entity, pool.prefab.name);
 			return SpawnEntityFromGameObject(entity);
 		}
-		public T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position) where T : Entity
+		public T SpawnEntityFromPool<T>(IPool pool, Vector3 position) where T : Entity
 		{
 			T entity = pool.Withdraw<T>();
 			RenameEntity(entity, pool.prefab.name);
 			return SpawnEntityFromGameObject(entity, position);
 		}
-		public T SpawnEntityFromPool<T>(PrefabPool pool, Vector3 position, Quaternion rotation) where T : Entity
-		{
-			T entity = pool.Withdraw<T>();
-			RenameEntity(entity, pool.prefab.name);
-			return SpawnEntityFromGameObject(entity, position, rotation);
-		}
-
-		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool) => SpawnEntityFromPool<Entity>(pool);
-		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position) => SpawnEntityFromPool<Entity>(pool, position);
-		public Entity SpawnEntityFromPool(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) => SpawnEntityFromPool<Entity>(pool, position, rotation);
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool) where T : Entity
-		{
-			T entity = pool.Withdraw<T>();
-			RenameEntity(entity, pool.prefab.name);
-			return SpawnEntityFromGameObject(entity);
-		}
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position) where T : Entity
-		{
-			T entity = pool.Withdraw<T>();
-			RenameEntity(entity, pool.prefab.name);
-			return SpawnEntityFromGameObject(entity, position);
-		}
-		public T SpawnEntityFromPool<T>(PrefabPoolMonoBehaviour pool, Vector3 position, Quaternion rotation) where T : Entity
+		public T SpawnEntityFromPool<T>(IPool pool, Vector3 position, Quaternion rotation) where T : Entity
 		{
 			T entity = pool.Withdraw<T>();
 			RenameEntity(entity, pool.prefab.name);
