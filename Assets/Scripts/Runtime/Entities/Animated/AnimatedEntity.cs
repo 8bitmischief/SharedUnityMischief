@@ -7,9 +7,7 @@ namespace SharedUnityMischief.Entities.Animated
 		private TAnimator _animator;
 
 		public TAnimator animator => _animator;
-		#pragma warning disable CS0109 // Ignore "does not hide an accessible member" warnings
 		protected new TAnimation animation => _animator != null ? _animator.animation : default(TAnimation);
-		#pragma warning restore CS0109
 		protected float totalAnimationTime => _animator?.totalAnimationTime ?? 0f;
 		protected int totalAnimationFrames => _animator?.totalAnimationFrames ?? 0;
 		protected float animationTime => _animator?.animationTime ?? 0f;
