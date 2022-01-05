@@ -16,6 +16,7 @@ namespace SharedUnityMischief.Effects
 
 		public bool isPlaying => _isPlaying;
 		public bool isPlayingEndlessly => _isPlaying && _endBehavior == EndBehavior.Loop;
+		public float playTime => _playTime;
 
 		private void Awake()
 		{

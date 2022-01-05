@@ -6,6 +6,8 @@ namespace SharedUnityMischief.Effects
 	[CustomEditor(typeof(ParticleEffect), true)]
 	public class ParticleEffectEditor : BaseEditor
 	{
+		public override bool RequiresConstantRepaint() => Application.isPlaying;
+
 		protected override void DrawControls()
 		{
 			ParticleEffect effect = (ParticleEffect) target;
@@ -32,6 +34,16 @@ namespace SharedUnityMischief.Effects
 		protected override void DrawEditModeControls()
 		{
 			DrawControls();
+		}
+
+		protected override void DrawState()
+		{
+			ParticleEffect effect = (ParticleEffect) target;
+
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Particle Effect State", EditorStyles.boldLabel);
+			EditorGUILayout.Toggle("IsPlaying", effect.isPlaying);
+			EditorGUILayout.FloatField("Play Time", effect.playTime);
 		}
 	}
 }
