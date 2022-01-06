@@ -209,6 +209,11 @@ namespace SharedUnityMischief.Entities.Animated
 			SetTriggerAndCheckForTriggeredAnimation(hash);
 		}
 
+		protected void SkipToNextFrame()
+		{
+			AdvanceToNextFrame();
+		}
+
 		protected virtual void OnStartAnimation(TAnimation animation) {}
 		protected virtual void OnEndAnimation(TAnimation animation) {}
 		protected virtual void OnChangeAnimation(TAnimation animation, TAnimation prevAnimation) {}
