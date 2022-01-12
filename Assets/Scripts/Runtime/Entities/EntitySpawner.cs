@@ -1,18 +1,23 @@
 using System;
 using UnityEngine;
+using SharedUnityMischief.Lifecycle;
 using SharedUnityMischief.Pool;
 
 namespace SharedUnityMischief.Entities
 {
-	public class EntitySpawner : EntityComponent
+	public class EntitySpawner : EntitySpawner<Entity> {}
+
+	public class EntitySpawner<TEntity> : EntityComponent where TEntity : Entity
 	{
 		[SerializeField] private PrefabPoolMonoBehaviour _pool;
 
 		[Header("Spawner Config")]
-		[SerializeField] private bool _spawnOnEnable = true;
+		[SerializeField] private bool _spawn = false;
+		[SerializeField] private bool _spawnOnEnable = false;
 		private ISpawner _spawnerEntity;
+		private bool _wasTriggered = false;
 
-		public event Action<Entity> onSpawnChild;
+		public event Action<TEntity> onSpawnChildEntity;
 
 		private void Awake()
 		{
@@ -23,19 +28,29 @@ namespace SharedUnityMischief.Entities
 		private void OnEnable()
 		{
 			if (_spawnOnEnable)
-				SpawnChild();
+				SpawnChildEntity();
 		}
 
-		public Entity SpawnChild()
+		public override void UpdateState()
 		{
-			Entity entity = SpawnEntityFromPool(_pool, transform.position, transform.rotation);
-			OnSpawnChild(entity);
+			if (!UpdateLoop.I.isInterpolating)
+			{
+				if (_spawn && !_wasTriggered)
+					SpawnChildEntity();
+				_wasTriggered = _spawn;
+			}
+		}
+
+		public TEntity SpawnChildEntity()
+		{
+			TEntity entity = SpawnEntityFromPool<TEntity>(_pool, transform.position, transform.rotation);
+			OnSpawnChildEntity(entity);
 			if (_spawnerEntity != null)
-				_spawnerEntity.OnSpawnChild(entity);
-			onSpawnChild?.Invoke(entity);
+				_spawnerEntity.OnSpawnChildEntity(entity);
+			onSpawnChildEntity?.Invoke(entity);
 			return entity;
 		}
 
-		protected virtual void OnSpawnChild(Entity entity) {}
+		protected virtual void OnSpawnChildEntity(TEntity entity) {}
 	}
 }

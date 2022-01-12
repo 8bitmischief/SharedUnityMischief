@@ -4,6 +4,6 @@ namespace SharedUnityMischief.Entities
 {
 	public interface ISpawner
 	{
-		void OnSpawnChild(Entity entity);
+		void OnSpawnChildEntity(Entity entity);
 	}
 }
