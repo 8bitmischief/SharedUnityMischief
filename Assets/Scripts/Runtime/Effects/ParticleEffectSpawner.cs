@@ -14,7 +14,6 @@ namespace SharedUnityMischief.Effects
 		[SerializeField] private bool _spawn = false;
 		[SerializeField] private bool _spawnOnEnable = false;
 		[SerializeField] private bool _playInEditMode = true;
-
 		private bool _wasTriggered = false;
 
 		private void OnEnable()
