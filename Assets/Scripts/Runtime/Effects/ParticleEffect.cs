@@ -33,6 +33,13 @@ namespace SharedUnityMischief.Effects
 		{
 			if (_isPlaying)
 			{
+				if (Application.isPlaying)
+				{
+					transform.localScale = new Vector3(
+						Mathf.Sign(transform.parent.lossyScale.x) * Mathf.Abs(transform.localScale.x),
+						Mathf.Sign(transform.parent.lossyScale.y) * Mathf.Abs(transform.localScale.y),
+						Mathf.Sign(transform.parent.lossyScale.z) * Mathf.Abs(transform.localScale.z));
+				}
 				_playTime += Time.deltaTime;
 				if (_playTime >= _duration)
 				{

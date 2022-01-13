@@ -46,5 +46,20 @@ namespace SharedUnityMischief.Effects
 			if (_particleEffect != null)
 				_particleEffect.Play();
 		}
+
+		public void Trigger(Vector3 position)
+		{
+			Vector3 prevPosition = transform.position;
+			transform.position = position;
+			Trigger();
+			transform.position = prevPosition;
+		}
+
+		public void Trigger(Vector3 position, Quaternion rotation)
+		{
+			Quaternion prevRotation = transform.rotation;
+			Trigger(position);
+			transform.rotation = prevRotation;
+		}
 	}
 }
