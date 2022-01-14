@@ -11,7 +11,7 @@ namespace SharedUnityMischief
 			if (Application.isPlaying)
 			{
 				bool wasEnabled = GUI.enabled;
-				GUI.enabled = Application.isPlaying;
+				GUI.enabled = true;
 				DrawControls();
 				GUI.enabled = false;
 				DrawState();
@@ -19,12 +19,18 @@ namespace SharedUnityMischief
 			}
 			else
 			{
+				bool wasEnabled = GUI.enabled;
+				GUI.enabled = true;
 				DrawEditModeControls();
+				GUI.enabled = false;
+				DrawEditModeState();
+				GUI.enabled = wasEnabled;
 			}
 		}
 
 		protected virtual void DrawControls() {}
 		protected virtual void DrawEditModeControls() {}
 		protected virtual void DrawState() {}
+		protected virtual void DrawEditModeState() {}
 	}
 }

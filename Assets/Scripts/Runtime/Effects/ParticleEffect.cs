@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 using SharedUnityMischief.Pool;
@@ -7,20 +8,25 @@ namespace SharedUnityMischief.Effects
 	[ExecuteInEditMode]
 	public class ParticleEffect : PoolableMonoBehaviour
 	{
-		[SerializeField] private float _duration = 1.0f;
+		[SerializeField] private float _duration = 1f;
+		[SerializeField] private float _delay = 0f;
+		[SerializeField] private float _cooldown = 0f;
 		[SerializeField] private bool _playOnEnable = false;
-		private VisualEffect[] _visualEffects;
-		private float _playTime = 0f;
-		private EndBehavior _endBehavior = EndBehavior.Destroy;
+		private VisualEffect _visualEffect;
+		private List<ParticleEffect> _childParticleEffects;
+		private List<VisualEffect> _childVisualEffects;
 		private bool _isPlaying = false;
+		private float _playTime = 0f;
+		private bool _hasPlayedEffects = false;
+		private bool _hasStoppedEffects = false;
+		private EndBehavior _endBehavior = EndBehavior.Destroy;
 
 		public bool isPlaying => _isPlaying;
 		public bool isPlayingEndlessly => _isPlaying && _endBehavior == EndBehavior.Loop;
-		public float playTime => _playTime;
 
 		private void Awake()
 		{
-			_visualEffects = GetComponentsInChildren<VisualEffect>();
+			FindEffects();
 		}
 
 		private void OnEnable()
@@ -33,6 +39,8 @@ namespace SharedUnityMischief.Effects
 		{
 			if (_isPlaying)
 			{
+				_playTime += Time.deltaTime;
+				// Keep particle effect flipped correctly
 				if (Application.isPlaying)
 				{
 					transform.localScale = new Vector3(
@@ -40,18 +48,35 @@ namespace SharedUnityMischief.Effects
 						Mathf.Sign(transform.parent.lossyScale.y) * Mathf.Abs(transform.localScale.y),
 						Mathf.Sign(transform.parent.lossyScale.z) * Mathf.Abs(transform.localScale.z));
 				}
-				_playTime += Time.deltaTime;
-				if (_playTime >= _duration)
+				// Play all effects after the initial delay
+				if (_playTime >= _delay && !_hasPlayedEffects)
+				{
+					PlayAllEffects();
+					_hasPlayedEffects = true;
+				}
+				// Stop all effects
+				if (_playTime >= _duration + _delay && !_hasStoppedEffects)
+				{
+					StopAllEffects();
+					_hasStoppedEffects = true;
+				}
+				// Stop playing or loop
+				if (_playTime >= _duration + _delay + _cooldown)
 				{
 					if (_endBehavior == EndBehavior.Loop)
 					{
-						PlayEndlessly();
+						_playTime = _delay;
+						_hasStoppedEffects = false;
+						PlayAllEffects();
+					}
+					else if (_endBehavior == EndBehavior.Destroy)
+					{
+						_isPlaying = false;
+						DepositToPoolOrDestroy();
 					}
 					else
 					{
-						Stop();
-						if (_endBehavior == EndBehavior.Destroy)
-							DepositToPoolOrDestroy();
+						_isPlaying = false;
 					}
 				}
 			}
@@ -69,28 +94,73 @@ namespace SharedUnityMischief.Effects
 				name = $"{name} (In Pool)";
 		}
 
+		public void Play() => Play(EndBehavior.None);
+		public void PlayOnceThenDestroy() => Play(EndBehavior.Destroy);
 		public void PlayEndlessly() => Play(EndBehavior.Loop);
-
-		public void Play(bool destroyWhenDonePlaying = false)
-			=> Play(destroyWhenDonePlaying ? EndBehavior.Destroy : EndBehavior.None);
-
 		private void Play(EndBehavior endBehavior)
 		{
-			if (!Application.isPlaying)
-				_visualEffects = GetComponentsInChildren<VisualEffect>();
-			_isPlaying = true;
+			_hasPlayedEffects = false;
+			_hasStoppedEffects = false;
 			_playTime = 0f;
-			this._endBehavior = endBehavior;
-			foreach (VisualEffect visualEffect in _visualEffects)
-				visualEffect.Play();
+			_endBehavior = endBehavior;
+			_isPlaying = true;
+			if (_delay <= 0f)
+			{
+				PlayAllEffects();
+				_hasPlayedEffects = true;
+			}
 		}
 
 		public void Stop()
 		{
-			if (!Application.isPlaying)
-				_visualEffects = GetComponentsInChildren<VisualEffect>();
 			_isPlaying = false;
-			foreach (VisualEffect visualEffect in _visualEffects)
+			StopAllEffects();
+		}
+
+		private void FindEffects()
+		{
+			_visualEffect = GetComponent<VisualEffect>();
+			_childParticleEffects = new List<ParticleEffect>();
+			_childVisualEffects = new List<VisualEffect>();
+			foreach (Transform child in transform)
+			{
+				ParticleEffect particleEffect = child.GetComponent<ParticleEffect>();
+				if (particleEffect != null)
+				{
+					_childParticleEffects.Add(particleEffect);
+				}
+				else
+				{
+					VisualEffect visualEffect = child.GetComponent<VisualEffect>();
+					if (visualEffect != null)
+					{
+						_childVisualEffects.Add(visualEffect);
+					}
+				}
+			}
+		}
+
+		private void PlayAllEffects()
+		{
+			if (!Application.isPlaying)
+				FindEffects();
+			if (_visualEffect != null)
+				_visualEffect.Play();
+			foreach (ParticleEffect particleEffect in _childParticleEffects)
+				particleEffect.Play();
+			foreach (VisualEffect visualEffect in _childVisualEffects)
+				visualEffect.Play();
+		}
+
+		private void StopAllEffects()
+		{
+			if (!Application.isPlaying)
+				FindEffects();
+			if (_visualEffect != null)
+				_visualEffect.Stop();
+			foreach (ParticleEffect particleEffect in _childParticleEffects)
+				particleEffect.Stop();
+			foreach (VisualEffect visualEffect in _childVisualEffects)
 				visualEffect.Stop();
 		}
 

@@ -53,7 +53,7 @@ namespace SharedUnityMischief.Effects
 		{
 			ParticleEffect effect = _pool.Withdraw<ParticleEffect>(position, rotation);
 			effect.transform.localScale = _pool.prefab.transform.lossyScale;
-			effect.Play(true);
+			effect.PlayOnceThenDestroy();
 			return effect;
 		}
 

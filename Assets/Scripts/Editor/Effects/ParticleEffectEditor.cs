@@ -14,7 +14,7 @@ namespace SharedUnityMischief.Effects
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Particle Effect Controls", EditorStyles.boldLabel);
-			if (GUILayout.Button("Play"))
+			if (GUILayout.Button("Play Once"))
 			{
 				effect.Play();
 			}
@@ -43,7 +43,6 @@ namespace SharedUnityMischief.Effects
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Particle Effect State", EditorStyles.boldLabel);
 			EditorGUILayout.Toggle("IsPlaying", effect.isPlaying);
-			EditorGUILayout.FloatField("Play Time", effect.playTime);
 		}
 	}
 }
