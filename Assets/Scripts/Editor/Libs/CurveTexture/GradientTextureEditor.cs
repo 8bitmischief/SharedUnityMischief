@@ -27,9 +27,9 @@ namespace SharedUnityMischief
 					TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
 					textureImporter.sRGBTexture = true;
 					textureImporter.alphaIsTransparency = true;
-					textureImporter.wrapMode = TextureWrapMode.Clamp;
-					textureImporter.filterMode = FilterMode.Point;
 					textureImporter.mipmapEnabled = false;
+					textureImporter.wrapMode = TextureWrapMode.Clamp;
+					textureImporter.filterMode = FilterMode.Bilinear;
 					textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
 					textureImporter.SaveAndReimport();
 				}
