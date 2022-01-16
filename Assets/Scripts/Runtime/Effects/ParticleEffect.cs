@@ -10,29 +10,21 @@ namespace SharedUnityMischief.Effects
 	{
 		[SerializeField] private float _duration = 1f;
 		[SerializeField] private float _delay = 0f;
-		[SerializeField] private float _cooldown = 0f;
-		[SerializeField] private bool _playOnEnable = false;
+		[SerializeField] private bool _loops = false;
 		private VisualEffect _visualEffect;
 		private List<ParticleEffect> _childParticleEffects;
 		private List<VisualEffect> _childVisualEffects;
 		private bool _isPlaying = false;
-		private float _playTime = 0f;
-		private bool _hasPlayedEffects = false;
-		private bool _hasStoppedEffects = false;
-		private EndBehavior _endBehavior = EndBehavior.Destroy;
+		private float _playTime;
+		private bool _hasPlayedEffects;
+		private EndBehavior _endBehavior;
 
 		public bool isPlaying => _isPlaying;
-		public bool isPlayingEndlessly => _isPlaying && _endBehavior == EndBehavior.Loop;
+		public bool isLooping => _isPlaying && (_endBehavior == EndBehavior.Loop || (_endBehavior == EndBehavior.Auto && _loops));
 
 		private void Awake()
 		{
 			FindEffects();
-		}
-
-		private void OnEnable()
-		{
-			if (_playOnEnable)
-				Play();
 		}
 
 		private void Update()
@@ -49,34 +41,32 @@ namespace SharedUnityMischief.Effects
 						Mathf.Sign(transform.parent.lossyScale.z) * Mathf.Abs(transform.localScale.z));
 				}
 				// Play all effects after the initial delay
-				if (_playTime >= _delay && !_hasPlayedEffects)
+				if (!_hasPlayedEffects && _playTime >= _delay)
 				{
 					PlayAllEffects();
 					_hasPlayedEffects = true;
 				}
-				// Stop all effects
-				if (_playTime >= _duration + _delay && !_hasStoppedEffects)
-				{
-					StopAllEffects();
-					_hasStoppedEffects = true;
-				}
 				// Stop playing or loop
-				if (_playTime >= _duration + _delay + _cooldown)
+				if (_playTime >= _duration + _delay)
 				{
-					if (_endBehavior == EndBehavior.Loop)
+					switch (_endBehavior)
 					{
-						_playTime = _delay;
-						_hasStoppedEffects = false;
-						PlayAllEffects();
-					}
-					else if (_endBehavior == EndBehavior.Destroy)
-					{
-						_isPlaying = false;
-						DepositToPoolOrDestroy();
-					}
-					else
-					{
-						_isPlaying = false;
+						case EndBehavior.Destroy:
+							_isPlaying = false;
+							StopAllEffects();
+							DepositToPoolOrDestroy();
+							break;
+						case EndBehavior.Loop:
+						case EndBehavior.Auto when !_loops:
+							_playTime = _delay;
+							if (!_loops)
+								PlayAllEffects();
+							break;
+						default:
+							_isPlaying = false;
+							if (_loops)
+								StopAllEffects();
+							break;
 					}
 				}
 			}
@@ -94,16 +84,16 @@ namespace SharedUnityMischief.Effects
 				name = $"{name} (In Pool)";
 		}
 
-		public void Play() => Play(EndBehavior.None);
+		public void Play() => Play(EndBehavior.Auto);
+		public void PlayOnce() => Play(EndBehavior.Stop);
 		public void PlayOnceThenDestroy() => Play(EndBehavior.Destroy);
-		public void PlayEndlessly() => Play(EndBehavior.Loop);
+		public void PlayLooping() => Play(EndBehavior.Loop);
 		private void Play(EndBehavior endBehavior)
 		{
-			_hasPlayedEffects = false;
-			_hasStoppedEffects = false;
-			_playTime = 0f;
-			_endBehavior = endBehavior;
 			_isPlaying = true;
+			_playTime = 0f;
+			_hasPlayedEffects = false;
+			_endBehavior = endBehavior;
 			if (_delay <= 0f)
 			{
 				PlayAllEffects();
@@ -115,6 +105,11 @@ namespace SharedUnityMischief.Effects
 		{
 			_isPlaying = false;
 			StopAllEffects();
+		}
+
+		public void StopLooping()
+		{
+			_endBehavior = EndBehavior.Stop;
 		}
 
 		private void FindEffects()
@@ -167,8 +162,10 @@ namespace SharedUnityMischief.Effects
 		private enum EndBehavior
 		{
 			None = 0,
-			Destroy = 1,
-			Loop = 2
+			Auto = 1,
+			Stop = 2,
+			Loop = 3,
+			Destroy = 4,
 		}
 	}
 }

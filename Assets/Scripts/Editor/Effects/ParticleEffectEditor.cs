@@ -16,14 +16,14 @@ namespace SharedUnityMischief.Effects
 			EditorGUILayout.LabelField("Particle Effect Controls", EditorStyles.boldLabel);
 			if (GUILayout.Button("Play Once"))
 			{
-				effect.Play();
+				effect.PlayOnce();
 			}
-			if (GUILayout.Button(effect.isPlayingEndlessly ? "Stop Playing Endlessly" : "Play Endlessly"))
+			if (GUILayout.Button(effect.isLooping ? "Stop Looping" : "Play (Looping)"))
 			{
-				if (effect.isPlayingEndlessly)
-					effect.Stop();
+				if (effect.isLooping)
+					effect.StopLooping();
 				else
-					effect.PlayEndlessly();
+					effect.PlayLooping();
 			}
 			if (GUILayout.Button("Stop"))
 			{
