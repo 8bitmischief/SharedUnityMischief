@@ -8,7 +8,7 @@ namespace SharedUnityMischief.Effects
 	[ExecuteInEditMode]
 	public class ParticleEffectSpawner : EntityComponent
 	{
-		[SerializeField] private PrefabPoolMonoBehaviour _pool;
+		[SerializeField] private PrefabPoolComponent _pool;
 
 		[Header("Spawner Config")]
 		[SerializeField] private bool _spawn = false;
@@ -60,7 +60,7 @@ namespace SharedUnityMischief.Effects
 		private void TriggerParticleEffect()
 		{
 			if (_pool.prefab != null && !_pool.isActualPrefab)
-				(_pool.prefab as ParticleEffect).Play();
+				_pool.prefab.GetComponent<ParticleEffect>().Play();
 		}
 	}
 }

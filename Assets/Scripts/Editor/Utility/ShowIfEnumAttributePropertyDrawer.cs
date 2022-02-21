@@ -31,14 +31,12 @@ namespace SharedUnityMischief
 
 		private bool ShouldShowProperty(ShowIfEnumAttribute showIfEnumAttribute, SerializedProperty property)
 		{
-			// Construct a path to the field
 			string pathToPropertyToCheck;
 			int index = property.propertyPath.LastIndexOf(property.name);
 			if ( index == -1 )
 				throw new Exception($"Could not construct path to property \"{showIfEnumAttribute.nameOfPropertyToCheck}\" using path \"{property.propertyPath}\" for [ShowIfEnum]");
 			pathToPropertyToCheck = property.propertyPath.Remove(index, property.name.Length).Insert(index, showIfEnumAttribute.nameOfPropertyToCheck);
 			SerializedProperty propertyToCheck = property.serializedObject.FindProperty(pathToPropertyToCheck);
-
 			if (propertyToCheck == null || propertyToCheck.enumNames.Length == 0 || propertyToCheck.enumValueIndex < 0 || propertyToCheck.enumValueIndex >= propertyToCheck.enumNames.Length)
 				throw new Exception($"Could not find property \"{showIfEnumAttribute.nameOfPropertyToCheck}\" for [ShowIfEnum]");
 			else

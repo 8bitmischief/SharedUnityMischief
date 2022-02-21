@@ -9,7 +9,7 @@ namespace SharedUnityMischief.Entities
 
 	public class EntitySpawner<TEntity> : EntityComponent where TEntity : Entity
 	{
-		[SerializeField] private PrefabPoolMonoBehaviour _pool;
+		[SerializeField] private PrefabPoolComponent _pool;
 
 		[Header("Spawner Config")]
 		[SerializeField] private bool _spawn = false;
