@@ -57,7 +57,7 @@ namespace SharedUnityMischief.Effects
 							DepositToPoolOrDestroy();
 							break;
 						case EndBehavior.Loop:
-						case EndBehavior.Auto when !_loops:
+						case EndBehavior.Auto when _loops:
 							_playTime = _delay;
 							if (!_loops)
 								PlayAllEffects();
