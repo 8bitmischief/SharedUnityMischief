@@ -33,7 +33,7 @@ namespace SharedUnityMischief.Effects
 			{
 				_playTime += Time.deltaTime;
 				// Keep particle effect flipped correctly
-				if (Application.isPlaying)
+				if (Application.isPlaying && transform.parent != null)
 				{
 					transform.localScale = new Vector3(
 						Mathf.Sign(transform.parent.lossyScale.x) * Mathf.Abs(transform.localScale.x),
