@@ -26,9 +26,6 @@ namespace SharedUnityMischief
 		// Called every frame once per camera
 		public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
 		{
-			if (!settings.isEnabled)
-				return;
-
 			if (renderingData.cameraData.isSceneViewCamera && !settings.showInSceneView)
 				return;
 
@@ -43,8 +40,7 @@ namespace SharedUnityMischief
 		[Serializable]
 		public class CustomMaterialSettings
 		{
-			public bool isEnabled = true;
-			[ShowIfBool("isEnabled")] public bool showInSceneView = true;
+			public bool showInSceneView = true;
 			public Material material;
 			public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 		}
