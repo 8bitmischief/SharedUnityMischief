@@ -2529,7 +2529,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "f8bd3bf9c7cf4acb97a36019cd3faa28",
     "m_Id": 0,
-    "m_DisplayName": "Offset Color",
+    "m_DisplayName": "Aberration Color",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
