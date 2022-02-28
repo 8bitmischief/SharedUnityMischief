@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-// Adopted from https://samdriver.xyz/article/scriptable-render
+// Adapted from https://samdriver.xyz/article/scriptable-render
 
 namespace SharedUnityMischief
 {

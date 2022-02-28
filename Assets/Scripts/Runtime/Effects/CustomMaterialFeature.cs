@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-// Adopted from https://samdriver.xyz/article/scriptable-render
+// Adapted from https://samdriver.xyz/article/scriptable-render
 
 namespace SharedUnityMischief
 {
@@ -30,7 +30,7 @@ namespace SharedUnityMischief
 				return;
 
 			// Gather up and pass any extra information our pass will need
-			RenderTargetIdentifier  cameraColorTargetIdent = renderer.cameraColorTarget;
+			RenderTargetIdentifier cameraColorTargetIdent = renderer.cameraColorTarget;
 			_renderPass.Setup(cameraColorTargetIdent);
 
 			// Ask the renderer to add our pass
