@@ -71,6 +71,8 @@ namespace SharedUnityMischief.Entities.Animated
 		private ProgrammaticRootMotionType _xProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType _yProgrammaticRootMotion = ProgrammaticRootMotionType.None;
 		private ProgrammaticRootMotionType _zProgrammaticRootMotion = ProgrammaticRootMotionType.None;
+		private bool _shouldTriggerAnimationStart = false;
+		private TAnimation _prevAnimation = default(TAnimation);
 
 		protected override Animator animator => _animator;
 		#pragma warning disable CS0109 // Ignore "does not hide an accessible member" warnings
@@ -156,7 +158,7 @@ namespace SharedUnityMischief.Entities.Animated
 			// OnAnimationStart is called when a new animation starts, likely as a result of a call to UpdateAnimator
 			_didStartNewAnimation = true;
 			_skipFirstFrame = animation.skipFirstFrame;
-			TAnimation prevAnimation = _animation;
+			_prevAnimation = _animation;
 			// Trigger OnEndAnimation
 			OnEndAnimation(_animation);
 			onEndAnimation?.Invoke(_animation);
@@ -176,12 +178,7 @@ namespace SharedUnityMischief.Entities.Animated
 			_programmaticRootMotionTraveledSoFar = Vector3.zero;
 			_programmaticRootMotionProgress = Vector3.zero;
 			RefreshAnimationState(stateInfo);
-			// Trigger OnStartAnimation
-			OnStartAnimation(_animation);
-			onStartAnimation?.Invoke(_animation);
-			// Trigger OnChangeAnimation
-			OnChangeAnimation(_animation, prevAnimation);
-			onChangeAnimation?.Invoke(_animation, prevAnimation);
+			_shouldTriggerAnimationStart = true;
 		}
 
 		public void SetRootMotion(Vector3 rootMotion, bool isRelativeRootMotion = true)
@@ -232,6 +229,19 @@ namespace SharedUnityMischief.Entities.Animated
 				if (_skipFirstFrame)
 					UpdateAnimator(UpdateLoop.TimePerUpdate);
 				InterpolateAnimation();
+			}
+		}
+
+		private void OnAnimatorMove()
+		{
+			_animator.ApplyBuiltinRootMotion();
+			if (_shouldTriggerAnimationStart)
+			{
+				_shouldTriggerAnimationStart = false;
+				OnStartAnimation(_animation);
+				onStartAnimation?.Invoke(_animation);
+				OnChangeAnimation(_animation, _prevAnimation);
+				onChangeAnimation?.Invoke(_animation, _prevAnimation);
 			}
 		}
 
