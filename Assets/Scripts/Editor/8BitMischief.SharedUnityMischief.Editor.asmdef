@@ -2,7 +2,14 @@
     "name": "8BitMischief.SharedUnityMischief.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:14eb6d69025de474aa405140eb989c9d"
+        "8BitMischief.SharedUnityMischief",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "Unity.TextMeshPro.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Core.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.Editor"
     ],
     "includePlatforms": [
         "Editor"
