@@ -8,6 +8,7 @@ namespace SharedUnityMischief.UI
 	[ExecuteAlways]
 	public class TableLayoutGroup : LayoutGroup
 	{
+		[SerializeField] protected RectOffset _rowPadding = new RectOffset();
 		[SerializeField] protected TextAnchor _cellAlignment = TextAnchor.UpperLeft;
 		[SerializeField] protected float _spacingBetweenColumns = 0;
 		[SerializeField] protected float _spacingBetweenRows = 0;
@@ -20,6 +21,7 @@ namespace SharedUnityMischief.UI
 		private List<TableRow> _rows = new List<TableRow>();
 		private int _numColumns = 0;
 
+		public RectOffset rowPadding { get { return _rowPadding; } set { SetProperty(ref _rowPadding, value); } }
 		public TextAnchor cellAlignment { get { return _cellAlignment; } set { SetProperty(ref _cellAlignment, value); } }
 		public float spacingBetweenColumns { get { return _spacingBetweenColumns; } set { SetProperty(ref _spacingBetweenColumns, value); } }
 		public float spacingBetweenRows { get { return _spacingBetweenRows; } set { SetProperty(ref _spacingBetweenRows, value); } }
@@ -46,7 +48,7 @@ namespace SharedUnityMischief.UI
 				totalPreferredWidth += preferredColumnWidth;
 				totalFlexibleWidth += flexibleColumnWidth;
 			}
-			SetLayoutInputForAxis(totalMinWidth, totalPreferredWidth, totalFlexibleWidth, 0);
+			SetLayoutInputForAxis(totalMinWidth + _rowPadding.horizontal, totalPreferredWidth + _rowPadding.horizontal, totalFlexibleWidth, 0);
 		}
 
 		public override void CalculateLayoutInputVertical()
@@ -57,8 +59,8 @@ namespace SharedUnityMischief.UI
 			for (int r = 0; r < _rows.Count; r++)
 			{
 				GetRowHeights(r, out float minRowHeight, out float preferredRowHeight, out float flexibleRowHeight);
-				totalMinHeight += minRowHeight;
-				totalPreferredHeight += preferredRowHeight;
+				totalMinHeight += minRowHeight + _rowPadding.vertical;
+				totalPreferredHeight += preferredRowHeight + _rowPadding.vertical;
 				totalFlexibleHeight += flexibleRowHeight;
 			}
 			SetLayoutInputForAxis(totalMinHeight, totalPreferredHeight, totalFlexibleHeight, 1);
@@ -86,7 +88,7 @@ namespace SharedUnityMischief.UI
 				minMaxLerp = Mathf.Clamp01((rectTransform.rect.width - GetTotalMinSize(0)) / (GetTotalPreferredSize(0) - GetTotalMinSize(0)));
 
 			float rowWidth = 0f;
-			float cellX = 0f;
+			float cellX = _rowPadding.left;
 			for (int c = startIndex; _reverseColumns ? c >= endIndex : c <= endIndex; c += increment)
 			{
 				GetColumnWidths(c, out float minColumnWidth, out float preferredColumnWidth, out float flexibleColumnWidth);
@@ -112,7 +114,7 @@ namespace SharedUnityMischief.UI
 			}
 			foreach (TableRow row in _rows)
 			{
-				SetChildAlongAxisWithScale(row.rect, 0, startX + padding.left, rowWidth, 1f);
+				SetChildAlongAxisWithScale(row.rect, 0, startX + padding.left, rowWidth + _rowPadding.horizontal, 1f);
 			}
 		}
 
@@ -143,7 +145,7 @@ namespace SharedUnityMischief.UI
 				GetRowHeights(r, out float minRowHeight, out float preferredRowHeight, out float flexibleRowHeight);
 				float rowHeight = Mathf.Lerp(minRowHeight, preferredRowHeight, minMaxLerp);
 				rowHeight += flexibleRowHeight * itemFlexibleMultiplier;
-				SetChildAlongAxisWithScale(_rows[r].rect, 1, rowY, rowHeight, 1f);
+				SetChildAlongAxisWithScale(_rows[r].rect, 1, rowY, rowHeight + _rowPadding.vertical, 1f);
 				foreach (RectTransform cellRect in _rows[r].cells)
 				{
 					float preferredCellHeight = LayoutUtility.GetPreferredHeight(cellRect);
@@ -153,9 +155,9 @@ namespace SharedUnityMischief.UI
 					else
 						cellHeight = Mathf.Min(preferredCellHeight, rowHeight);
 					float surplusHeight = rowHeight - cellHeight;
-					SetChildAlongAxisWithScale(cellRect, 1, surplusHeight * GetCellAlignmentOnAxis(1), cellHeight, 1f);
+					SetChildAlongAxisWithScale(cellRect, 1, _rowPadding.top + surplusHeight * GetCellAlignmentOnAxis(1), cellHeight, 1f);
 				}
-				rowY += rowHeight + spacingBetweenRows;
+				rowY += rowHeight + _rowPadding.vertical + spacingBetweenRows;
 			}
 		}
 
@@ -191,9 +193,10 @@ namespace SharedUnityMischief.UI
 			flexibleRowHeight = -1f;
 			if (rowIndex < _rows.Count)
 			{
-				for (int c = 0; c < _rows[rowIndex].cells.Count; c++)
+				TableRow row = _rows[rowIndex];
+				for (int c = 0; c < row.cells.Count; c++)
 				{
-					RectTransform cellRect = _rows[rowIndex].cells[c];
+					RectTransform cellRect = row.cells[c];
 
 					float minHeight = LayoutUtility.GetMinHeight(cellRect);
 					float preferredHeight = LayoutUtility.GetPreferredHeight(cellRect);
@@ -206,6 +209,9 @@ namespace SharedUnityMischief.UI
 					if (_forceExpandRows)
 						flexibleRowHeight = Mathf.Max(flexibleRowHeight, 1f);
 				}
+				minRowHeight = Mathf.Max(minRowHeight, LayoutUtility.GetMinHeight(row.rect));
+				preferredRowHeight = Mathf.Max(preferredRowHeight, LayoutUtility.GetPreferredHeight(row.rect));
+				flexibleRowHeight = Mathf.Max(flexibleRowHeight, LayoutUtility.GetFlexibleHeight(row.rect));
 			}
 		}
 

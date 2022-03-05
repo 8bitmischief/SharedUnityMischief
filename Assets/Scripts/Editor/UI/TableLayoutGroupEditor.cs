@@ -8,6 +8,7 @@ namespace SharedUnityMischief.UI
 	public class TableLayoutGroupEditor : Editor
 	{
 		private SerializedProperty _padding;
+		private SerializedProperty _rowPadding;
 		private SerializedProperty _childAlignment;
 		private SerializedProperty _cellAlignment;
 		private SerializedProperty _spacingBetweenColumns;
@@ -22,6 +23,7 @@ namespace SharedUnityMischief.UI
 		protected virtual void OnEnable()
 		{
 			_padding = serializedObject.FindProperty("m_Padding");
+			_rowPadding = serializedObject.FindProperty("_rowPadding");
 			_childAlignment = serializedObject.FindProperty("m_ChildAlignment");
 			_cellAlignment = serializedObject.FindProperty("_cellAlignment");
 			_spacingBetweenColumns = serializedObject.FindProperty("_spacingBetweenColumns");
@@ -38,6 +40,7 @@ namespace SharedUnityMischief.UI
 		{
 			serializedObject.Update();
 			EditorGUILayout.PropertyField(_padding, true);
+			EditorGUILayout.PropertyField(_rowPadding, true);
 			EditorGUILayout.PropertyField(_childAlignment, true);
 			EditorGUILayout.PropertyField(_cellAlignment, true);
 			EditorGUILayout.PropertyField(_spacingBetweenColumns, true);
