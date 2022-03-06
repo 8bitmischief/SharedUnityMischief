@@ -7,10 +7,12 @@ namespace SharedUnityMischief
 	public class ShowIfBoolAttribute : PropertyAttribute
 	{
 		public string nameOfPropertyToCheck = "";
+		public bool valueToCheckFor = true;
 
-		public ShowIfBoolAttribute(string nameOfPropertyToCheck)
+		public ShowIfBoolAttribute(string nameOfPropertyToCheck, bool valueToCheckFor = true)
 		{
 			this.nameOfPropertyToCheck = nameOfPropertyToCheck;
+			this.valueToCheckFor = valueToCheckFor;
 		}
 	}
 }

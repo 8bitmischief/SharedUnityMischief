@@ -39,7 +39,7 @@ namespace SharedUnityMischief
 			if (propertyToCheck == null)
 				throw new Exception($"Could not find property \"{showIfBoolAttribute.nameOfPropertyToCheck}\" for [ShowIfBool]");
 			else
-				return propertyToCheck.boolValue;
+				return propertyToCheck.boolValue == showIfBoolAttribute.valueToCheckFor;
 		}
 	}
 }
