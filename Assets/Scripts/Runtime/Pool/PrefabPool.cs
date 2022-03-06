@@ -118,6 +118,7 @@ namespace SharedUnityMischief.Pool
 						return true;
 					}
 				};
+				poolableInstance.OnWithdrawFromPool();
 			}
 			return instance;
 		}
