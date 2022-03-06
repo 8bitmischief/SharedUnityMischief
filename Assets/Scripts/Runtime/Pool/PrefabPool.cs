@@ -9,6 +9,7 @@ namespace SharedUnityMischief.Pool
 	{
 		[SerializeField] private GameObject _prefab;
 		[SerializeField] private bool _isActualPrefab = false;
+		[SerializeField, ShowIfBool("_isActualPrefab", false)] private bool _disablePrefab = false;
 		[SerializeField] private bool _collectionCheck = false;
 		[SerializeField] private int _defaultCapacity = 0;
 		[SerializeField] private bool _hasMaxCapacity = false;
@@ -22,9 +23,10 @@ namespace SharedUnityMischief.Pool
 		public int numAvailableInstances => _availableInstances.Count;
 
 		public void Prewarm() => Prewarm(_defaultCapacity);
-
 		public void Prewarm(int numInstancesToCreate)
 		{
+			if (!_isActualPrefab && _disablePrefab && _prefab != null)
+				_prefab.SetActive(false);
 			for (int i = 0; i < numInstancesToCreate; i++)
 				Deposit(CreateInstance());
 		}
@@ -43,7 +45,13 @@ namespace SharedUnityMischief.Pool
 				return WithdrawInstance();
 			}
 		}
-
+		public GameObject Withdraw(Transform parent)
+		{
+			GameObject instance = Withdraw();
+			if (instance != null)
+				instance.transform.SetParent(parent);
+			return instance;
+		}
 		public GameObject Withdraw(Vector3 position)
 		{
 			GameObject instance = Withdraw();
@@ -51,7 +59,13 @@ namespace SharedUnityMischief.Pool
 				instance.transform.position = position;
 			return instance;
 		}
-
+		public GameObject Withdraw(Transform parent, Vector3 position)
+		{
+			GameObject instance = Withdraw(position);
+			if (instance != null)
+				instance.transform.SetParent(parent);
+			return instance;
+		}
 		public GameObject Withdraw(Vector3 position, Quaternion rotation)
 		{
 			GameObject instance = Withdraw(position);
@@ -59,10 +73,20 @@ namespace SharedUnityMischief.Pool
 				instance.transform.rotation = rotation;
 			return instance;
 		}
+		public GameObject Withdraw(Transform parent, Vector3 position, Quaternion rotation)
+		{
+			GameObject instance = Withdraw(position, rotation);
+			if (instance != null)
+				instance.transform.SetParent(parent);
+			return instance;
+		}
 
 		public T Withdraw<T>() where T : MonoBehaviour => GetComponent<T>(Withdraw());
+		public T Withdraw<T>(Transform parent) where T : MonoBehaviour => GetComponent<T>(Withdraw(parent));
 		public T Withdraw<T>(Vector3 position) where T : MonoBehaviour => GetComponent<T>(Withdraw(position));
+		public T Withdraw<T>(Transform parent, Vector3 position) where T : MonoBehaviour => GetComponent<T>(Withdraw(parent, position));
 		public T Withdraw<T>(Vector3 position, Quaternion rotation) where T : MonoBehaviour => GetComponent<T>(Withdraw(position, rotation));
+		public T Withdraw<T>(Transform parent, Vector3 position, Quaternion rotation) where T : MonoBehaviour => GetComponent<T>(Withdraw(parent, position, rotation));
 
 		public void Deposit(GameObject instance) => DepositInstance(instance);
 
