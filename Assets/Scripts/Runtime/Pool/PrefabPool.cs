@@ -33,51 +33,71 @@ namespace SharedUnityMischief.Pool
 
 		public GameObject Withdraw()
 		{
-			if (_availableInstances.Count == 0)
+			GameObject instance = CreateOrWithdrawInstance();
+			if (instance != null)
 			{
-				if (_hasMaxCapacity && _maxCapacity >= 0 && numInstances >= _maxCapacity)
-					return null;
-				else
-					return CreateInstance();
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
 			}
-			else
-			{
-				return WithdrawInstance();
-			}
+			return instance;
 		}
 		public GameObject Withdraw(Transform parent)
 		{
-			GameObject instance = Withdraw();
+			GameObject instance = CreateOrWithdrawInstance(parent);
 			if (instance != null)
+			{
 				instance.transform.SetParent(parent);
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
+			}
 			return instance;
 		}
 		public GameObject Withdraw(Vector3 position)
 		{
-			GameObject instance = Withdraw();
+			GameObject instance = CreateOrWithdrawInstance();
 			if (instance != null)
+			{
 				instance.transform.position = position;
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
+			}
 			return instance;
 		}
 		public GameObject Withdraw(Transform parent, Vector3 position)
 		{
-			GameObject instance = Withdraw(position);
+			GameObject instance = CreateOrWithdrawInstance(parent);
 			if (instance != null)
+			{
 				instance.transform.SetParent(parent);
+				instance.transform.position = position;
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
+			}
 			return instance;
 		}
 		public GameObject Withdraw(Vector3 position, Quaternion rotation)
 		{
-			GameObject instance = Withdraw(position);
+			GameObject instance = CreateOrWithdrawInstance();
 			if (instance != null)
+			{
+				instance.transform.position = position;
 				instance.transform.rotation = rotation;
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
+			}
 			return instance;
 		}
 		public GameObject Withdraw(Transform parent, Vector3 position, Quaternion rotation)
 		{
-			GameObject instance = Withdraw(position, rotation);
+			GameObject instance = CreateOrWithdrawInstance(parent);
 			if (instance != null)
+			{
 				instance.transform.SetParent(parent);
+				instance.transform.position = position;
+				instance.transform.rotation = rotation;
+				if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
+					poolableInstance.OnWithdrawFromPool();
+			}
 			return instance;
 		}
 
@@ -96,13 +116,13 @@ namespace SharedUnityMischief.Pool
 				DestroyInstance(instance);
 		}
 
-		private GameObject CreateInstance()
+		private GameObject CreateInstance(Transform parent = null)
 		{
 			if (prefab == null)
 				throw new Exception("Cannot instantiate null prefab in PrefabPool");
 			_numInstances++;
 			// Create and prepare the instance
-			GameObject instance = GameObject.Instantiate(prefab);
+			GameObject instance = GameObject.Instantiate(prefab, parent);
 			instance.name = prefab.name;
 			instance.gameObject.SetActive(true);
 			if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
@@ -118,17 +138,25 @@ namespace SharedUnityMischief.Pool
 						return true;
 					}
 				};
-				poolableInstance.OnWithdrawFromPool();
 			}
 			return instance;
 		}
 
-		private GameObject WithdrawInstance()
+		private GameObject WithdrawInstance() => _availableInstances.Dequeue();
+
+		private GameObject CreateOrWithdrawInstance(Transform parent = null)
 		{
-			GameObject instance = _availableInstances.Dequeue();
-			if (instance.TryGetComponent<IPoolable>(out IPoolable poolableInstance))
-				poolableInstance.OnWithdrawFromPool();
-			return instance;
+			if (_availableInstances.Count == 0)
+			{
+				if (_hasMaxCapacity && _maxCapacity >= 0 && numInstances >= _maxCapacity)
+					return null;
+				else
+					return CreateInstance(parent);
+			}
+			else
+			{
+				return WithdrawInstance();
+			}
 		}
 
 		private void DepositInstance(GameObject instance)
