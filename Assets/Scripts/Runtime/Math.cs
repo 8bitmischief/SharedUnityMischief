@@ -4,9 +4,6 @@ namespace SharedUnityMischief
 {
 	public static class Math
 	{
-		public static float Map(float value, float fromMin, float fromMax, bool clamp = false)
-			=> Map(value, fromMin, fromMax, 0f, 1f, clamp);
-
 		public static float Map(float value, float fromMin, float fromMax, float toMin, float toMax, bool clamp = false)
 		{
 			float mappedValue = ((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
