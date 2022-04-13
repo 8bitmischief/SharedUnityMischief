@@ -16,5 +16,14 @@ namespace SharedUnityMischief
 				return mappedValue;
 			}
 		}
+
+		public static Vector3 Round(Vector3 vector, int decimals = 0)
+		{
+			float multiplier = Mathf.Pow(10f, decimals);
+			return new Vector3(
+				Mathf.Round(vector.x * multiplier) / multiplier,
+				Mathf.Round(vector.y * multiplier) / multiplier,
+				Mathf.Round(vector.z * multiplier) / multiplier);
+		}
 	}
 }
