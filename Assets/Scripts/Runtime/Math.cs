@@ -31,5 +31,16 @@ namespace SharedUnityMischief
 				Mathf.Round(vector.y * multiplier) / multiplier,
 				Mathf.Round(vector.z * multiplier) / multiplier);
 		}
+
+		public static Vector3 CalculatePlaneLineIntersection(Vector3 pointOnPlane, Vector3 planeNormal, Vector3 pointOnLine, Vector3 lineDirection) {
+			return pointOnLine - lineDirection * Vector3.Dot(pointOnLine - pointOnPlane, planeNormal) / Vector3.Dot(lineDirection, planeNormal);
+		}
+
+		public static float CalculateChangeInSlope(Vector3 planeNormal, Vector3 vector, Vector3 down)
+		{
+			Vector3 intersectionPoint = CalculatePlaneLineIntersection(Vector3.zero, planeNormal, vector, down);
+			Vector3 slopeVector = intersectionPoint - vector;
+			return -Vector3.Dot(slopeVector, down);
+		}
 	}
 }
